@@ -1,0 +1,31 @@
+{
+  "id": "pucca",
+  "name": "Pucca",
+  "version": "1.0",
+  "palette": {
+    "accent": "#E8443A",
+    "background": "#FFF0F0",
+    "text": "#4A2020",
+    "stripBg": "#FFE8E8"
+  },
+  "fonts": { "branding": "'Georgia', serif" },
+  "frame": { "url": "./frame.webp", "width": 1200, "height": 1600 },
+  "photoSlots": {
+    "strip_4": [
+      { "x": 0.08, "y": 0.03, "w": 0.84, "h": 0.20 },
+      { "x": 0.08, "y": 0.26, "w": 0.84, "h": 0.20 },
+      { "x": 0.08, "y": 0.49, "w": 0.84, "h": 0.20 },
+      { "x": 0.08, "y": 0.72, "w": 0.84, "h": 0.20 }
+    ],
+    "grid_2x2": [
+      { "x": 0.04, "y": 0.04, "w": 0.44, "h": 0.44 },
+      { "x": 0.52, "y": 0.04, "w": 0.44, "h": 0.44 },
+      { "x": 0.04, "y": 0.52, "w": 0.44, "h": 0.44 },
+      { "x": 0.52, "y": 0.52, "w": 0.44, "h": 0.44 }
+    ],
+    "polaroid": [{ "x": 0.10, "y": 0.10, "w": 0.80, "h": 0.65 }],
+    "single": [{ "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 }]
+  },
+  "branding": { "showOnStrip": true, "text": "our photobooth", "position": "bottom", "fontSize": 32, "color": "#4A2020" },
+  "previewColor": "#FFE8E8"
+}
