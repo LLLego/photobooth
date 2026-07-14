@@ -180,12 +180,28 @@ export function Icon({ name, size = 20 }) {
   el.style.width = `${size}px`;
   el.style.height = `${size}px`;
   el.setAttribute('aria-hidden', 'true');
-  const map = {
-    camera: '📷', gallery: '🖼️', settings: '⚙️', heart: '♥', heartFilled: '❤️',
-    switch: '🔄', flash: '⚡', download: '⬇', share: '↗', close: '✕',
-    trash: '🗑', back: '←', add: '+', check: '✓', user: '👤',
-    sparkle: '✨', link: '🔗', wifi: '📡', play: '▶', pause: '⏸',
+  
+  // Custom GLM-5.2 SVG icons — load from /photobooth/icons/
+  const svgMap = {
+    camera: 'camera', gallery: 'gallery', settings: 'settings',
+    heart: 'heart', heartFilled: 'heart-filled', switch: 'switch',
+    download: 'download', share: 'share', close: 'close',
+    back: 'back', check: 'check', add: 'close', user: 'home',
+    sparkle: 'sparkle', home: 'home', refresh: 'refresh',
+    filter: 'filter', grid: 'grid', strip: 'strip',
+    polaroid: 'polaroid', photo: 'single-photo',
   };
-  el.textContent = map[name] || '•';
+  const svgName = svgMap[name];
+  if (svgName) {
+    const img = document.createElement('img');
+    img.src = `${import.meta.env.BASE_URL}icons/${svgName}.svg`;
+    img.alt = '';
+    img.style.width = `${size}px`;
+    img.style.height = `${size}px`;
+    img.loading = 'lazy';
+    el.append(img);
+  } else {
+    el.textContent = '•';
+  }
   return el;
 }

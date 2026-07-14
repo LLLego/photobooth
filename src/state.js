@@ -29,6 +29,7 @@ const initial = {
   preferences: {
     themeId: 'minimal',
     layout: 'strip_4',
+    aspectRatio: '3:4',
     darkMode: false,
     autoDownload: false,
     countdownDuration: 3,

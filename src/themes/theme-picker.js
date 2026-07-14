@@ -117,6 +117,33 @@ export async function renderThemePicker(mount) {
   }
 
   wrap.append(layoutWrap);
+
+  // Aspect ratio selector
+  const ratioWrap = document.createElement('div');
+  ratioWrap.className = 'mt-2 pt-2 border-t border-warmth-200 dark:border-warmth-300';
+  ratioWrap.innerHTML = `
+    <p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Aspect ratio</p>
+    <div class="grid grid-cols-4 gap-2" data-ratios></div>
+  `;
+  const ratioRow = ratioWrap.querySelector('[data-ratios]');
+  const RATIOS = [
+    { id: '1:1', label: '1:1' },
+    { id: '3:4', label: '3:4' },
+    { id: '4:3', label: '4:3' },
+    { id: '16:9', label: '16:9' },
+  ];
+  for (const r of RATIOS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 dark:border-warmth-300 text-warmth-900 dark:text-warmth-100 transition-colors duration-150';
+    b.textContent = r.label;
+    b.dataset.ratio = r.id;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => onSelectRatio(r.id));
+    ratioRow.append(b);
+  }
+  wrap.append(ratioWrap);
+
   mount.append(wrap);
 
   applyActiveStates();
@@ -154,6 +181,14 @@ function onSelectLayout(id) {
   applyActiveStates();
 }
 
+function onSelectRatio(id) {
+  set({ preferences: { ...getState().preferences, aspectRatio: id } });
+  set({ capture: { ...getState().capture, aspectRatio: id } });
+  applyActiveStates();
+  // Update camera stage aspect ratio
+  window.dispatchEvent(new CustomEvent('ratio-changed', { detail: { aspectRatio: id } }));
+}
+
 function applyActiveStates() {
   const { themeId, layout } = getState().preferences;
   const cards = document.querySelectorAll('[data-theme-id]');
@@ -166,6 +201,31 @@ function applyActiveStates() {
   });
   document.querySelectorAll('[data-layout]').forEach((b) => {
     const isActive = b.dataset.layout === layout;
+    b.classList.remove(
+      'bg-warmth-900', 'dark:bg-warmth-100',
+      'text-warmth-50', 'dark:text-warmth-900',
+      'border-warmth-900', 'dark:border-warmth-100',
+      'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
+      'border-warmth-200', 'dark:border-warmth-300'
+    );
+    if (isActive) {
+      b.classList.add(
+        'bg-warmth-900', 'dark:bg-warmth-100',
+        'text-warmth-50', 'dark:text-warmth-900',
+        'border-warmth-900', 'dark:border-warmth-100'
+      );
+    } else {
+      b.classList.add(
+        'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
+        'border-warmth-200', 'dark:border-warmth-300'
+      );
+    }
+    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+  // Aspect ratio buttons
+  document.querySelectorAll('[data-ratio]').forEach((b) => {
+    const ratioId = getState().preferences.aspectRatio || '3:4';
+    const isActive = b.dataset.ratio === ratioId;
     b.classList.remove(
       'bg-warmth-900', 'dark:bg-warmth-100',
       'text-warmth-50', 'dark:text-warmth-900',

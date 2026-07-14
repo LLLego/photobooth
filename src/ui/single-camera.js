@@ -39,8 +39,11 @@ export async function renderSingleCamera(mount) {
   header.append(back, captureCount);
   wrap.append(header);
 
+  const aspectRatio = getState().preferences.aspectRatio || '3:4';
+  const ratioClass = `aspect-[${aspectRatio.replace(':', '/')}]`;
   stage = document.createElement('div');
-  stage.className = 'camera-stage aspect-[3/4] w-full mx-auto';
+  stage.className = `camera-stage ${ratioClass} w-full mx-auto`;
+  stage.setAttribute('data-ratio', aspectRatio);
   videoEl = document.createElement('video');
   videoEl.className = 'camera-video';
   videoEl.muted = true;
@@ -162,6 +165,16 @@ export async function renderSingleCamera(mount) {
     }
   };
   window.addEventListener('theme-changed', handleThemeChanged);
+
+  // Live aspect ratio switching
+  window.addEventListener('ratio-changed', (ev) => {
+    const newRatio = ev.detail?.aspectRatio;
+    if (newRatio && stage) {
+      const rc = `aspect-[${newRatio.replace(':', '/')}]`;
+      stage.className = `camera-stage ${rc} w-full mx-auto`;
+      stage.setAttribute('data-ratio', newRatio);
+    }
+  });
 
   function updateCount() {
     const req = requiredPhotoCount(getState().capture.layout || layout);
