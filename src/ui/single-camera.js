@@ -33,7 +33,7 @@ export async function renderSingleCamera(mount) {
   header.className = 'flex items-center justify-between mb-4';
   const back = Button({ label: 'Home', variant: 'ghost', onClick: () => cleanupAndExit(mount) });
   const captureCount = document.createElement('span');
-  captureCount.className = 'text-sm text-warmth-500';
+  captureCount.className = 'text-sm text-warmth-500 dark:text-warmth-400';
   header.append(back, captureCount);
   wrap.append(header);
 
@@ -71,7 +71,7 @@ export async function renderSingleCamera(mount) {
   wrap.append(stage);
 
   const status = document.createElement('p');
-  status.className = 'text-center text-sm text-warmth-500 mt-3';
+  status.className = 'text-center text-sm text-warmth-500 dark:text-warmth-400 mt-3';
   status.textContent = 'Starting camera…';
   wrap.append(status);
 
@@ -147,7 +147,7 @@ export async function renderSingleCamera(mount) {
     const req = requiredPhotoCount(layoutId);
     if (!localPhotos.length) {
       const tip = document.createElement('p');
-      tip.className = 'text-sm text-warmth-500 text-center';
+      tip.className = 'text-sm text-warmth-500 dark:text-warmth-400 text-center';
       tip.textContent = `Take ${req} ${req === 1 ? 'photo' : 'photos'} to compose your strip.`;
       reviewList.append(tip);
       return;
@@ -156,7 +156,7 @@ export async function renderSingleCamera(mount) {
     grid.className = 'grid grid-cols-4 gap-2';
     for (const blob of localPhotos) {
       const card = document.createElement('div');
-      card.className = 'aspect-[3/4] rounded-2xl overflow-hidden bg-warmth-100';
+      card.className = 'aspect-[3/4] rounded-2xl overflow-hidden bg-warmth-100 dark:bg-warmth-200';
       const img = document.createElement('img');
       img.src = URL.createObjectURL(blob);
       img.className = 'w-full h-full object-cover';

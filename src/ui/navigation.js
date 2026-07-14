@@ -17,7 +17,7 @@ export function mountNavigation(root) {
   for (const item of ITEMS) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'flex flex-col items-center gap-1 px-4 py-2 text-xs text-warmth-600 transition';
+    btn.className = 'flex flex-col items-center gap-1 px-4 py-2 text-xs text-warmth-600 dark:text-warmth-300 transition';
     btn.setAttribute('data-route', item.name);
     const icon = Icon({ name: item.icon, size: 22 });
     const label = document.createElement('span');
@@ -34,7 +34,9 @@ export function mountNavigation(root) {
     for (const b of row.querySelectorAll('button')) {
       const isActive = b.getAttribute('data-route') === current;
       b.classList.toggle('text-warmth-900', isActive);
+      b.classList.toggle('dark:text-warmth-100', isActive);
       b.classList.toggle('text-warmth-600', !isActive);
+      b.classList.toggle('dark:text-warmth-400', !isActive);
       b.setAttribute('aria-current', isActive ? 'page' : 'false');
     }
   };

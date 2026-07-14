@@ -31,13 +31,13 @@ export function Modal({ title, content, actions, onClose, dismissible = true } =
   backdrop.className = 'modal-backdrop fade-in';
 
   const dialog = document.createElement('div');
-  dialog.className = 'card max-w-md w-full p-6 fade-up';
+  dialog.className = 'card max-w-md w-full p-6 fade-up dark:bg-warmth-100 dark:border-warmth-300';
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
 
   if (title) {
     const h = document.createElement('h2');
-    h.className = 'heading-display text-2xl mb-3';
+    h.className = 'heading-display text-2xl mb-3 text-warmth-900 dark:text-warmth-100';
     h.textContent = title;
     dialog.append(h);
   }
@@ -46,7 +46,7 @@ export function Modal({ title, content, actions, onClose, dismissible = true } =
     if (content instanceof HTMLElement) body.append(content);
     else if (typeof content === 'string') body.innerHTML = content;
     else body.append(...content);
-    body.className = 'text-warmth-700 leading-relaxed';
+    body.className = 'text-warmth-700 dark:text-warmth-200 leading-relaxed';
     dialog.append(body);
   }
   if (actions && actions.length) {
@@ -75,7 +75,7 @@ export function Modal({ title, content, actions, onClose, dismissible = true } =
 export function Toast({ message, type = 'info' }) {
   const root = document.createElement('div');
   const palette = {
-    info: 'bg-warmth-900 text-warmth-50',
+    info: 'bg-warmth-900 text-warmth-50 dark:bg-warmth-100 dark:text-warmth-900',
     success: 'bg-sage-500 text-warmth-50',
     error: 'bg-rose-500 text-warmth-50',
     warn: 'bg-honey-500 text-warmth-900',
@@ -87,9 +87,9 @@ export function Toast({ message, type = 'info' }) {
 
 export function Spinner({ size = 24, label } = {}) {
   const wrap = document.createElement('div');
-  wrap.className = 'inline-flex items-center gap-2 text-warmth-600';
+  wrap.className = 'inline-flex items-center gap-2 text-warmth-600 dark:text-warmth-300';
   const ring = document.createElement('span');
-  ring.className = 'inline-block rounded-full border-2 border-warmth-200 border-t-warmth-900 animate-spin';
+  ring.className = 'inline-block rounded-full border-2 border-warmth-200 border-t-warmth-900 dark:border-warmth-700 dark:border-t-warmth-100 animate-spin';
   ring.style.width = `${size}px`;
   ring.style.height = `${size}px`;
   wrap.append(ring);
@@ -106,10 +106,10 @@ export function EmptyState({ title, message, action }) {
   const root = document.createElement('div');
   root.className = 'card p-8 text-center fade-up';
   const h = document.createElement('h3');
-  h.className = 'heading-display text-xl mb-2';
+  h.className = 'heading-display text-xl mb-2 text-warmth-900 dark:text-warmth-100';
   h.textContent = title;
   const p = document.createElement('p');
-  p.className = 'text-warmth-600';
+  p.className = 'text-warmth-600 dark:text-warmth-300';
   p.textContent = message;
   root.append(h, p);
   if (action) root.append(action);

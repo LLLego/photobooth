@@ -15,13 +15,25 @@ async function fetchJson(url) {
   return res.json();
 }
 
-function normalize(manifest, id) {
+function resolveAssetUrl(manifestUrl, assetUrl) {
+  if (!assetUrl) return null;
+  if (/^(https?:|data:|blob:)/i.test(assetUrl)) return assetUrl;
+  try {
+    return new URL(assetUrl, manifestUrl).toString();
+  } catch {
+    return assetUrl;
+  }
+}
+
+function normalize(manifest, id, manifestUrl) {
   if (!manifest || typeof manifest !== 'object') return null;
+  const frame = manifest.frame ? { ...manifest.frame } : { url: null, width: 1200, height: 1600 };
+  if (frame.url) frame.url = resolveAssetUrl(manifestUrl, frame.url);
   return {
     ...manifest,
     id: manifest.id || id,
     photoSlots: manifest.photoSlots || FALLBACK_THEME.photoSlots,
-    frame: manifest.frame || { url: null, width: 1200, height: 1600 },
+    frame,
     palette: manifest.palette || FALLBACK_THEME.palette,
     branding: manifest.branding || FALLBACK_THEME.branding,
     previewColor: manifest.previewColor || manifest?.palette?.background || '#FFFFFF',
@@ -34,8 +46,9 @@ export async function loadTheme(id = DEFAULT_THEME_ID) {
   if (inflight.has(id)) return inflight.get(id);
   const promise = (async () => {
     try {
-      const manifest = await fetchJson(resolveUrl(id));
-      const normalized = normalize(manifest, id);
+      const manifestUrl = resolveUrl(id);
+      const manifest = await fetchJson(manifestUrl);
+      const normalized = normalize(manifest, id, manifestUrl);
       cache.set(id, normalized || FALLBACK_THEME);
       return cache.get(id);
     } catch (err) {

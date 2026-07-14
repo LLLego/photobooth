@@ -70,9 +70,17 @@ function readPhoto(photo) {
   }
   if (photo instanceof Blob) {
     if (typeof createImageBitmap === 'function') {
-      return createImageBitmap(photo).catch(() => loadImage(URL.createObjectURL(photo)));
+      return createImageBitmap(photo).catch(async () => {
+        const url = URL.createObjectURL(photo);
+        try {
+          return await loadImage(url);
+        } finally {
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+        }
+      });
     }
-    return loadImage(URL.createObjectURL(photo));
+    const url = URL.createObjectURL(photo);
+    return loadImage(url).finally(() => setTimeout(() => URL.revokeObjectURL(url), 5000));
   }
   if (typeof photo === 'string') return loadImage(photo);
   return Promise.resolve(null);
@@ -94,7 +102,7 @@ function drawBranding(ctx, theme, width, height) {
   ctx.font = `${fontSize}px ${font}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const y = position === 'top' ? height - fontSize - 12 : height - fontSize - 12;
+  const y = position === 'top' ? fontSize + 12 : height - fontSize - 12;
   ctx.fillText(text, width / 2, y);
   ctx.restore();
 }

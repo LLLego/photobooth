@@ -23,12 +23,14 @@ export function openStripViewer(strip) {
   }, { passive: false });
 
   let pinchStart = null;
+  let pinchBaseScale = 1;
   img.addEventListener('touchstart', (ev) => {
     if (ev.touches.length === 2) {
       pinchStart = Math.hypot(
         ev.touches[0].clientX - ev.touches[1].clientX,
         ev.touches[0].clientY - ev.touches[1].clientY
       );
+      pinchBaseScale = state.scale;
     }
   }, { passive: true });
   img.addEventListener('touchmove', (ev) => {
@@ -38,8 +40,7 @@ export function openStripViewer(strip) {
         ev.touches[0].clientY - ev.touches[1].clientY
       );
       const ratio = d / pinchStart;
-      state.scale = Math.min(4, Math.max(1, state.scale * (ratio / (state.scale || 1))));
-      pinchStart = d;
+      state.scale = Math.min(4, Math.max(1, pinchBaseScale * ratio));
       img.style.transform = `scale(${state.scale})`;
     }
   }, { passive: true });
@@ -55,30 +56,39 @@ export function openStripViewer(strip) {
   wrap.append(img);
 
   const meta = document.createElement('div');
-  meta.className = 'text-sm text-warmth-500 text-center mt-3';
+  meta.className = 'text-sm text-warmth-500 dark:text-warmth-400 text-center mt-3';
   meta.textContent = `${strip.mode === 'dual' ? 'Dual camera' : 'Single camera'} · ${strip.layout} · ${formatDate(strip.createdAt)}`;
   wrap.append(meta);
 
   ensureSignedUrl(strip).then((url) => { if (url) img.src = url; });
 
-  const favBtn = Button({ variant: 'ghost', icon: Icon({ name: strip.favorited ? 'heartFilled' : 'heart' }), label: strip.favorited ? 'Unfavorite' : 'Favorite' });
+  const buildFavBtn = (favorited) => Button({
+    variant: 'ghost',
+    icon: Icon({ name: favorited ? 'heartFilled' : 'heart' }),
+    label: favorited ? 'Unfavorite' : 'Favorite',
+  });
+  let favBtn = buildFavBtn(!!strip.favorited);
   const downloadBtn = Button({ variant: 'primary', icon: Icon({ name: 'download' }), label: 'Download' });
   const shareBtn = Button({ variant: 'ghost', icon: Icon({ name: 'share' }), label: 'Share' });
   const deleteBtn = Button({ variant: 'danger', icon: Icon({ name: 'trash' }), label: 'Delete' });
 
-  favBtn.addEventListener('click', async () => {
+  const replaceFavBtn = (favorited) => {
+    const fresh = buildFavBtn(favorited);
+    fresh.addEventListener('click', favClick);
+    favBtn.replaceWith(fresh);
+    favBtn = fresh;
+  };
+
+  const favClick = async () => {
     try {
       const now = await toggleFavoriteForStrip(strip.id);
       strip.favorited = now;
-      favBtn.querySelector('span').textContent = '';
-      favBtn.querySelector('span').append(Icon({ name: now ? 'heartFilled' : 'heart' }));
-      const lbl = document.createElement('span');
-      lbl.textContent = now ? 'Unfavorite' : 'Favorite';
-      favBtn.append(lbl);
+      replaceFavBtn(now);
     } catch (err) {
       pushToast({ message: err.message, type: 'error' });
     }
-  });
+  };
+  favBtn.addEventListener('click', favClick);
 
   shareBtn.addEventListener('click', async () => {
     try {
@@ -108,26 +118,6 @@ export function openStripViewer(strip) {
     }
   });
 
-  deleteBtn.addEventListener('click', async () => {
-    const confirm = Modal({
-      title: 'Delete this strip?',
-      content: 'This removes the strip from your gallery. The original photos remain on the device only.',
-      actions: [
-        Button({ label: 'Cancel', variant: 'ghost', onClick: () => confirm.close() }),
-        Button({ label: 'Delete', variant: 'danger', onClick: async () => {
-          confirm.close();
-          try {
-            await removeStrip(strip.id);
-            modal.close();
-          } catch (err) {
-            pushToast({ message: err.message, type: 'error' });
-          }
-        } }),
-      ],
-    });
-    document.body.append(confirm.element);
-  });
-
   const actions = [favBtn, shareBtn, downloadBtn, deleteBtn];
   const modal = Modal({
     title: strip.themeName || 'Strip',
@@ -137,6 +127,42 @@ export function openStripViewer(strip) {
   });
   activeModal = modal;
   document.body.append(modal.element);
+
+  deleteBtn.addEventListener('click', () => {
+    const restore = () => {
+      titleEl.textContent = strip.themeName || 'Strip';
+      bodyEl.innerHTML = '';
+      bodyEl.append(wrap);
+      rowEl.innerHTML = '';
+      actions.forEach((a) => rowEl.append(a));
+    };
+    const titleEl = modal.element.querySelector('h2');
+    const bodyEl = modal.element.querySelector('.text-warmth-700');
+    const rowEl = modal.element.querySelector('.flex.flex-wrap.justify-end');
+    if (!titleEl || !bodyEl || !rowEl) {
+      window.confirm('Delete this strip? This cannot be undone.') && removeStrip(strip.id).then(() => modal.close()).catch((err) => pushToast({ message: err.message, type: 'error' }));
+      return;
+    }
+    titleEl.textContent = 'Delete this strip?';
+    bodyEl.innerHTML = '';
+    const warn = document.createElement('p');
+    warn.className = 'text-warmth-700 dark:text-warmth-800 leading-relaxed';
+    warn.textContent = 'This removes the strip from your gallery. The original photos remain on the device only.';
+    bodyEl.append(warn);
+    rowEl.innerHTML = '';
+    rowEl.append(
+      Button({ label: 'Cancel', variant: 'ghost', onClick: restore }),
+      Button({ label: 'Delete', variant: 'danger', onClick: async () => {
+        try {
+          await removeStrip(strip.id);
+          modal.close();
+        } catch (err) {
+          pushToast({ message: err.message, type: 'error' });
+          restore();
+        }
+      } }),
+    );
+  });
 }
 
 function formatDate(iso) {

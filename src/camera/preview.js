@@ -9,15 +9,7 @@ export async function startLivePreview({ videoEl, frameEl, themeId, onError, onS
     attachStreamToVideo(videoEl, stream);
     onStatusChange?.('ready');
     if (frameEl) {
-      const theme = await loadTheme(themeId || 'minimal');
-      const url = theme?.frame?.url ? absoluteUrl(theme.frame.url) : null;
-      if (url) {
-        frameEl.src = url;
-        frameEl.style.display = '';
-      } else {
-        frameEl.removeAttribute('src');
-        frameEl.style.display = 'none';
-      }
+      await setPreviewFrame(frameEl, themeId || 'minimal');
     }
     return stream;
   } catch (err) {
@@ -45,17 +37,10 @@ export async function setPreviewFrame(frameEl, themeId) {
   if (!frameEl) return;
   const theme = await loadTheme(themeId);
   if (theme?.frame?.url) {
-    frameEl.src = absoluteUrl(theme.frame.url);
+    frameEl.src = theme.frame.url;
     frameEl.style.display = '';
   } else {
     frameEl.removeAttribute('src');
     frameEl.style.display = 'none';
   }
-}
-
-function absoluteUrl(url) {
-  if (!url) return null;
-  if (/^https?:\/\//i.test(url)) return url;
-  if (url.startsWith('/')) return url;
-  return `/${url}`;
 }

@@ -41,31 +41,33 @@ export async function renderDualCamera(mount) {
   await renderThemePicker(themeCard);
 
   hostStage = document.createElement('div');
-  hostStage.className = 'camera-stage w-full mx-auto hidden flex';
+  hostStage.className = 'dual-stage camera-stage w-full mx-auto hidden';
   hostStage.style.aspectRatio = '3/2';
-  hostStage.style.display = 'none';
   const localWrap = document.createElement('div');
-  localWrap.className = 'flex-1 relative';
+  localWrap.className = 'dual-pane';
   const remoteWrap = document.createElement('div');
-  remoteWrap.className = 'flex-1 relative';
+  remoteWrap.className = 'dual-pane';
   localVideo = document.createElement('video');
-  localVideo.className = 'camera-video';
-  localVideo.style.position = 'relative';
-  localVideo.style.width = '100%';
-  localVideo.style.height = '100%';
-  localVideo.style.objectFit = 'cover';
+  localVideo.className = 'dual-video';
   localVideo.muted = true;
   localVideo.playsInline = true;
+  localVideo.autoplay = true;
   remoteVideo = document.createElement('video');
-  remoteVideo.className = 'camera-video';
-  remoteVideo.style.position = 'relative';
-  remoteVideo.style.width = '100%';
-  remoteVideo.style.height = '100%';
-  remoteVideo.style.objectFit = 'cover';
+  remoteVideo.className = 'dual-video';
   remoteVideo.muted = true;
   remoteVideo.playsInline = true;
-  localWrap.append(localVideo);
-  remoteWrap.append(remoteVideo);
+  remoteVideo.autoplay = true;
+
+  const localLabel = document.createElement('span');
+  localLabel.className = 'dual-pane-label';
+  localLabel.textContent = 'You';
+  const remoteLabel = document.createElement('span');
+  remoteLabel.className = 'dual-pane-label';
+  remoteLabel.textContent = 'Partner';
+
+  localWrap.append(localVideo, localLabel);
+  remoteWrap.append(remoteVideo, remoteLabel);
+
   const dualOverlay = document.createElement('div');
   dualOverlay.className = 'camera-overlay-grid';
   dualOverlay.style.position = 'absolute';
@@ -77,22 +79,22 @@ export async function renderDualCamera(mount) {
   captureBtn.className = 'capture-button';
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
   captureBtn.addEventListener('click', () => triggerCapture());
-  controls.append(captureBtn, document.createElement('span'));
+  controls.append(document.createElement('span'), captureBtn, document.createElement('span'));
   hostStage.append(localWrap, remoteWrap, dualOverlay, controls);
   wrap.append(hostStage);
 
   const status = document.createElement('p');
-  status.className = 'text-center text-sm text-warmth-500 mt-3';
+  status.className = 'text-center text-sm text-warmth-500 dark:text-warmth-400 mt-3';
   status.textContent = 'Ready when you are.';
   wrap.append(status);
 
   const codeCard = document.createElement('div');
   codeCard.className = 'card p-5 mt-4 hidden text-center';
   const codeLabel = document.createElement('p');
-  codeLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 mb-1';
+  codeLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400 mb-1';
   codeLabel.textContent = 'Room code';
   const codeValue = document.createElement('p');
-  codeValue.className = 'heading-display text-4xl tracking-widest font-mono';
+  codeValue.className = 'heading-display text-4xl tracking-widest font-mono text-warmth-900 dark:text-warmth-100';
   codeCard.append(codeLabel, codeValue);
   const shareBtn = Button({ label: 'Copy code', variant: 'primary' });
   shareBtn.classList.add('mt-4', 'w-full');
@@ -145,7 +147,7 @@ export async function renderDualCamera(mount) {
     input.className = 'input uppercase tracking-widest text-center font-mono text-xl';
     input.placeholder = 'ABC123';
     const label = document.createElement('p');
-    label.className = 'text-sm text-warmth-600 mb-2';
+    label.className = 'text-sm text-warmth-600 dark:text-warmth-300 mb-2';
     label.textContent = 'Enter the 6-character code shared by your partner.';
     const content = document.createElement('div');
     content.append(label, input);
