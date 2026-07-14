@@ -106,6 +106,13 @@ function mountLoading(mount) {
 function applyDarkMode(enabled) {
   document.documentElement.classList.toggle('dark', Boolean(enabled));
 }
+// Keep dark mode in sync with state changes
+subscribe((s) => {
+  const dm = s?.preferences?.darkMode;
+  if (dm !== undefined) {
+    document.documentElement.classList.toggle('dark', Boolean(dm));
+  }
+});
 
 let toasterRoot = null;
 let toastUnsubscribe = null;
@@ -143,7 +150,6 @@ function renderToasts() {
 }
 
 let navHost = null;
-let navUpdateInterval = null;
 let navUpdateHash = null;
 function mountNavigationHost() {
   if (navHost) return;

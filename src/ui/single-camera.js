@@ -266,9 +266,11 @@ export async function renderSingleCamera(mount) {
         try {
           saveBtn.disabled = true;
           status.textContent = 'Saving…';
-          const session = await createSession({ mode: 'single', themeId, layout: layoutId });
+          // Extract base theme from variant keys like "hundred-acre-gang/pooh"
+          const baseThemeId = themeId.includes('/') ? themeId.split('/')[0] : themeId;
+          const session = await createSession({ mode: 'single', themeId: baseThemeId, layout: layoutId });
           currentSessionId = session.id;
-          await uploadStrip({ sessionId: session.id, blob, layout: layoutId, themeId, isPrivate: false });
+          await uploadStrip({ sessionId: session.id, blob, layout: layoutId, themeId: baseThemeId, isPrivate: false });
           await completeSession(session.id);
           pushToast({ message: 'Saved to gallery.', type: 'success' });
           navigate('gallery');

@@ -42,6 +42,33 @@ function normalize(manifest, id, manifestUrl) {
 
 export async function loadTheme(id = DEFAULT_THEME_ID) {
   if (!id || id === 'none') return NO_FRAME_THEME;
+  
+  // Handle variant keys like "hundred-acre-gang/pooh"
+  if (id.includes('/')) {
+    const [baseId, variantId] = id.split('/');
+    if (cache.has(id)) return cache.get(id);
+    if (inflight.has(id)) return inflight.get(id);
+    const promise = (async () => {
+      try {
+        const base = await loadTheme(baseId);
+        if (!base || base.id === 'none') return FALLBACK_THEME;
+        const variant = (base.variants || []).find(v => v.id === variantId);
+        if (variant && variant.frame) {
+          const themed = { ...base, id, frame: { ...base.frame, url: variant.frame } };
+          cache.set(id, themed);
+          return themed;
+        }
+        cache.set(id, base);
+        return base;
+      } catch (err) {
+        cache.set(id, FALLBACK_THEME);
+        return FALLBACK_THEME;
+      }
+    })();
+    inflight.set(id, promise);
+    return promise;
+  }
+
   if (cache.has(id)) return cache.get(id);
   if (inflight.has(id)) return inflight.get(id);
   const promise = (async () => {
