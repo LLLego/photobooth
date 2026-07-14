@@ -81,6 +81,42 @@ export async function renderSingleCamera(mount) {
   wrap.append(themeCard);
   await renderThemePicker(themeCard);
 
+  // Filter bar
+  const filterBar = document.createElement('div');
+  filterBar.className = 'mt-4';
+  filterBar.innerHTML = '<p class="text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400 mb-2">Filter</p>';
+  const filterScroller = document.createElement('div');
+  filterScroller.className = 'flex gap-2 overflow-x-auto no-scrollbar pb-1';
+  for (const f of FILTER_PRESETS) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'shrink-0 px-3 py-1.5 rounded-2xl text-xs font-medium border border-warmth-200 dark:border-warmth-300 text-warmth-700 dark:text-warmth-200 whitespace-nowrap transition';
+    btn.textContent = f.name;
+    btn.dataset.filter = f.id;
+    btn.addEventListener('click', () => {
+      // Update all filter buttons
+      filterScroller.querySelectorAll('button').forEach(b => {
+        b.classList.toggle('bg-warmth-900', b.dataset.filter === f.id);
+        b.classList.toggle('text-warmth-50', b.dataset.filter === f.id);
+        b.classList.toggle('dark:bg-warmth-100', b.dataset.filter === f.id);
+        b.classList.toggle('dark:text-warmth-900', b.dataset.filter === f.id);
+      });
+      // Apply filter to video live
+      const css = getFilterCSS(f.id);
+      if (videoEl) {
+        videoEl.style.filter = css === 'none' ? '' : css;
+      }
+      set({ preferences: { ...getState().preferences, filterId: f.id } });
+    });
+    // Preselect original
+    if (f.id === 'original') {
+      btn.classList.add('bg-warmth-900', 'text-warmth-50', 'dark:bg-warmth-100', 'dark:text-warmth-900');
+    }
+    filterScroller.append(btn);
+  }
+  filterBar.append(filterScroller);
+  wrap.append(filterBar);
+
   const review = document.createElement('div');
   review.className = 'mt-6 space-y-3';
   review.setAttribute('data-review', 'true');
@@ -143,7 +179,7 @@ export async function renderSingleCamera(mount) {
       await startCountdown(stage, { duration: getState().preferences.countdownDuration });
       const theme = await loadTheme(getState().preferences.themeId || 'minimal');
       const slots = (theme.photoSlots || {})[getState().capture.layout || layout] || [{ x: 0, y: 0, w: 1, h: 1 }];
-      const { blob } = await takePhoto(videoEl, theme?.frame?.url || null, theme, { slots });
+      const { blob } = await takePhoto(videoEl, theme?.frame?.url || null, theme, { slots, filter: getFilterCSS(getState().preferences.filterId || 'original') });
       localPhotos.push(blob);
       renderReview();
       updateCount();

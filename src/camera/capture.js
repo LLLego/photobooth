@@ -92,7 +92,7 @@ async function loadImage(src) {
 
 export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {}) {
   if (!videoEl) throw new Error('Video element required for capture.');
-  const { width = DEFAULTS.width, height = DEFAULTS.height, quality = DEFAULTS.quality, type = DEFAULTS.type, slots } = opts;
+  const { width = DEFAULTS.width, height = DEFAULTS.height, quality = DEFAULTS.quality, type = DEFAULTS.type, slots, filter } = opts;
 
   const canvas = createCanvas(width, height);
   const ctx = ctxOf(canvas);
@@ -107,6 +107,11 @@ export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {
   if (themeConfig.background) {
     ctx.fillStyle = themeConfig.background;
     ctx.fillRect(0, 0, width, height);
+  }
+
+  // Apply photo filter
+  if (filter && filter !== 'none') {
+    ctx.filter = filter;
   }
 
   for (const slot of targetSlots) {
