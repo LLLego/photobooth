@@ -1,7 +1,7 @@
 {
   "id": "hundred-acre-gang",
   "name": "Hundred Acre Gang",
-  "version": "1.0",
+  "version": "2.0",
   "palette": {
     "accent": "#FFB400",
     "background": "#FFF8E7",
@@ -10,6 +10,13 @@
   },
   "fonts": { "branding": "'Georgia', serif" },
   "frame": { "url": "./frame.svg", "width": 1200, "height": 1600 },
+  "variants": [
+    { "id": "frame", "name": "All Together", "frame": "./frame.svg", "preview": "./preview.png" },
+    { "id": "pooh", "name": "Winnie the Pooh", "frame": "./pooh.svg", "preview": "./pooh-preview.png" },
+    { "id": "piglet", "name": "Piglet", "frame": "./piglet.svg", "preview": "./piglet-preview.png" },
+    { "id": "tigger", "name": "Tigger", "frame": "./tigger.svg", "preview": "./tigger-preview.png" },
+    { "id": "eeyore", "name": "Eeyore", "frame": "./eeyore.svg", "preview": "./eeyore-preview.png" }
+  ],
   "photoSlots": {
     "strip_4": [
       { "x": 0.08, "y": 0.03, "w": 0.84, "h": 0.20 },

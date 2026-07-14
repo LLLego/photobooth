@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600">
+
+  <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8C547" stroke-width="3"/>
+  <g transform="translate(200,140)">
+    <ellipse cx="0" cy="0" rx="28" ry="34" fill="#A0A0B0"/><circle cx="0" cy="-24" r="12" fill="#A0A0B0"/>
+    <ellipse cx="-12" cy="-24" rx="7" ry="12" fill="#808090"/><ellipse cx="12" cy="-24" rx="7" ry="12" fill="#808090"/>
+    <circle cx="-5" cy="-24" r="2.5" fill="#333"/><circle cx="5" cy="-24" r="2.5" fill="#333"/>
+    <ellipse cx="0" cy="-8" rx="6" ry="3" fill="#666"/>
+    <rect x="-5" y="30" width="10" height="10" rx="3" fill="#E891A0"/>
+    <path d="M-12,28 Q-20,24 -22,18" stroke="#A0A0B0" stroke-width="3" fill="none"/>
+  </g>
+  <!-- Rain clouds -->
+  <g transform="translate(950,100)"><ellipse cx="0" cy="0" rx="30" ry="15" fill="#CCC"/><ellipse cx="-15" cy="-5" rx="15" ry="10" fill="#CCC"/><ellipse cx="15" cy="-5" rx="15" ry="10" fill="#CCC"/></g>
+  <text x="600" y="1565" text-anchor="middle" font-family="Georgia,serif" font-size="28" fill="#8B6914" opacity="0.7">Eeyore</text>
+</svg>

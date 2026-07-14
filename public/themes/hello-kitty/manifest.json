@@ -1,7 +1,7 @@
 {
   "id": "hello-kitty",
   "name": "Hello Kitty",
-  "version": "1.0",
+  "version": "2.0",
   "palette": {
     "accent": "#E891A0",
     "background": "#FFF5F7",
@@ -10,6 +10,11 @@
   },
   "fonts": { "branding": "'Georgia', serif" },
   "frame": { "url": "./frame.svg", "width": 1200, "height": 1600 },
+  "variants": [
+    { "id": "frame", "name": "Hello Kitty", "frame": "./frame.svg", "preview": "./preview.png" },
+    { "id": "kitty-only", "name": "Kitty", "frame": "./kitty-only.svg", "preview": "./kitty-only-preview.png" },
+    { "id": "bows-only", "name": "Bows & Ribbons", "frame": "./bows-only.svg", "preview": "./bows-only-preview.png" }
+  ],
   "photoSlots": {
     "strip_4": [
       { "x": 0.08, "y": 0.03, "w": 0.84, "h": 0.20 },

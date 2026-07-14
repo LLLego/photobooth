@@ -1,7 +1,7 @@
 {
   "id": "pucca",
   "name": "Pucca",
-  "version": "1.0",
+  "version": "2.0",
   "palette": {
     "accent": "#E8443A",
     "background": "#FFF0F0",
@@ -10,6 +10,11 @@
   },
   "fonts": { "branding": "'Georgia', serif" },
   "frame": { "url": "./frame.svg", "width": 1200, "height": 1600 },
+  "variants": [
+    { "id": "frame", "name": "Pucca & Garu", "frame": "./frame.svg", "preview": "./preview.png" },
+    { "id": "pucca-only", "name": "Pucca", "frame": "./pucca-only.svg", "preview": "./pucca-only-preview.png" },
+    { "id": "garu-only", "name": "Garu", "frame": "./garu-only.svg", "preview": "./garu-only-preview.png" }
+  ],
   "photoSlots": {
     "strip_4": [
       { "x": 0.08, "y": 0.03, "w": 0.84, "h": 0.20 },

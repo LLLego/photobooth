@@ -33,6 +33,7 @@ const initial = {
     autoDownload: false,
     countdownDuration: 3,
     displayName: '',
+    filterId: 'original',
   },
   themes: {
     cache: new Map(),

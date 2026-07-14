@@ -3,6 +3,7 @@ import { startLivePreview, stopLivePreview, flipCamera, setPreviewFrame } from '
 import { takePhoto } from '../camera/capture.js';
 import { startCountdown } from './countdown.js';
 import { Button, Icon, Spinner } from './components.js';
+import { FILTER_PRESETS, getFilterCSS } from '../camera/filters.js';
 import { renderThemePicker } from '../themes/theme-picker.js';
 import { loadTheme } from '../themes/theme-loader.js';
 import { compositeStrip } from '../strips/compositor.js';
@@ -112,8 +113,15 @@ export async function renderSingleCamera(mount) {
   // Live theme switching — update frame overlay when user picks a new theme
   window.addEventListener('theme-changed', async (ev) => {
     const newThemeId = ev.detail?.themeId;
+    const frameUrl = ev.detail?.frameUrl;
     if (newThemeId && frameEl) {
-      await setPreviewFrame(frameEl, newThemeId);
+      if (frameUrl) {
+        // Use the variant-specific frame URL directly
+        frameEl.src = `${import.meta.env.BASE_URL}themes/${newThemeId.split('/')[0]}/${frameUrl.split('/').pop()}`;
+        frameEl.style.display = '';
+      } else {
+        await setPreviewFrame(frameEl, newThemeId);
+      }
       status.textContent = 'Ready';
     }
   });

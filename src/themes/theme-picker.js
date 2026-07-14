@@ -38,40 +38,48 @@ export async function renderThemePicker(mount) {
   for (const id of themeList) {
     const t = id === 'none' ? NO_FRAME_THEME : await loadTheme(id);
     if (!t) continue;
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'shrink-0 w-24 flex flex-col items-center gap-2 text-center focus:outline-none';
-    card.setAttribute('data-theme-id', t.id);
 
-    const previewWrap = document.createElement('span');
-    previewWrap.className = 'relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100';
-    previewWrap.style.background = t.previewColor || t.palette?.background || '#FFFFFF';
+    // Show variants if available, otherwise single card
+    const variants = (t.variants && t.variants.length) ? t.variants : [{ id: t.id, name: t.name || t.id, frame: t.frame?.url, preview: `./preview.png` }];
 
-    if (t.id !== 'none') {
-      const img = document.createElement('img');
-      img.className = 'absolute inset-0 w-full h-full object-cover';
-      img.alt = `${t.name || t.id} preview`;
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.src = `${import.meta.env.BASE_URL}themes/${t.id}/preview.png`;
-      img.onerror = () => {
-        img.onerror = null;
-        img.src = `${import.meta.env.BASE_URL}themes/${t.id}/frame.webp`;
-      };
-      previewWrap.append(img);
-    } else {
-      const noneIcon = document.createElement('span');
-      noneIcon.className = 'absolute inset-0 flex items-center justify-center text-warmth-400 dark:text-warmth-600 text-2xl';
-      noneIcon.textContent = '∅';
-      previewWrap.append(noneIcon);
+    for (const v of variants) {
+      const variantKey = t.id === 'none' ? 'none' : `${t.id}/${v.id}`;
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'shrink-0 w-24 flex flex-col items-center gap-2 text-center focus:outline-none';
+      card.setAttribute('data-theme-id', variantKey);
+      card.setAttribute('data-frame-url', v.frame || '');
+
+      const previewWrap = document.createElement('span');
+      previewWrap.className = 'relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100';
+      previewWrap.style.background = t.previewColor || t.palette?.background || '#FFFFFF';
+
+      if (t.id !== 'none') {
+        const img = document.createElement('img');
+        img.className = 'absolute inset-0 w-full h-full object-cover';
+        img.alt = `${v.name} preview`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.src = `${import.meta.env.BASE_URL}themes/${t.id}/${v.preview || 'preview.png'}`;
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = `${import.meta.env.BASE_URL}themes/${t.id}/frame.webp`;
+        };
+        previewWrap.append(img);
+      } else {
+        const noneIcon = document.createElement('span');
+        noneIcon.className = 'absolute inset-0 flex items-center justify-center text-warmth-400 dark:text-warmth-600 text-2xl';
+        noneIcon.textContent = '∅';
+        previewWrap.append(noneIcon);
+      }
+
+      const label = document.createElement('span');
+      label.className = 'text-xs text-warmth-700 dark:text-warmth-200 leading-tight';
+      label.textContent = v.name;
+      card.append(previewWrap, label);
+      card.addEventListener('click', () => onSelectTheme(variantKey, v.frame || t.frame?.url));
+      scroller.append(card);
     }
-
-    const label = document.createElement('span');
-    label.className = 'text-xs text-warmth-700 dark:text-warmth-200 leading-tight';
-    label.textContent = t.name || t.id;
-    card.append(previewWrap, label);
-    card.addEventListener('click', () => onSelectTheme(t.id));
-    scroller.append(card);
   }
 
   const layoutWrap = document.createElement('div');
@@ -115,12 +123,12 @@ async function listThemes() {
   return DEFAULT_THEME_IDS;
 }
 
-function onSelectTheme(id) {
+function onSelectTheme(id, frameUrl) {
   set({ preferences: { ...getState().preferences, themeId: id } });
   set({ capture: { ...getState().capture, themeId: id } });
   applyActiveStates();
   // Notify camera to update preview frame
-  window.dispatchEvent(new CustomEvent('theme-changed', { detail: { themeId: id } }));
+  window.dispatchEvent(new CustomEvent('theme-changed', { detail: { themeId: id, frameUrl } }));
 }
 
 function onSelectLayout(id) {
