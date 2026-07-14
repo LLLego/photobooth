@@ -28,14 +28,14 @@ export async function renderSettings(mount) {
   mount.innerHTML = '';
 
   const wrap = document.createElement('div');
-  wrap.className = 'max-w-md mx-auto px-6 pt-8 pb-28 fade-in';
+  wrap.className = 'max-w-md md:max-w-2xl mx-auto px-6 pt-8 pb-28 fade-in';
 
   const h = document.createElement('h1');
   h.className = 'heading-display text-3xl mb-6';
   h.textContent = 'Settings';
 
   const nameCard = document.createElement('section');
-  nameCard.className = 'card p-5 mb-5';
+  nameCard.className = 'card p-5 mb-5 md:mb-0';
   nameCard.innerHTML = `
     <label class="block">
       <span class="text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400">Display name</span>
@@ -71,7 +71,7 @@ export async function renderSettings(mount) {
   nameCard.append(nameActions);
 
   const prefsCard = document.createElement('section');
-  prefsCard.className = 'card p-5 mb-5';
+  prefsCard.className = 'card p-5 mb-5 md:mb-0';
   prefsCard.innerHTML = `
     <h2 class="heading-display text-lg mb-3 text-warmth-900 dark:text-warmth-100">Capture preferences</h2>
     <div class="flex items-center justify-between py-2">
@@ -81,8 +81,8 @@ export async function renderSettings(mount) {
       </div>
       <label class="inline-flex items-center cursor-pointer">
         <input type="checkbox" class="sr-only peer" data-pref="autoDownload" />
-        <span class="w-11 h-6 bg-warmth-200 dark:bg-warmth-700 rounded-full peer-checked:bg-warmth-900 dark:peer-checked:bg-warmth-100 relative transition">
-          <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 dark:bg-warmth-200 rounded-full transition peer-checked:translate-x-5"></span>
+        <span class="toggle-track w-11 h-6 bg-warmth-200 dark:bg-warmth-700 rounded-full peer-checked:bg-warmth-900 dark:peer-checked:bg-warmth-100 relative transition">
+          <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 dark:bg-warmth-200 rounded-full transition peer-checked:translate-x-5"></span>
         </span>
       </label>
     </div>
@@ -93,8 +93,8 @@ export async function renderSettings(mount) {
       </div>
       <label class="inline-flex items-center cursor-pointer">
         <input type="checkbox" class="sr-only peer" data-pref="darkMode" />
-        <span class="w-11 h-6 bg-warmth-200 dark:bg-warmth-700 rounded-full peer-checked:bg-warmth-900 dark:peer-checked:bg-warmth-100 relative transition">
-          <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 dark:bg-warmth-200 rounded-full transition peer-checked:translate-x-5"></span>
+        <span class="toggle-track w-11 h-6 bg-warmth-200 dark:bg-warmth-700 rounded-full peer-checked:bg-warmth-900 dark:peer-checked:bg-warmth-100 relative transition">
+          <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 dark:bg-warmth-200 rounded-full transition peer-checked:translate-x-5"></span>
         </span>
       </label>
     </div>
@@ -159,7 +159,7 @@ export async function renderSettings(mount) {
   });
 
   const accountCard = document.createElement('section');
-  accountCard.className = 'card p-5 mb-5';
+  accountCard.className = 'card p-5 mb-5 md:mb-0';
   const refreshBtn = Button({ label: 'Refresh profile', variant: 'ghost' });
   refreshBtn.addEventListener('click', async () => {
     refreshBtn.disabled = true;
@@ -203,7 +203,11 @@ export async function renderSettings(mount) {
     }
   });
 
-  wrap.append(h, nameCard, prefsCard, accountCard, signOutBtn);
+  wrap.append(h);
+  const cardsGrid = document.createElement('div');
+  cardsGrid.className = 'md:grid md:grid-cols-2 md:gap-5';
+  cardsGrid.append(nameCard, prefsCard, accountCard);
+  wrap.append(cardsGrid, signOutBtn);
   mount.append(wrap);
 
   syncPrefsToUI();

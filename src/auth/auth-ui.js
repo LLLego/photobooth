@@ -114,11 +114,13 @@ export async function renderAuthUI(mount) {
     if (hidden) {
       nameWrap.setAttribute('aria-hidden', 'true');
       nameWrap.setAttribute('hidden', '');
+      nameWrap.setAttribute('inert', '');
       nameInput.setAttribute('tabindex', '-1');
       nameInput.setAttribute('aria-hidden', 'true');
     } else {
       nameWrap.removeAttribute('aria-hidden');
       nameWrap.removeAttribute('hidden');
+      nameWrap.removeAttribute('inert');
       nameInput.removeAttribute('tabindex');
       nameInput.removeAttribute('aria-hidden');
     }

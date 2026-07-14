@@ -31,7 +31,7 @@ export async function renderThemePicker(mount) {
   wrap.append(heading);
 
   const scroller = document.createElement('div');
-  scroller.className = 'theme-picker no-scrollbar';
+  scroller.className = 'theme-picker no-scrollbar theme-picker-scroller';
   wrap.append(scroller);
 
   const themeList = await listThemes();
@@ -46,12 +46,12 @@ export async function renderThemePicker(mount) {
       const variantKey = t.id === 'none' ? 'none' : `${t.id}/${v.id}`;
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = 'shrink-0 w-24 flex flex-col items-center gap-2 text-center focus:outline-none';
+      card.className = 'theme-card shrink-0 w-24 flex flex-col items-center gap-2 text-center focus:outline-none transition-transform duration-150 ease-out';
       card.setAttribute('data-theme-id', variantKey);
       card.setAttribute('data-frame-url', v.frame || '');
 
       const previewWrap = document.createElement('span');
-      previewWrap.className = 'relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100';
+      previewWrap.className = 'theme-thumb relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100 transition-all duration-150 ease-out';
       previewWrap.style.background = t.previewColor || t.palette?.background || '#FFFFFF';
 
       if (t.id !== 'none') {
@@ -86,7 +86,13 @@ export async function renderThemePicker(mount) {
       const label = document.createElement('span');
       label.className = 'text-xs text-warmth-700 dark:text-warmth-200 leading-tight';
       label.textContent = v.name;
-      card.append(previewWrap, label);
+
+      const badge = document.createElement('span');
+      badge.className = 'theme-card-badge';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.textContent = '✓';
+
+      card.append(previewWrap, label, badge);
       card.addEventListener('click', () => onSelectTheme(variantKey, v.frame || t.frame?.url));
       scroller.append(card);
     }
@@ -152,10 +158,9 @@ function applyActiveStates() {
   const cards = document.querySelectorAll('[data-theme-id]');
   cards.forEach((c) => {
     const isActive = c.getAttribute('data-theme-id') === themeId;
-    const wrap = c.querySelector('span');
-    wrap.classList.toggle('ring-4', isActive);
-    wrap.classList.toggle('ring-warmth-900', isActive);
-    wrap.classList.toggle('dark:ring-warmth-100', isActive);
+    c.classList.toggle('is-active', isActive);
+    const badge = c.querySelector('.theme-card-badge');
+    if (badge) badge.classList.toggle('is-visible', isActive);
   });
   document.querySelectorAll('[data-layout]').forEach((b) => {
     const isActive = b.dataset.layout === layout;
