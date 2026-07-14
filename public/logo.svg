@@ -1,20 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFFAF0"/><stop offset="100%" stop-color="#FFE4C4"/></linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#2D1B11" flood-opacity="0.12"/></filter>
+    <clipPath id="clip-bg">
+      <rect width="512" height="512" rx="112" />
+    </clipPath>
+    <clipPath id="clip-photo">
+      <rect x="318" y="110" width="126" height="84" rx="10" />
+    </clipPath>
   </defs>
-  <rect width="512" height="512" rx="90" fill="url(#bg)"/>
-  <g filter="url(#shadow)">
-    <rect x="100" y="160" width="312" height="210" rx="45" fill="#2D1B11"/>
-    <rect x="120" y="140" width="95" height="25" rx="8" fill="#D4956A"/>
-    <rect x="300" y="145" width="80" height="18" rx="6" fill="#D4956A" opacity="0.5"/>
-    <circle cx="256" cy="250" r="70" fill="#4A2515" stroke="#D4956A" stroke-width="5"/>
-    <circle cx="256" cy="250" r="42" fill="#1A0D06"/>
-    <circle cx="256" cy="250" r="22" fill="#D4956A" opacity="0.3"/>
-    <path d="M248 250 C248 242 256 238 262 238 C268 238 268 244 262 248 C256 252 248 242 248 250Z" fill="#FFB400"/>
+
+  <!-- Cream Background -->
+  <rect width="512" height="512" rx="112" fill="#F2E8D5" />
+
+  <!-- Vintage corner ornaments -->
+  <g fill="none" stroke="#C7956D" stroke-width="5" stroke-linecap="round">
+    <path d="M 48 88 L 48 48 L 88 48" />
+    <path d="M 424 48 L 464 48 L 464 88" />
+    <path d="M 48 424 L 48 464 L 88 464" />
+    <path d="M 424 464 L 464 464 L 464 424" />
   </g>
-  <circle cx="380" cy="210" r="5" fill="#FFB400"/>
-  <circle cx="120" cy="380" r="4" fill="#E891A0"/>
-  <rect x="175" y="395" width="162" height="30" rx="15" fill="#D4956A"/>
-  <text x="256" y="416" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#FFFAF0">OURS</text>
+
+  <!-- Soft Shadow under Camera -->
+  <ellipse cx="256" cy="400" rx="160" ry="14" fill="#8C6A45" opacity="0.15" />
+
+  <!-- Film Photo Ejecting from Top -->
+  <g>
+    <rect x="318" y="110" width="126" height="84" rx="10" fill="#FFFFFF" />
+    <g clip-path="url(#clip-photo)">
+      <rect x="318" y="110" width="126" height="84" fill="#E8C39E" />
+      <circle cx="351" cy="152" r="13" fill="#5C3A21" />
+      <path d="M 351 165 C 334 165 322 185 322 205 L 380 205 C 380 185 368 165 351 165 Z" fill="#5C3A21" />
+      <circle cx="408" cy="148" r="11" fill="#3E2A1C" />
+      <path d="M 408 159 C 394 159 384 176 384 195 L 432 195 C 432 176 422 159 408 159 Z" fill="#3E2A1C" />
+      <rect x="384" y="154" width="12" height="9" rx="4.5" fill="#C0504D" />
+      <rect x="318" y="110" width="126" height="24" fill="#FFFFFF" opacity="0.3" />
+    </g>
+    <rect x="318" y="110" width="126" height="84" rx="10" fill="none" stroke="#E5D3B0" stroke-width="3" />
+  </g>
+
+  <!-- Camera Body -->
+  <rect x="66" y="156" width="380" height="230" rx="42" fill="#3E2A1C" />
+  <!-- Top Edge Highlight -->
+  <rect x="66" y="156" width="380" height="6" rx="3" fill="#5C3A21" />
+
+  <!-- Optical Viewfinder (Left) -->
+  <rect x="100" y="184" width="80" height="52" rx="12" fill="#2A1B10" />
+  <circle cx="140" cy="210" r="20" fill="#050200" />
+  <circle cx="140" cy="210" r="9" fill="#8B5A3C" opacity="0.6" />
+
+  <!-- Flash Unit (Right) -->
+  <rect x="332" y="184" width="80" height="52" rx="12" fill="#2A1B10" />
+  <rect x="346" y="196" width="52" height="28" rx="6" fill="#F9F2E2" />
+  <rect x="346" y="196" width="52" height="14" rx="6" fill="#FFFFFF" />
+
+  <!-- Shutter Button -->
+  <rect x="176" y="144" width="56" height="22" rx="11" fill="#2A1B10" />
+  <circle cx="204" cy="155" r="11" fill="#D9482E" />
+  <circle cx="204" cy="155" r="11" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.4" />
+
+  <!-- Brand Plate -->
+  <rect x="206" y="324" width="100" height="32" rx="8" fill="#C7956D" />
+  <text x="256" y="346" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#3E2A1C" text-anchor="middle" letter-spacing="2">OUR BOOTH</text>
+
+  <!-- Lens Assembly -->
+  <!-- Lens Base Mount -->
+  <circle cx="256" cy="271" r="96" fill="#5C3A21" />
+  <!-- Outer Lens Ring -->
+  <circle cx="256" cy="271" r="88" fill="#2A1B10" />
+  <!-- Inner Lens Glass -->
+  <circle cx="256" cy="271" r="70" fill="#050200" />
+  <!-- Lens Reflections -->
+  <ellipse cx="228" cy="245" rx="26" ry="16" fill="#8C6A45" opacity="0.35" transform="rotate(-30 228 245)" />
+  <circle cx="256" cy="271" r="58" fill="none" stroke="#5C3A21" stroke-width="1.5" opacity="0.6" />
+  <!-- Aperture Highlight Ring -->
+  <circle cx="256" cy="271" r="32" fill="none" stroke="#A88B65" stroke-width="4" />
+
+  <!-- Gold Heart on Lens -->
+  <path d="M 256 291 C 226 271 226 241 251 241 C 256 241 256 246 256 246 C 256 246 256 241 261 241 C 286 241 286 271 256 291 Z" fill="#D4AF37" />
+  <path d="M 256 291 C 226 271 226 241 251 241 C 256 241 256 246 256 246 Z" fill="#F4D47C" />
 </svg>

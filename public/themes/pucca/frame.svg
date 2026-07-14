@@ -1,43 +1,76 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600">
-  <defs><filter id="soft"><feGaussianBlur stdDeviation="1"/></filter></defs>
-  <!-- Border -->
-  <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
-  <!-- Pucca (top left) -->
-  <g transform="translate(120,90)">
-    <!-- Body -->
-    <rect x="-15" y="15" width="30" height="35" rx="8" fill="#E8443A"/>
-    <!-- Head -->
-    <ellipse cx="0" cy="0" rx="22" ry="20" fill="#FFE4C4"/>
-    <!-- Hair buns -->
-    <circle cx="-18" cy="-8" r="14" fill="#1A1A2E"/>
-    <circle cx="18" cy="-8" r="14" fill="#1A1A2E"/>
-    <circle cx="-18" cy="-8" r="5" fill="#E8443A"/>
-    <circle cx="18" cy="-8" r="5" fill="#E8443A"/>
-    <!-- Face -->
-    <circle cx="-7" cy="-3" r="2.5" fill="#333"/><circle cx="7" cy="-3" r="2.5" fill="#333"/>
-    <path d="M-5 5 Q0 12 5 5" stroke="#E8443A" stroke-width="1.5" fill="none"/>
-    <!-- Kiss heart -->
-    <path d="M25 -5 C25 -12 32 -8 28 -2 C24 -8 25 -12 25 -5Z" fill="#E8443A"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600" width="1200" height="1600">
+  <defs>
+    <clipPath id="centerHole"><rect x="80" y="210" width="1040" height="1180" rx="20" ry="20"/></clipPath>
+    <mask id="centerMask">
+      <rect width="1200" height="1600" fill="white"/>
+      <rect x="80" y="210" width="1040" height="1180" rx="20" ry="20" fill="black"/>
+    </mask>
+    <symbol id="heart" viewBox="-50 -45 100 90" overflow="visible">
+      <path d="M0,35 C-45,5 -50,-25 -25,-40 C-10,-40 -3,-30 0,-18 C3,-30 10,-40 25,-40 C50,-25 45,5 0,35 Z" fill="#E8443A"/>
+    </symbol>
+    <symbol id="heartPink" viewBox="-50 -45 100 90" overflow="visible">
+      <path d="M0,35 C-45,5 -50,-25 -25,-40 C-10,-40 -3,-30 0,-18 C3,-30 10,-40 25,-40 C50,-25 45,5 0,35 Z" fill="#FFB6C1"/>
+    </symbol>
+  </defs>
+
+  <rect width="1200" height="1600" fill="#FFF0F0"/>
+
+  <g mask="url(#centerMask)">
+    <rect x="0" y="0" width="1200" height="1600" fill="#1A1A2E"/>
+    <path d="M0,0 Q300,50 600,0 T1200,0 L1200,150 Q600,180 0,150 Z" fill="#E8443A"/>
+    <path d="M0,1450 Q600,1420 1200,1450 L1200,1600 L0,1600 Z" fill="#E8443A"/>
+    
+    <path d="M80,280 L80,130" stroke="#FFF0F0" stroke-width="6" fill="none" stroke-dasharray="2 14"/>
+    <path d="M1120,280 L1120,130" stroke="#FFF0F0" stroke-width="6" fill="none" stroke-dasharray="2 14"/>
   </g>
-  <!-- Garu (top right) -->
-  <g transform="translate(1050,90)">
-    <rect x="-12" y="15" width="24" height="30" rx="6" fill="#1A1A2E"/>
-    <ellipse cx="0" cy="0" rx="18" ry="16" fill="#FFE4C4"/>
-    <rect x="-16" y="-10" width="32" height="8" rx="3" fill="#1A1A2E"/>
-    <circle cx="-5" cy="-2" r="2" fill="#333"/><circle cx="5" cy="-2" r="2" fill="#333"/>
-    <rect x="18" y="15" width="4" height="20" rx="2" fill="#888"/> <!-- sword -->
+
+  <rect x="80" y="210" width="1040" height="1180" rx="20" ry="20" fill="none" stroke="#E8443A" stroke-width="6" stroke-dasharray="12 10"/>
+  <rect x="92" y="222" width="1016" height="1156" rx="14" ry="14" fill="none" stroke="#FFB6C1" stroke-width="3"/>
+
+  <g transform="translate(20, 20)">
+    <ellipse cx="95" cy="115" rx="42" ry="45" fill="#1A1A2E"/>
+    <circle cx="55" cy="80" r="28" fill="#1A1A2E"/>
+    <circle cx="55" cy="80" r="16" fill="#3A3A5E"/>
+    <circle cx="135" cy="80" r="28" fill="#1A1A2E"/>
+    <circle cx="135" cy="80" r="16" fill="#3A3A5E"/>
+    <path d="M52,145 L138,145 L130,235 L60,235 Z" fill="#E8443A"/>
+    <circle cx="95" cy="190" r="22" fill="#FFF0F0"/>
+    <path d="M50,145 L140,145 L125,165 L65,165 Z" fill="#C31F15"/>
+    <path d="M85,95 Q95,105 105,95 L95,85 Z" fill="#1A1A2E"/>
+    <circle cx="80" cy="108" r="4" fill="#1A1A2E"/>
+    <circle cx="110" cy="108" r="4" fill="#1A1A2E"/>
+    <path d="M88,118 Q95,125 102,118" stroke="#E8443A" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M80,130 Q95,140 110,130" stroke="#E8443A" stroke-width="4" fill="#E8443A" stroke-linecap="round"/>
   </g>
-  <!-- Hearts -->
-  <path d="M300 50 C300 40 310 38 315 45 C320 38 330 40 330 50 C330 58 315 65 315 65 C315 65 300 58 300 50Z" fill="#E8443A" opacity="0.5"/>
-  <path d="M900 50 C900 42 908 40 912 46 C916 40 924 42 924 50 C924 56 912 62 912 62 C912 62 900 56 900 50Z" fill="#FF6B6B" opacity="0.4"/>
-  <path d="M250 1550 C250 1540 260 1538 265 1545 C270 1538 280 1540 280 1550 C280 1558 265 1565 265 1565 C265 1565 250 1558 250 1550Z" fill="#E8443A" opacity="0.5"/>
-  <path d="M950 1550 C950 1542 958 1540 962 1546 C966 1540 974 1542 974 1550 C974 1556 962 1562 962 1562 C962 1562 950 1556 950 1550Z" fill="#FF6B6B" opacity="0.4"/>
-  <!-- Small hearts scattered -->
-  <text x="400" y="60" font-size="16" opacity="0.3">♥</text>
-  <text x="750" y="55" font-size="20" opacity="0.4">♥</text>
-  <text x="180" y="1555" font-size="14" opacity="0.3">♥</text>
-  <text x="800" y="1560" font-size="18" opacity="0.35">♥</text>
-  <text x="600" y="50" font-size="12" opacity="0.3">♥</text>
-  <!-- Branding -->
-  <text x="600" y="1565" text-anchor="middle" font-family="Georgia,serif" font-size="24" fill="#4A2020" opacity="0.7">Pucca &amp; Garu</text>
+
+  <g transform="translate(1030, 20)">
+    <rect x="70" y="25" width="50" height="95" rx="15" fill="#1A1A2E"/>
+    <rect x="50" y="80" width="90" height="120" rx="10" fill="#1A1A2E"/>
+    <rect x="80" y="110" width="30" height="100" fill="#2A2A4E"/>
+    <rect x="145" y="60" width="15" height="110" fill="#1A1A2E"/>
+    <ellipse cx="152" cy="55" rx="18" ry="35" transform="rotate(45 152 55)" fill="#E8443A"/>
+    <path d="M140,30 L165,75 L135,85 Z" fill="#E8443A"/>
+    <circle cx="95" cy="35" r="38" fill="#1A1A2E"/>
+    <path d="M60,20 Q95,5 130,20 Q140,35 130,45 Q95,30 60,45 Q50,35 60,20" fill="#1A1A2E"/>
+    <path d="M75,15 L90,5 L95,20" stroke="#1A1A2E" stroke-width="4" fill="#1A1A2E"/>
+    <circle cx="85" cy="40" r="4" fill="#FFF0F0"/>
+    <circle cx="105" cy="40" r="4" fill="#FFF0F0"/>
+    <path d="M95,45 Q100,52 105,47" stroke="#FFF0F0" stroke-width="2" fill="none"/>
+  </g>
+
+  <use href="#heart" x="180" y="0" width="40" height="40"/>
+  <use href="#heartPink" x="900" y="10" width="50" height="50"/>
+  <use href="#heart" x="30" y="450" width="35" height="35"/>
+  <use href="#heartPink" x="1130" y="400" width="45" height="45"/>
+  <use href="#heart" x="20" y="800" width="55" height="55"/>
+  <use href="#heartPink" x="1120" y="750" width="50" height="50"/>
+  <use href="#heart" x="40" y="1100" width="40" height="40"/>
+  <use href="#heartPink" x="1130" y="1080" width="35" height="35"/>
+  <use href="#heart" x="250" y="1520" width="60" height="60"/>
+  <use href="#heartPink" x="850" y="1530" width="50" height="50"/>
+  <use href="#heart" x="550" y="1550" width="40" height="40"/>
+  <use href="#heartPink" x="450" y="20" width="30" height="30"/>
+  <use href="#heart" x="750" y="10" width="35" height="35"/>
+  <use href="#heartPink" x="380" y="1530" width="30" height="30"/>
+  <use href="#heart" x="680" y="1540" width="25" height="25"/>
 </svg>
