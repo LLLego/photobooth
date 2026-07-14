@@ -15,11 +15,11 @@ export async function renderAuthUI(mount) {
   title.textContent = 'our photobooth';
 
   const subtitle = document.createElement('p');
-  subtitle.className = 'text-warmth-600 text-center text-sm mb-6';
+  subtitle.className = 'text-warmth-600 dark:text-warmth-400 text-center text-sm mb-6';
   subtitle.textContent = 'Take photos together, even when we are apart.';
 
   const tabs = document.createElement('div');
-  tabs.className = 'flex bg-warmth-100 rounded-2xl p-1 mb-6';
+  tabs.className = 'flex bg-warmth-100 dark:bg-warmth-800 rounded-2xl p-1 mb-6';
   const tabLogin = makeTab('Login');
   const tabSignup = makeTab('Sign Up');
   tabs.append(tabLogin, tabSignup);
@@ -31,7 +31,7 @@ export async function renderAuthUI(mount) {
   const nameWrap = document.createElement('label');
   nameWrap.className = 'flex flex-col gap-1';
   const nameLabel = document.createElement('span');
-  nameLabel.className = 'text-xs uppercase tracking-widest text-warmth-500';
+  nameLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400';
   nameLabel.textContent = 'Display name (optional)';
   const nameInput = document.createElement('input');
   nameInput.type = 'text';
@@ -43,7 +43,7 @@ export async function renderAuthUI(mount) {
   const emailWrap = document.createElement('label');
   emailWrap.className = 'flex flex-col gap-1';
   const emailLabel = document.createElement('span');
-  emailLabel.className = 'text-xs uppercase tracking-widest text-warmth-500';
+  emailLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400';
   emailLabel.textContent = 'Email';
   const emailInput = document.createElement('input');
   emailInput.type = 'email';
@@ -56,7 +56,7 @@ export async function renderAuthUI(mount) {
   const pwWrap = document.createElement('label');
   pwWrap.className = 'flex flex-col gap-1';
   const pwLabel = document.createElement('span');
-  pwLabel.className = 'text-xs uppercase tracking-widest text-warmth-500';
+  pwLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400';
   pwLabel.textContent = 'Password';
   const pwInput = document.createElement('input');
   pwInput.type = 'password';
@@ -86,7 +86,9 @@ export async function renderAuthUI(mount) {
   const setMode = (next) => {
     mode = next;
     tabLogin.classList.toggle('bg-warmth-50', mode === 'login');
+    tabLogin.classList.toggle('dark:bg-warmth-900', mode === 'login');
     tabSignup.classList.toggle('bg-warmth-50', mode === 'signup');
+    tabSignup.classList.toggle('dark:bg-warmth-900', mode === 'signup');
     tabLogin.classList.toggle('text-warmth-400', mode !== 'login');
     tabSignup.classList.toggle('text-warmth-400', mode !== 'signup');
     nameWrap.style.display = mode === 'signup' ? 'flex' : 'none';
@@ -158,7 +160,7 @@ export async function renderAuthUI(mount) {
 function makeTab(label) {
   const el = document.createElement('button');
   el.type = 'button';
-  el.className = 'flex-1 py-2 rounded-xl text-sm font-medium text-warmth-400 transition';
+  el.className = 'flex-1 py-2 rounded-xl text-sm font-medium text-warmth-400 dark:text-warmth-300 transition';
   el.textContent = label;
   return el;
 }

@@ -32,7 +32,7 @@ export async function renderGallery(mount) {
   FILTERS.forEach((f) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'px-4 py-2 rounded-2xl text-sm border border-warmth-200 whitespace-nowrap';
+    b.className = 'px-4 py-2 rounded-2xl text-sm border border-warmth-200 dark:border-warmth-700 whitespace-nowrap';
     b.textContent = f.label;
     b.dataset.filter = f.id;
     b.addEventListener('click', () => applyFilter(f.id));
@@ -46,7 +46,7 @@ export async function renderGallery(mount) {
   wrap.append(grid);
 
   const sentinel = document.createElement('div');
-  sentinel.className = 'h-12 flex items-center justify-center text-sm text-warmth-500';
+  sentinel.className = 'h-12 flex items-center justify-center text-sm text-warmth-500 dark:text-warmth-400';
   sentinel.setAttribute('data-sentinel', 'true');
   wrap.append(sentinel);
 
@@ -128,7 +128,7 @@ function renderGrid(gallery, mount) {
     card.className = 'card overflow-hidden flex flex-col fade-up cursor-pointer';
     card.style.animationDelay = `${Math.min(gallery.items.indexOf(strip), 12) * 60}ms`;
     const media = document.createElement('div');
-    media.className = 'aspect-[3/4] bg-warmth-100 relative';
+    media.className = 'aspect-[3/4] bg-warmth-100 dark:bg-warmth-800 relative';
     media.style.background = strip.previewColor || '#F5F5F5';
     const img = document.createElement('img');
     img.alt = strip.themeName || 'Strip';
@@ -148,7 +148,7 @@ function renderGrid(gallery, mount) {
     themeName.className = 'text-sm font-medium truncate';
     themeName.textContent = strip.themeName || 'Strip';
     const sub = document.createElement('p');
-    sub.className = 'text-xs text-warmth-500';
+    sub.className = 'text-xs text-warmth-500 dark:text-warmth-400';
     sub.textContent = `${strip.mode === 'dual' ? 'Dual' : 'Single'} · ${formatDate(strip.createdAt)}`;
     meta.append(themeName, sub);
     const fav = document.createElement('button');

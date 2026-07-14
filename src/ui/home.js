@@ -10,7 +10,7 @@ export async function renderHome(mount) {
   wrap.className = 'max-w-md mx-auto px-6 pt-10 pb-32 fade-in';
 
   const greeting = document.createElement('p');
-  greeting.className = 'text-warmth-500 text-sm uppercase tracking-widest';
+  greeting.className = 'text-warmth-500 dark:text-warmth-300 text-sm uppercase tracking-widest';
   const displayName = state.profile?.display_name || state.user?.user_metadata?.display_name;
   greeting.textContent = displayName ? `Hi, ${displayName}` : 'Welcome back';
   wrap.append(greeting);
@@ -21,7 +21,7 @@ export async function renderHome(mount) {
   wrap.append(title);
 
   const subtitle = document.createElement('p');
-  subtitle.className = 'text-warmth-600 mb-8';
+  subtitle.className = 'text-warmth-600 dark:text-warmth-300 mb-8';
   subtitle.textContent = 'Take photos together, even when you are apart.';
   wrap.append(subtitle);
 

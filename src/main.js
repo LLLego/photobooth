@@ -8,7 +8,7 @@ import { renderDualCamera } from './ui/dual-camera.js';
 import { renderGallery } from './gallery/gallery-ui.js';
 import { renderSettings } from './ui/settings.js';
 import { onAuthStateChange, getSession, fetchProfile } from './auth/auth.js';
-import { set, getState, pushToast } from './state.js';
+import { set, getState, pushToast, subscribe } from './state.js';
 import { loadStoredPrefs } from './utils/storage.js';
 import { registerSW } from './utils/sw.js';
 import { preloadPopularThemes } from './themes/theme-loader.js';
@@ -103,19 +103,23 @@ function applyDarkMode(enabled) {
 }
 
 let toasterRoot = null;
+let toastUnsubscribe = null;
 function mountToaster(root) {
   if (toasterRoot) return;
   toasterRoot = document.createElement('div');
   toasterRoot.className = 'toast-root';
   document.body.append(toasterRoot);
-  // Repaint on state changes
-  setInterval(() => {
-    const toasts = getState().toasts || [];
-    toasterRoot.innerHTML = '';
-    for (const t of toasts) {
-      toasterRoot.appendChild(Toast({ message: t.message, type: t.type }));
-    }
-  }, 250);
+  if (typeof toastUnsubscribe === 'function') toastUnsubscribe();
+  toastUnsubscribe = subscribe(renderToasts);
+  renderToasts();
+}
+function renderToasts() {
+  if (!toasterRoot) return;
+  const toasts = getState().toasts || [];
+  toasterRoot.innerHTML = '';
+  for (const t of toasts) {
+    toasterRoot.appendChild(Toast({ message: t.message, type: t.type }));
+  }
 }
 
 let navHost = null;

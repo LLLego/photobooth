@@ -6,7 +6,7 @@ const popularIds = ['minimal', 'hundred-acre-gang', 'pucca', 'hello-kitty'];
 let preloaded = false;
 
 function resolveUrl(id) {
-  return `/themes/${id}/manifest.json`;
+  return `${import.meta.env.BASE_URL}themes/${id}/manifest.json`;
 }
 
 async function fetchJson(url) {
