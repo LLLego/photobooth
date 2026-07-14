@@ -9,7 +9,7 @@
     "stripBg": "#FFE8EC"
   },
   "fonts": { "branding": "'Georgia', serif" },
-  "frame": { "url": "./frame.webp", "width": 1200, "height": 1600 },
+  "frame": { "url": "./frame.svg", "width": 1200, "height": 1600 },
   "photoSlots": {
     "strip_4": [
       { "x": 0.08, "y": 0.03, "w": 0.84, "h": 0.20 },

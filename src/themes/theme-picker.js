@@ -119,7 +119,8 @@ function onSelectTheme(id) {
   set({ preferences: { ...getState().preferences, themeId: id } });
   set({ capture: { ...getState().capture, themeId: id } });
   applyActiveStates();
-  pushToast({ message: `Theme: ${id === 'none' ? 'No frame' : id}`, type: 'info', duration: 1600 });
+  // Notify camera to update preview frame
+  window.dispatchEvent(new CustomEvent('theme-changed', { detail: { themeId: id } }));
 }
 
 function onSelectLayout(id) {

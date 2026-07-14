@@ -109,6 +109,15 @@ export async function renderSingleCamera(mount) {
 
   captureBtn.addEventListener('click', onCapture);
 
+  // Live theme switching — update frame overlay when user picks a new theme
+  window.addEventListener('theme-changed', async (ev) => {
+    const newThemeId = ev.detail?.themeId;
+    if (newThemeId && frameEl) {
+      await setPreviewFrame(frameEl, newThemeId);
+      status.textContent = 'Ready';
+    }
+  });
+
   function updateCount() {
     const req = requiredPhotoCount(getState().capture.layout || layout);
     captureCount.textContent = `${localPhotos.length} / ${req}`;
