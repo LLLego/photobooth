@@ -17,7 +17,7 @@ const FILTERS = [
 export async function renderGallery(mount) {
   mount.innerHTML = '';
   const wrap = document.createElement('div');
-  wrap.className = 'max-w-5xl mx-auto px-4 pt-6 pb-32 fade-in';
+  wrap.className = 'max-w-5xl mx-auto px-4 pt-6 pb-40 fade-in';
   const h = document.createElement('div');
   h.className = 'flex items-center justify-between mb-4';
   const back = Button({ label: 'Home', variant: 'ghost', onClick: () => navigate('home'), icon: Icon({ name: 'back' }) });

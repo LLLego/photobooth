@@ -7,7 +7,7 @@ export async function renderHome(mount) {
   const state = getState();
   mount.innerHTML = '';
   const wrap = document.createElement('div');
-  wrap.className = 'max-w-md md:max-w-2xl mx-auto px-6 pt-10 md:pt-14 pb-32 fade-in space-y-2 md:space-y-4';
+  wrap.className = 'max-w-md md:max-w-2xl mx-auto px-6 pt-10 md:pt-14 pb-40 fade-in space-y-2 md:space-y-4';
   wrap.setAttribute('role', 'main');
 
   const greeting = document.createElement('p');

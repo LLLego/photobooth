@@ -28,7 +28,7 @@ export async function renderSettings(mount) {
   mount.innerHTML = '';
 
   const wrap = document.createElement('div');
-  wrap.className = 'max-w-md md:max-w-2xl mx-auto px-6 pt-8 pb-28 fade-in';
+  wrap.className = 'max-w-md md:max-w-2xl mx-auto px-6 pt-8 pb-36 fade-in';
 
   const topBar = document.createElement('div');
   topBar.className = 'flex items-center justify-between mb-4';
