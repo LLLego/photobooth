@@ -273,7 +273,7 @@ export async function renderSingleCamera(mount) {
           await uploadStrip({ sessionId: session.id, blob, layout: layoutId, themeId: baseThemeId, isPrivate: false });
           await completeSession(session.id);
           pushToast({ message: 'Saved to gallery.', type: 'success' });
-          navigate('gallery');
+          navigate('gallery', {}, { replace: true, force: true });
         } catch (err) {
           pushToast({ message: err.message, type: 'error' });
           saveBtn.disabled = false;

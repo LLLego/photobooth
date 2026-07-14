@@ -43,13 +43,17 @@ async function boot() {
   set({ themes: { ...getState().themes, cache: Array.isArray(themeCache) ? themeCache : [] } });
 
   mountLoading(mount);
-  await Promise.allSettled([
+  // Don't block boot on theme loading — render UI immediately
+  Promise.allSettled([
     preloadPopularThemes(),
     fetchThemes().then((themes) => {
       if (themes.length) set({ themes: { ...getState().themes, cache: themes } });
     }),
     registerSW(),
   ]);
+
+  // Remove loading spinner and show routes immediately
+  mount.innerHTML = '';
 
   defineRoute('login', renderLoginRoute);
   defineRoute('home', renderHome);

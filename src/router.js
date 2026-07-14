@@ -27,6 +27,16 @@ export function navigate(name, params = {}, opts = {}) {
     ? `?${new URLSearchParams(params).toString()}`
     : '';
   const hash = `#/${name}${qs}`;
+  if (opts.force) {
+    // Force re-render even if same route
+    const current = getState().route;
+    set({ route: { name: '__force__', params: {} } });
+    setTimeout(() => {
+      if (opts.replace) location.replace(hash);
+      else location.hash = hash;
+    }, 0);
+    return;
+  }
   if (location.hash === hash) return;
   if (opts.replace) {
     location.replace(hash);
