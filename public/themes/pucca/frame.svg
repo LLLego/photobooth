@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600">
+  <defs><filter id="soft"><feGaussianBlur stdDeviation="1"/></filter></defs>
+  <!-- Border -->
+  <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
+  <!-- Pucca (top left) -->
+  <g transform="translate(120,90)">
+    <!-- Body -->
+    <rect x="-15" y="15" width="30" height="35" rx="8" fill="#E8443A"/>
+    <!-- Head -->
+    <ellipse cx="0" cy="0" rx="22" ry="20" fill="#FFE4C4"/>
+    <!-- Hair buns -->
+    <circle cx="-18" cy="-8" r="14" fill="#1A1A2E"/>
+    <circle cx="18" cy="-8" r="14" fill="#1A1A2E"/>
+    <circle cx="-18" cy="-8" r="5" fill="#E8443A"/>
+    <circle cx="18" cy="-8" r="5" fill="#E8443A"/>
+    <!-- Face -->
+    <circle cx="-7" cy="-3" r="2.5" fill="#333"/><circle cx="7" cy="-3" r="2.5" fill="#333"/>
+    <path d="M-5 5 Q0 12 5 5" stroke="#E8443A" stroke-width="1.5" fill="none"/>
+    <!-- Kiss heart -->
+    <path d="M25 -5 C25 -12 32 -8 28 -2 C24 -8 25 -12 25 -5Z" fill="#E8443A"/>
+  </g>
+  <!-- Garu (top right) -->
+  <g transform="translate(1050,90)">
+    <rect x="-12" y="15" width="24" height="30" rx="6" fill="#1A1A2E"/>
+    <ellipse cx="0" cy="0" rx="18" ry="16" fill="#FFE4C4"/>
+    <rect x="-16" y="-10" width="32" height="8" rx="3" fill="#1A1A2E"/>
+    <circle cx="-5" cy="-2" r="2" fill="#333"/><circle cx="5" cy="-2" r="2" fill="#333"/>
+    <rect x="18" y="15" width="4" height="20" rx="2" fill="#888"/> <!-- sword -->
+  </g>
+  <!-- Hearts -->
+  <path d="M300 50 C300 40 310 38 315 45 C320 38 330 40 330 50 C330 58 315 65 315 65 C315 65 300 58 300 50Z" fill="#E8443A" opacity="0.5"/>
+  <path d="M900 50 C900 42 908 40 912 46 C916 40 924 42 924 50 C924 56 912 62 912 62 C912 62 900 56 900 50Z" fill="#FF6B6B" opacity="0.4"/>
+  <path d="M250 1550 C250 1540 260 1538 265 1545 C270 1538 280 1540 280 1550 C280 1558 265 1565 265 1565 C265 1565 250 1558 250 1550Z" fill="#E8443A" opacity="0.5"/>
+  <path d="M950 1550 C950 1542 958 1540 962 1546 C966 1540 974 1542 974 1550 C974 1556 962 1562 962 1562 C962 1562 950 1556 950 1550Z" fill="#FF6B6B" opacity="0.4"/>
+  <!-- Small hearts scattered -->
+  <text x="400" y="60" font-size="16" opacity="0.3">♥</text>
+  <text x="750" y="55" font-size="20" opacity="0.4">♥</text>
+  <text x="180" y="1555" font-size="14" opacity="0.3">♥</text>
+  <text x="800" y="1560" font-size="18" opacity="0.35">♥</text>
+  <text x="600" y="50" font-size="12" opacity="0.3">♥</text>
+  <!-- Branding -->
+  <text x="600" y="1565" text-anchor="middle" font-family="Georgia,serif" font-size="24" fill="#4A2020" opacity="0.7">Pucca &amp; Garu</text>
+</svg>
