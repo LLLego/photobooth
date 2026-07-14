@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Frame — Minimal Photo Overlay</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: #2a2520;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .stage {
+    position: relative;
+    width: 1200px;
+    height: 1600px;
+    flex-shrink: 0;
+    /* Translucent warm wash behind the frame so the cream shows
+       through slightly around edges — gives depth without
+       compromising the transparent center. */
+    background:
+      radial-gradient(ellipse at center, rgba(255, 250, 240, 0.04) 0%, transparent 70%);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  /* Transparency indicator — standard checkerboard.
+     ONLY sits behind the truly transparent center. */
+  .checkerboard {
+    position: absolute;
+    inset: 28px;
+    background-image:
+      linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%),
+      linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    z-index: 1;
+  }
+
+  /* === THE FRAME COMPOSITION === */
+  .frame {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Outer soft cream halo — barely-there warmth at the very edge */
+  .frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 250, 240, 0.025);
+    border-radius: 6px;
+  }
+
+  /* Thin outer gold line — metallic feel via conic gradient */
+  .outer-line {
+    position: absolute;
+    inset: 28px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background:
+      linear-gradient(rgba(255,250,240,0.02), rgba(255,250,240,0.02)) padding-box,
+      conic-gradient(
+        from 45deg,
+        #C9A96E 0%,
+        #B8985E 25%,
+        #D4B478 50%,
+        #B8985E 75%,
+        #C9A96E 100%
+      ) border-box;
+  }
+
+  /* Inner gold line — creates the double-line effect */
+  .inner-line {
+    position: absolute;
+    inset: 46px;
+    border: 1px solid;
+    border-color: rgba(201, 169, 110, 0.55);
+    border-radius: 2px;
+  }
+
+  /* Subtle inner shadow at very edge to suggest paper depth */
+  .inner-shadow {
+    position: absolute;
+    inset: 28px;
+    border-radius: 3px;
+    box-shadow:
+      inset 0 0 0 1px rgba(139, 115, 85, 0.06),
+      inset 0 2px 14px rgba(139, 115, 85, 0.10);
+    pointer-events: none;
+  }
+
+  /* === CORNER ACCENTS — small diamonds === */
+  .corner {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: linear-gradient(135deg, #D4B478 0%, #C9A96E 50%, #8B7355 100%);
+    transform: translate(-50%, -50%) rotate(45deg);
+    box-shadow:
+      0 0 0 1px rgba(255, 250, 240, 0.5),
+      0 0 6px rgba(201, 169, 110, 0.35);
+    z-index: 4;
+  }
+
+  /* Position corners at the intersection of outer & inner lines */
+  .corner.tl { top: 37px; left: 37px; }
+  .corner.tr { top: 37px; right: 37px; transform: translate(50%, -50%) rotate(45deg); }
+  .corner.bl { bottom: 37px; left: 37px; transform: translate(-50%, 50%) rotate(45deg); }
+  .corner.br { bottom: 37px; right: 37px; transform: translate(50%, 50%) rotate(45deg); }
+
+  /* === EDGE TICK MARKS — subtle Japanese stationery detail === */
+  .tick {
+    position: absolute;
+    background: #C9A96E;
+    z-index: 3;
+  }
+  .tick-h { /* horizontal ticks on top & bottom midpoints */
+    width: 1px;
+    height: 7px;
+  }
+  .tick-v { /* vertical ticks on left & right midpoints */
+    width: 7px;
+    height: 1px;
+  }
+  .tick.top    { top: 28px;    left: 50%; transform: translateX(-50%); }
+  .tick.bottom { bottom: 28px; left: 50%; transform: translateX(-50%); }
+  .tick.left   { left: 28px;   top: 50%;  transform: translateY(-50%); }
+  .tick.right  { right: 28px;  top: 50%;  transform: translateY(-50%); }
+
+  /* === OUTER CORNER TICKS — extend the line motif outward === */
+  .corner-tick {
+    position: absolute;
+    background: rgba(201, 169, 110, 0.7);
+    z-index: 3;
+  }
+  /* Small inward-pointing ticks just outside each corner */
+  .ct-tl-v { top: 14px; left: 28px; width: 1px; height: 10px; }
+  .ct-tl-h { top: 28px; left: 14px; width: 10px; height: 1px; }
+  .ct-tr-v { top: 14px; right: 28px; width: 1px; height: 10px; }
+  .ct-tr-h { top: 28px; right: 14px; width: 10px; height: 1px; }
+  .ct-bl-v { bottom: 14px; left: 28px; width: 1px; height: 10px; }
+  .ct-bl-h { bottom: 28px; left: 14px; width: 10px; height: 1px; }
+  .ct-br-v { bottom: 14px; right: 28px; width: 1px; height: 10px; }
+  .ct-br-h { bottom: 28px; right: 14px; width: 10px; height: 1px; }
+
+  /* Caption text — kept whisper-quiet, sits in the bottom margin band */
+  .caption {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 0.6em;
+    color: rgba(201, 169, 110, 0.55);
+    text-transform: uppercase;
+    font-weight: 400;
+    z-index: 5;
+    white-space: nowrap;
+    /* Slight ink-style text rendering */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .caption::before,
+  .caption::after {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: rgba(201, 169, 110, 0.4);
+    vertical-align: middle;
+    margin: 0 14px;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="checkerboard"></div>
+
+    <div class="frame">
+      <div class="outer-line"></div>
+      <div class="inner-line"></div>
+      <div class="inner-shadow"></div>
+
+      <!-- Edge midpoint ticks -->
+      <div class="tick tick-h top"></div>
+      <div class="tick tick-h bottom"></div>
+      <div class="tick tick-v left"></div>
+      <div class="tick tick-v right"></div>
+
+      <!-- Outer corner ticks (the "extended frame" motif) -->
+      <div class="corner-tick ct-tl-v"></div>
+      <div class="corner-tick ct-tl-h"></div>
+      <div class="corner-tick ct-tr-v"></div>
+      <div class="corner-tick ct-tr-h"></div>
+      <div class="corner-tick ct-bl-v"></div>
+      <div class="corner-tick ct-bl-h"></div>
+      <div class="corner-tick ct-br-v"></div>
+      <div class="corner-tick ct-br-h"></div>
+
+      <!-- Corner diamonds -->
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+
+      <!-- Bottom caption -->
+      <div class="caption">Moment · Together</div>
+    </div>
+  </div>
+</body>
+</html>
