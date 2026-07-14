@@ -1,7 +1,7 @@
 import { signOut, updateProfile, fetchProfile } from '../auth/auth.js';
 import { getState, set, pushToast } from '../state.js';
 import { navigate } from '../router.js';
-import { Button } from './components.js';
+import { Button, Icon } from './components.js';
 import { storageGet, storageSet } from '../utils/storage.js';
 import { reloadGallery } from '../gallery/gallery.js';
 
@@ -29,6 +29,12 @@ export async function renderSettings(mount) {
 
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md md:max-w-2xl mx-auto px-6 pt-8 pb-28 fade-in';
+
+  const topBar = document.createElement('div');
+  topBar.className = 'flex items-center justify-between mb-4';
+  const back = Button({ label: 'Home', variant: 'ghost', onClick: () => navigate('home'), icon: Icon({ name: 'back' }) });
+  topBar.append(back);
+  wrap.append(topBar);
 
   const h = document.createElement('h1');
   h.className = 'heading-display text-3xl mb-6';

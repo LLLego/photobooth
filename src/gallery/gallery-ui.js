@@ -20,11 +20,12 @@ export async function renderGallery(mount) {
   wrap.className = 'max-w-5xl mx-auto px-4 pt-6 pb-32 fade-in';
   const h = document.createElement('div');
   h.className = 'flex items-center justify-between mb-4';
+  const back = Button({ label: 'Home', variant: 'ghost', onClick: () => navigate('home'), icon: Icon({ name: 'back' }) });
   const title = document.createElement('h1');
   title.className = 'heading-display text-3xl';
   title.textContent = 'Gallery';
   const refresh = Button({ label: 'Refresh', variant: 'ghost', onClick: () => refreshAll(), ariaLabel: 'Refresh gallery' });
-  h.append(title, refresh);
+  h.append(back, title, refresh);
   wrap.append(h);
 
   const filterBar = document.createElement('div');
@@ -169,9 +170,10 @@ function renderGrid(gallery, mount) {
     card.className = 'card overflow-hidden flex flex-col fade-up cursor-pointer';
     card.style.animationDelay = `${Math.min(idx, 12) * 60}ms`;
     const media = document.createElement('div');
-    media.className = 'aspect-[3/4] bg-warmth-100 dark:bg-warmth-800 relative';
+    media.className = 'gallery-card-media bg-warmth-100 dark:bg-warmth-800 relative';
     media.style.background = strip.previewColor || '#F5F5F5';
     const img = document.createElement('img');
+    let signedUrlRefreshAttempted = false;
     img.alt = strip.themeName || 'Strip';
     img.loading = 'lazy';
     img.className = 'absolute inset-0 w-full h-full object-cover';
@@ -181,9 +183,10 @@ function renderGrid(gallery, mount) {
     img.addEventListener('error', () => {
       img.style.opacity = '0.3';
       img.alt = 'Image unavailable';
-      // Refresh signed URL — may have expired since initial fetch.
+      if (signedUrlRefreshAttempted) return;
+      signedUrlRefreshAttempted = true;
       ensureSignedUrl(strip, { force: true }).then((url) => {
-        if (url && url !== img.src) {
+        if (url) {
           img.alt = strip.themeName || 'Strip';
           img.src = url;
         }

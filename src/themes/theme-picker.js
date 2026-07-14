@@ -1,6 +1,5 @@
 import { loadTheme, NO_FRAME_THEME } from './theme-loader.js';
-import { getState, set, pushToast } from '../state.js';
-import { Icon } from '../ui/components.js';
+import { getState, set } from '../state.js';
 import { fetchThemes } from '../db/themes.js';
 
 const PREVIEW_LAYOUTS = [
@@ -17,7 +16,7 @@ export async function renderThemePicker(mount) {
   mount.innerHTML = '';
 
   const wrap = document.createElement('section');
-  wrap.className = 'card p-4 mb-4';
+  wrap.className = 'card p-4 pb-4 mb-4';
 
   const heading = document.createElement('div');
   heading.className = 'flex items-center justify-between mb-3';
@@ -46,12 +45,13 @@ export async function renderThemePicker(mount) {
       const variantKey = t.id === 'none' ? 'none' : `${t.id}/${v.id}`;
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = 'theme-card shrink-0 w-24 flex flex-col items-center gap-2 text-center focus:outline-none transition-transform duration-150 ease-out';
+      card.className = 'theme-card shrink-0 w-24 min-w-24 flex flex-col items-center gap-2 text-center focus:outline-none';
       card.setAttribute('data-theme-id', variantKey);
       card.setAttribute('data-frame-url', v.frame || '');
+      card.setAttribute('aria-pressed', 'false');
 
       const previewWrap = document.createElement('span');
-      previewWrap.className = 'theme-thumb relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100 transition-all duration-150 ease-out';
+      previewWrap.className = 'theme-thumb relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100 transition-transform duration-150 ease-out';
       previewWrap.style.background = t.previewColor || t.palette?.background || '#FFFFFF';
 
       if (t.id !== 'none') {
@@ -84,7 +84,7 @@ export async function renderThemePicker(mount) {
       }
 
       const label = document.createElement('span');
-      label.className = 'text-xs text-warmth-700 dark:text-warmth-200 leading-tight';
+      label.className = 'theme-card-label text-xs text-warmth-700 dark:text-warmth-200 leading-tight';
       label.textContent = v.name;
 
       const badge = document.createElement('span');
@@ -99,7 +99,7 @@ export async function renderThemePicker(mount) {
   }
 
   const layoutWrap = document.createElement('div');
-  layoutWrap.className = 'mt-4';
+  layoutWrap.className = 'mt-2 pt-2 border-t border-warmth-200 dark:border-warmth-300';
   layoutWrap.innerHTML = `
     <p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Layout</p>
     <div class="grid grid-cols-4 gap-2" data-layouts></div>
@@ -108,9 +108,10 @@ export async function renderThemePicker(mount) {
   for (const layout of PREVIEW_LAYOUTS) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'px-3 py-2 rounded-2xl text-xs border border-warmth-200';
+    b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 dark:border-warmth-300 text-warmth-900 dark:text-warmth-100 transition-colors duration-150';
     b.textContent = layout.label;
     b.dataset.layout = layout.id;
+    b.setAttribute('aria-pressed', 'false');
     b.addEventListener('click', () => onSelectLayout(layout.id));
     layoutRow.append(b);
   }
@@ -159,16 +160,31 @@ function applyActiveStates() {
   cards.forEach((c) => {
     const isActive = c.getAttribute('data-theme-id') === themeId;
     c.classList.toggle('is-active', isActive);
+    c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     const badge = c.querySelector('.theme-card-badge');
     if (badge) badge.classList.toggle('is-visible', isActive);
   });
   document.querySelectorAll('[data-layout]').forEach((b) => {
     const isActive = b.dataset.layout === layout;
-    b.classList.toggle('bg-warmth-900', isActive);
-    b.classList.toggle('dark:bg-warmth-100', isActive);
-    b.classList.toggle('text-warmth-50', isActive);
-    b.classList.toggle('dark:text-warmth-900', isActive);
-    b.classList.toggle('border-warmth-900', isActive);
-    b.classList.toggle('dark:border-warmth-100', isActive);
+    b.classList.remove(
+      'bg-warmth-900', 'dark:bg-warmth-100',
+      'text-warmth-50', 'dark:text-warmth-900',
+      'border-warmth-900', 'dark:border-warmth-100',
+      'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
+      'border-warmth-200', 'dark:border-warmth-300'
+    );
+    if (isActive) {
+      b.classList.add(
+        'bg-warmth-900', 'dark:bg-warmth-100',
+        'text-warmth-50', 'dark:text-warmth-900',
+        'border-warmth-900', 'dark:border-warmth-100'
+      );
+    } else {
+      b.classList.add(
+        'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
+        'border-warmth-200', 'dark:border-warmth-300'
+      );
+    }
+    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   });
 }

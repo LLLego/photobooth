@@ -67,7 +67,6 @@ export async function renderSingleCamera(mount) {
   captureBtn.className = 'capture-button';
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
   captureBtn.setAttribute('aria-label', 'Capture photo');
-  captureBtn.addEventListener('click', () => onCapture());
   controls.append(flipBtn, captureBtn, document.createElement('span'));
   stage.append(videoEl, frameEl, overlay, controls);
   wrap.append(stage);
@@ -135,7 +134,6 @@ export async function renderSingleCamera(mount) {
     status.textContent = 'Ready';
   } catch (err) {
     status.textContent = describeCameraError(err);
-    pushToast({ message: describeCameraError(err), type: 'error' });
   }
 
   captureBtn.addEventListener('click', onCapture);
@@ -158,14 +156,8 @@ export async function renderSingleCamera(mount) {
 
   const handleThemeChanged = async (ev) => {
     const newThemeId = ev.detail?.themeId;
-    const frameUrl = ev.detail?.frameUrl;
     if (newThemeId && frameEl) {
-      if (frameUrl) {
-        frameEl.src = frameUrl;
-        frameEl.style.display = '';
-      } else {
-        await setPreviewFrame(frameEl, newThemeId);
-      }
+      await setPreviewFrame(frameEl, newThemeId);
       status.textContent = 'Ready';
     }
   };
