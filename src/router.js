@@ -48,6 +48,8 @@ export function navigate(name, params = {}, opts = {}) {
   }
 }
 
+let isRendering = false;
+
 async function renderRoute(name, params) {
   if (!routes.has(name)) {
     navigate('home', {}, { replace: true });
@@ -97,6 +99,8 @@ async function renderRoute(name, params) {
     isRendering = false;
   }
 }
+
+
 
 function parseHash() {
   const raw = (location.hash || '').replace(/^#\/?/, '');
