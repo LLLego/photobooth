@@ -28,13 +28,16 @@ export function navigate(name, params = {}, opts = {}) {
     : '';
   const hash = `#/${name}${qs}`;
   if (opts.force) {
-    // Force re-render even if same route
-    const current = getState().route;
-    set({ route: { name: '__force__', params: {} } });
-    setTimeout(() => {
+    // Update route state and re-render directly. Avoids hash-flash + race where
+    // a stale `__force__` sentinel leaks into the route name.
+    set({ route: { name, params } });
+    if (location.hash !== hash) {
       if (opts.replace) location.replace(hash);
       else location.hash = hash;
-    }, 0);
+    } else {
+      // Same hash — render directly since handleHashChange would early-return.
+      renderRoute(name, params);
+    }
     return;
   }
   if (location.hash === hash) return;
@@ -45,40 +48,17 @@ export function navigate(name, params = {}, opts = {}) {
   }
 }
 
-function parseHash() {
-  const raw = (location.hash || '').replace(/^#\/?/, '');
-  const [pathRaw, queryRaw] = raw.split('?');
-  const name = pathRaw || 'home';
-  let params = {};
-  try {
-    params = Object.fromEntries(new URLSearchParams(queryRaw || ''));
-  } catch {
-    params = {};
-  }
-  return { name, params };
-}
-
-let isRendering = false;
-async function handleHashChange() {
-  if (isRendering) return;
-  const { name, params } = parseHash();
+async function renderRoute(name, params) {
   if (!routes.has(name)) {
     navigate('home', {}, { replace: true });
     return;
   }
-
   const session = await getSession();
   if (!session && name !== 'login') {
-    if (name !== 'login') navigate('login', {}, { replace: true });
+    navigate('login', {}, { replace: true });
     return;
   }
-
-  const currentRoute = getState().route;
-  if (currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) {
-    return;
-  }
-  set({ route: { name, params } });
-
+  if (isRendering) return;
   isRendering = true;
   try {
     const render = routes.get(name);
@@ -116,6 +96,31 @@ async function handleHashChange() {
   } finally {
     isRendering = false;
   }
+}
+
+function parseHash() {
+  const raw = (location.hash || '').replace(/^#\/?/, '');
+  const [pathRaw, queryRaw] = raw.split('?');
+  const name = pathRaw || 'home';
+  let params = {};
+  try {
+    params = Object.fromEntries(new URLSearchParams(queryRaw || ''));
+  } catch {
+    params = {};
+  }
+  return { name, params };
+}
+
+async function handleHashChange() {
+  if (isRendering) return;
+  const { name, params } = parseHash();
+
+  const currentRoute = getState().route;
+  if (currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) {
+    return;
+  }
+  set({ route: { name, params } });
+  await renderRoute(name, params);
 }
 
 function shallowEqualParams(a, b) {

@@ -60,10 +60,20 @@ export async function renderThemePicker(mount) {
         img.alt = `${v.name} preview`;
         img.loading = 'lazy';
         img.decoding = 'async';
-        img.src = `${import.meta.env.BASE_URL}themes/${t.id}/${v.preview || 'preview.png'}`;
+        const baseUrl = `${import.meta.env.BASE_URL}themes/${t.id}`;
+        img.src = `${baseUrl}/${v.preview || 'preview.png'}`;
         img.onerror = () => {
           img.onerror = null;
-          img.src = `${import.meta.env.BASE_URL}themes/${t.id}/frame.webp`;
+          // Try base theme preview first (helps when the variant preview is missing).
+          if (v.preview && v.preview !== 'preview.png') {
+            img.src = `${baseUrl}/preview.png`;
+            img.onerror = () => {
+              img.onerror = null;
+              img.src = `${baseUrl}/frame.webp`;
+            };
+          } else {
+            img.src = `${baseUrl}/frame.webp`;
+          }
         };
         previewWrap.append(img);
       } else {

@@ -3,12 +3,14 @@ import { Button, Icon, Spinner, Modal } from './components.js';
 import { renderThemePicker } from '../themes/theme-picker.js';
 import { startDualSession, joinDualSession, getDualSession } from '../webrtc/dual-session.js';
 import { attachStreamToVideo, describeCameraError } from '../camera/camera.js';
+import { setPreviewFrame } from '../camera/preview.js';
 import { navigate } from '../router.js';
 
 let hostStage = null;
 let remoteVideo = null;
 let localVideo = null;
 let activeSession = null;
+let frameEl = null;
 
 export async function renderDualCamera(mount) {
   mount.innerHTML = '';
@@ -73,6 +75,10 @@ export async function renderDualCamera(mount) {
   dualOverlay.style.position = 'absolute';
   dualOverlay.style.inset = '0';
   dualOverlay.style.zIndex = '3';
+  frameEl = document.createElement('img');
+  frameEl.className = 'camera-frame';
+  frameEl.alt = '';
+  frameEl.style.display = 'none';
   const controls = document.createElement('div');
   controls.className = 'camera-controls';
   const captureBtn = document.createElement('button');
@@ -80,7 +86,7 @@ export async function renderDualCamera(mount) {
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
   captureBtn.addEventListener('click', () => triggerCapture());
   controls.append(document.createElement('span'), captureBtn, document.createElement('span'));
-  hostStage.append(localWrap, remoteWrap, dualOverlay, controls);
+  hostStage.append(localWrap, remoteWrap, dualOverlay, frameEl, controls);
   wrap.append(hostStage);
 
   const status = document.createElement('p');
@@ -107,6 +113,15 @@ export async function renderDualCamera(mount) {
   wrap.append(codeCard);
 
   mount.append(wrap);
+
+  // Live theme switching — update frame overlay when user picks a new theme
+  const handleThemeChanged = async (ev) => {
+    const newThemeId = ev.detail?.themeId;
+    if (newThemeId && frameEl) {
+      await setPreviewFrame(frameEl, newThemeId);
+    }
+  };
+  window.addEventListener('theme-changed', handleThemeChanged);
 
   startBtn.addEventListener('click', async () => {
     startBtn.disabled = true;
@@ -190,6 +205,12 @@ export async function renderDualCamera(mount) {
       captureBtn.disabled = false;
     }
   }
+
+  return () => {
+    window.removeEventListener('theme-changed', handleThemeChanged);
+    try { activeSession?.dispose(); } catch {}
+    activeSession = null;
+  };
 }
 
 function cleanupAndExit(mount) {

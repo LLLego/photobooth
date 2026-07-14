@@ -34,6 +34,7 @@ export async function renderAuthUI(mount) {
 
   const nameWrap = document.createElement('label');
   nameWrap.className = 'flex flex-col gap-1';
+  nameWrap.setAttribute('data-name-wrap', 'true');
   const nameLabel = document.createElement('span');
   nameLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400';
   nameLabel.textContent = 'Display name (optional)';
@@ -108,7 +109,19 @@ export async function renderAuthUI(mount) {
     tabSignup.classList.toggle('dark:text-warmth-400', mode !== 'signup');
     tabLogin.setAttribute('aria-selected', mode === 'login');
     tabSignup.setAttribute('aria-selected', mode === 'signup');
-    nameWrap.style.display = mode === 'signup' ? 'flex' : 'none';
+    const hidden = mode !== 'signup';
+    nameWrap.style.display = hidden ? 'none' : 'flex';
+    if (hidden) {
+      nameWrap.setAttribute('aria-hidden', 'true');
+      nameWrap.setAttribute('hidden', '');
+      nameInput.setAttribute('tabindex', '-1');
+      nameInput.setAttribute('aria-hidden', 'true');
+    } else {
+      nameWrap.removeAttribute('aria-hidden');
+      nameWrap.removeAttribute('hidden');
+      nameInput.removeAttribute('tabindex');
+      nameInput.removeAttribute('aria-hidden');
+    }
     submit.textContent = mode === 'signup' ? 'Create account' : 'Sign in';
     error.classList.add('hidden');
   };

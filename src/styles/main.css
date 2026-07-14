@@ -308,11 +308,11 @@ html.dark .btn-primary:hover {
   background: var(--warmth-100);
 }
 html.dark .btn-accent {
-  background: var(--warmth-400);
-  color: var(--warmth-900);
+  background: var(--warmth-700);
+  color: var(--warmth-50);
 }
 html.dark .btn-accent:hover {
-  background: var(--warmth-500);
+  background: var(--warmth-600);
   color: var(--warmth-50);
 }
 html.dark .btn-honey {

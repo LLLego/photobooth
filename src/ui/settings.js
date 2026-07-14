@@ -1,7 +1,7 @@
 import { signOut, updateProfile, fetchProfile } from '../auth/auth.js';
 import { getState, set, pushToast } from '../state.js';
 import { navigate } from '../router.js';
-import { Button, Spinner } from './components.js';
+import { Button } from './components.js';
 import { storageGet, storageSet } from '../utils/storage.js';
 import { reloadGallery } from '../gallery/gallery.js';
 
@@ -115,16 +115,27 @@ export async function renderSettings(mount) {
     const prefs = getState().preferences;
     autoDownloadToggle.checked = !!prefs.autoDownload;
     darkModeToggle.checked = !!prefs.darkMode;
+    const target = Number(prefs.countdownDuration);
     countdownGroup.querySelectorAll('button').forEach((b) => {
-      const isActive = Number(b.dataset.value) === Number(prefs.countdownDuration);
-      b.classList.toggle('bg-warmth-900', isActive);
-      b.classList.toggle('dark:bg-warmth-100', isActive);
-      b.classList.toggle('text-warmth-50', isActive);
-      b.classList.toggle('dark:text-warmth-900', isActive);
-      b.classList.toggle('border-warmth-900', isActive);
-      b.classList.toggle('dark:border-warmth-100', isActive);
-      b.classList.toggle('border-warmth-200', !isActive);
-      b.classList.toggle('dark:border-warmth-300', !isActive);
+      // Reset ALL state classes first
+      b.classList.remove(
+        'bg-warmth-900', 'dark:bg-warmth-100',
+        'text-warmth-50', 'dark:text-warmth-900',
+        'border-warmth-900', 'dark:border-warmth-100',
+        'border-warmth-200', 'dark:border-warmth-300'
+      );
+      const isActive = Number(b.dataset.value) === target;
+      if (isActive) {
+        b.classList.add(
+          'bg-warmth-900', 'dark:bg-warmth-100',
+          'text-warmth-50', 'dark:text-warmth-900',
+          'border-warmth-900', 'dark:border-warmth-100'
+        );
+      } else {
+        b.classList.add(
+          'border-warmth-200', 'dark:border-warmth-300'
+        );
+      }
     });
   };
   refreshPrefUI();
@@ -192,10 +203,8 @@ export async function renderSettings(mount) {
     }
   });
 
-  const spinner = Spinner({ size: 18, label: 'Loading…' });
-  wrap.append(h, nameCard, prefsCard, accountCard, signOutBtn, spinner);
+  wrap.append(h, nameCard, prefsCard, accountCard, signOutBtn);
   mount.append(wrap);
-  spinner.style.display = 'none';
 
   syncPrefsToUI();
   return () => { /* no persistent listeners */ };

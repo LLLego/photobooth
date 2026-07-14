@@ -73,6 +73,21 @@ export async function ensureSignedUrl(strip, { force = false } = {}) {
   return url;
 }
 
+let refreshTimer = null;
+export function startSignedUrlRefreshLoop({ intervalMs = 30 * 60 * 1000 } = {}) {
+  if (refreshTimer) return () => {};
+  refreshTimer = setInterval(async () => {
+    const items = getState().gallery?.items || [];
+    for (const strip of items) {
+      try { await ensureSignedUrl(strip, { force: true }); } catch {}
+    }
+  }, intervalMs);
+  return () => {
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = null;
+  };
+}
+
 export async function toggleFavoriteForStrip(stripId) {
   try {
     const nowFav = await toggleFavorite(stripId);

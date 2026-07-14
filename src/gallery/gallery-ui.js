@@ -1,5 +1,5 @@
 import { getState, set, subscribe, pushToast } from '../state.js';
-import { fetchStrips, loadMoreStrips, ensureSignedUrl, toggleFavoriteForStrip, loadFavoritesSet } from './gallery.js';
+import { fetchStrips, loadMoreStrips, ensureSignedUrl, toggleFavoriteForStrip, loadFavoritesSet, startSignedUrlRefreshLoop } from './gallery.js';
 import { openStripViewer } from './viewer.js';
 import { Spinner, EmptyState, Button, Icon } from '../ui/components.js';
 import { navigate } from '../router.js';
@@ -82,9 +82,12 @@ export async function renderGallery(mount) {
   }, { rootMargin: '400px' });
   observer.observe(sentinel);
 
+  const stopRefresh = startSignedUrlRefreshLoop();
+
   cleanup = () => {
     unsubscribe();
     observer.disconnect();
+    stopRefresh();
     cleanup = null;
   };
   return cleanup;
@@ -178,6 +181,13 @@ function renderGrid(gallery, mount) {
     img.addEventListener('error', () => {
       img.style.opacity = '0.3';
       img.alt = 'Image unavailable';
+      // Refresh signed URL — may have expired since initial fetch.
+      ensureSignedUrl(strip, { force: true }).then((url) => {
+        if (url && url !== img.src) {
+          img.alt = strip.themeName || 'Strip';
+          img.src = url;
+        }
+      }).catch(() => {});
     });
     media.append(img);
     card.append(media);

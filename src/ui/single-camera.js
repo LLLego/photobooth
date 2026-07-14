@@ -1,5 +1,6 @@
 import { getState, set, pushToast } from '../state.js';
 import { startLivePreview, stopLivePreview, flipCamera, setPreviewFrame } from '../camera/preview.js';
+import { describeCameraError } from '../camera/camera.js';
 import { takePhoto } from '../camera/capture.js';
 import { startCountdown } from './countdown.js';
 import { Button, Icon, Spinner } from './components.js';
@@ -94,25 +95,18 @@ export async function renderSingleCamera(mount) {
     btn.textContent = f.name;
     btn.dataset.filter = f.id;
     btn.addEventListener('click', () => {
-      // Update all filter buttons
-      filterScroller.querySelectorAll('button').forEach(b => {
-        b.classList.toggle('bg-warmth-900', b.dataset.filter === f.id);
-        b.classList.toggle('text-warmth-50', b.dataset.filter === f.id);
-        b.classList.toggle('dark:bg-warmth-100', b.dataset.filter === f.id);
-        b.classList.toggle('dark:text-warmth-900', b.dataset.filter === f.id);
-      });
-      // Apply filter to video live
-      const css = getFilterCSS(f.id);
-      if (videoEl) {
-        videoEl.style.filter = css === 'none' ? '' : css;
-      }
-      set({ preferences: { ...getState().preferences, filterId: f.id } });
+      applyFilter(f.id);
     });
-    // Preselect original
-    if (f.id === 'original') {
+    if (f.id === (prefs.filterId || 'original')) {
       btn.classList.add('bg-warmth-900', 'text-warmth-50', 'dark:bg-warmth-100', 'dark:text-warmth-900');
     }
     filterScroller.append(btn);
+  }
+  // Apply saved filter to the video element up front
+  const savedFilterId = prefs.filterId || 'original';
+  const savedFilterCss = getFilterCSS(savedFilterId);
+  if (videoEl) {
+    videoEl.style.filter = savedFilterCss === 'none' ? '' : savedFilterCss;
   }
   filterBar.append(filterScroller);
   wrap.append(filterBar);
@@ -140,27 +134,42 @@ export async function renderSingleCamera(mount) {
     activeStream = await startLivePreview({ videoEl, frameEl, themeId, onError: (msg) => pushToast({ message: msg, type: 'error' }) });
     status.textContent = 'Ready';
   } catch (err) {
-    status.textContent = 'Camera unavailable';
-    pushToast({ message: err.message, type: 'error' });
+    status.textContent = describeCameraError(err);
+    pushToast({ message: describeCameraError(err), type: 'error' });
   }
 
   captureBtn.addEventListener('click', onCapture);
 
   // Live theme switching — update frame overlay when user picks a new theme
-  window.addEventListener('theme-changed', async (ev) => {
+  function applyFilter(id) {
+    filterScroller.querySelectorAll('button').forEach(b => {
+      const active = b.dataset.filter === id;
+      b.classList.toggle('bg-warmth-900', active);
+      b.classList.toggle('text-warmth-50', active);
+      b.classList.toggle('dark:bg-warmth-100', active);
+      b.classList.toggle('dark:text-warmth-900', active);
+    });
+    const css = getFilterCSS(id);
+    if (videoEl) {
+      videoEl.style.filter = css === 'none' ? '' : css;
+    }
+    set({ preferences: { ...getState().preferences, filterId: id } });
+  }
+
+  const handleThemeChanged = async (ev) => {
     const newThemeId = ev.detail?.themeId;
     const frameUrl = ev.detail?.frameUrl;
     if (newThemeId && frameEl) {
       if (frameUrl) {
-        // Use the variant-specific frame URL directly
-        frameEl.src = `${import.meta.env.BASE_URL}themes/${newThemeId.split('/')[0]}/${frameUrl.split('/').pop()}`;
+        frameEl.src = frameUrl;
         frameEl.style.display = '';
       } else {
         await setPreviewFrame(frameEl, newThemeId);
       }
       status.textContent = 'Ready';
     }
-  });
+  };
+  window.addEventListener('theme-changed', handleThemeChanged);
 
   function updateCount() {
     const req = requiredPhotoCount(getState().capture.layout || layout);
@@ -285,15 +294,21 @@ export async function renderSingleCamera(mount) {
       status.textContent = 'Compose failed';
     }
   }
+
+  return () => {
+    window.removeEventListener('theme-changed', handleThemeChanged);
+    try { stopLivePreview(videoEl); } catch {}
+    activeStream = null;
+  };
 }
 
 function cleanupAndExit(mount) {
-  stopLivePreview(videoEl);
+  try { stopLivePreview(videoEl); } catch {}
   activeStream = null;
   navigate('home');
 }
 
 export function disposeSingleCamera() {
-  stopLivePreview(videoEl);
+  try { stopLivePreview(videoEl); } catch {}
   activeStream = null;
 }
