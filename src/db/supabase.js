@@ -30,6 +30,13 @@ export function requireSupabase() {
   return supabase;
 }
 
+export function isOnline() {
+  if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
+    return navigator.onLine;
+  }
+  return true;
+}
+
 export function renderSupabaseMissing(mount) {
   if (!mount) return;
   mount.innerHTML = '';
@@ -41,11 +48,11 @@ export function renderSupabaseMissing(mount) {
   title.className = 'heading-display text-2xl mb-2';
   title.textContent = 'Setup required';
   const body = document.createElement('p');
-  body.className = 'text-warmth-700 leading-relaxed mb-4';
+  body.className = 'text-warmth-700 dark:text-warmth-400 leading-relaxed mb-4';
   body.textContent =
     'This photobooth needs Supabase credentials. Create a .env file in the project root with the following values, then restart the dev server.';
   const code = document.createElement('pre');
-  code.className = 'text-left bg-warmth-100 text-warmth-900 rounded-2xl p-4 text-xs overflow-x-auto font-mono';
+  code.className = 'text-left bg-warmth-100 dark:bg-warmth-800 text-warmth-900 dark:text-warmth-100 rounded-2xl p-4 text-xs overflow-x-auto font-mono';
   code.textContent = 'VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co\nVITE_SUPABASE_ANON_KEY=YOUR-ANON-KEY';
   const link = document.createElement('a');
   link.className = 'btn-accent mt-6 inline-flex';

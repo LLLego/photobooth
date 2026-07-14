@@ -47,5 +47,10 @@ export function getFilterById(id) {
 }
 
 export function getFilterCSS(id) {
-  return getFilterById(id).css;
+  const filter = getFilterById(id);
+  return filter ? filter.css : 'none';
+}
+
+export function isFilterActive(id) {
+  return id && id !== 'original' && id !== 'none';
 }

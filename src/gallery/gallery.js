@@ -62,9 +62,14 @@ export async function loadMoreStrips() {
 export async function ensureSignedUrl(strip, { force = false } = {}) {
   if (!strip?.storage_path) return null;
   const existing = strip._signedUrl;
-  if (existing && !force) return existing;
+  const createdAt = strip._signedUrlCreatedAt || 0;
+  const ageSec = (Date.now() - createdAt) / 1000;
+  if (existing && !force && ageSec < SIGNED_URL_TTL - 60) return existing;
   const url = await getStripSignedUrl(strip.storage_path, { expiresIn: SIGNED_URL_TTL });
-  if (url) strip._signedUrl = url;
+  if (url) {
+    strip._signedUrl = url;
+    strip._signedUrlCreatedAt = Date.now();
+  }
   return url;
 }
 

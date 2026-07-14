@@ -12,16 +12,22 @@ export function downloadStrip(blob, filename = 'photobooth-strip') {
   a.href = url;
   a.download = filenameWithExt(filename, blob.type);
   a.rel = 'noopener';
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  try {
+    document.body.append(a);
+    a.click();
+  } finally {
+    if (a.parentNode) a.remove();
+    setTimeout(() => {
+      try { URL.revokeObjectURL(url); } catch {}
+    }, 1000);
+  }
 }
 
 export async function shareStrip(blob, { filename = 'photobooth-strip', title = 'our photobooth', text = 'A photo from our photobooth' } = {}) {
   if (!blob) throw new Error('A blob is required to share.');
-  const file = new File([blob], filenameWithExt(filename, blob.type), { type: blob.type });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  const finalName = filenameWithExt(filename, blob.type);
+  const file = new File([blob], finalName, { type: blob.type });
+  if (typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title, text });
       return { shared: true, method: 'native' };
@@ -30,7 +36,7 @@ export async function shareStrip(blob, { filename = 'photobooth-strip', title = 
       throw err;
     }
   }
-  if (navigator.share) {
+  if (typeof navigator !== 'undefined' && navigator.share) {
     try {
       await navigator.share({ title, text });
       return { shared: true, method: 'link' };
@@ -42,11 +48,11 @@ export async function shareStrip(blob, { filename = 'photobooth-strip', title = 
   return { shared: false, method: 'download' };
 }
 
-function filenameWithExt(name, mime) {
+export function filenameWithExt(name, mime) {
   const base = (name || 'photobooth-strip').replace(/\.[^./]+$/, '');
   if (!mime) return `${base}.webp`;
   if (mime.includes('png')) return `${base}.png`;
-  if (mime.includes('jpeg')) return `${base}.jpg`;
+  if (mime.includes('jpeg') || mime.includes('jpg')) return `${base}.jpg`;
   if (mime.includes('webp')) return `${base}.webp`;
   return base;
 }

@@ -24,19 +24,20 @@ function canvasToBlob(canvas, type, quality) {
       }, type, quality);
     });
   }
-  if (typeof canvas.convertToBlob === 'function') {
+  if (canvas && typeof canvas.convertToBlob === 'function') {
     return canvas.convertToBlob({ type, quality });
   }
   return Promise.reject(new Error('Canvas type is not supported for export.'));
 }
 
 function ctxOf(canvas) {
-  if (canvas.getContext) return canvas.getContext('2d');
+  if (!canvas) return null;
+  if (typeof canvas.getContext === 'function') return canvas.getContext('2d');
   return null;
 }
 
 function drawCover(ctx, source, dx, dy, dw, dh) {
-  if (!source) return;
+  if (!source || !ctx) return;
   const sw = source.videoWidth || source.naturalWidth || source.width;
   const sh = source.videoHeight || source.naturalHeight || source.height;
   if (!sw || !sh) {
@@ -65,7 +66,7 @@ function drawFromBlob(blob) {
       URL.revokeObjectURL(url);
       resolve(img);
     };
-    img.onerror = (e) => {
+    img.onerror = () => {
       URL.revokeObjectURL(url);
       reject(new Error('Could not decode image blob.'));
     };
@@ -76,14 +77,19 @@ function drawFromBlob(blob) {
 async function loadImage(src) {
   if (!src) return null;
   if (src instanceof HTMLImageElement && src.complete && src.naturalWidth) return src;
-  return new Promise((resolve, reject) => {
+  if (src instanceof HTMLCanvasElement && src.width > 0) return src;
+  if (typeof createImageBitmap === 'function' && (src instanceof Blob || src instanceof ImageBitmap)) {
+    try { return await createImageBitmap(src); } catch {}
+  }
+  return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`Could not load frame: ${typeof src === 'string' ? src : '<image>'}`));
+    img.onerror = () => resolve(null);
     if (src instanceof HTMLImageElement) {
-      if (src.complete) resolve(src);
+      if (src.complete && src.naturalWidth) resolve(src);
       else src.addEventListener('load', () => resolve(src), { once: true });
+      src.addEventListener('error', () => resolve(null), { once: true });
     } else {
       img.src = src;
     }
@@ -98,42 +104,51 @@ export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {
   const ctx = ctxOf(canvas);
   if (!ctx) throw new Error('2D canvas context is not available.');
 
-  const videoW = videoEl.videoWidth || width;
-  const videoH = videoEl.videoHeight || height;
-  const targetSlots = (slots && slots.length)
-    ? slots
-    : [{ x: 0, y: 0, w: 1, h: 1 }];
-
   if (themeConfig.background) {
     ctx.fillStyle = themeConfig.background;
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Apply photo filter
-  if (filter && filter !== 'none') {
+  const targetSlots = (slots && slots.length)
+    ? slots
+    : [{ x: 0, y: 0, w: 1, h: 1 }];
+
+  const previousFilter = ctx.filter;
+  if (filter && filter !== 'none' && filter !== 'original') {
     ctx.filter = filter;
   }
 
-  for (const slot of targetSlots) {
-    const dx = slot.x * width;
-    const dy = slot.y * height;
-    const dw = slot.w * width;
-    const dh = slot.h * height;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(dx, dy, dw, dh);
-    ctx.clip();
-    drawCover(ctx, videoEl, dx, dy, dw, dh);
-    ctx.restore();
-  }
+  try {
+    for (const slot of targetSlots) {
+      const dx = slot.x * width;
+      const dy = slot.y * height;
+      const dw = slot.w * width;
+      const dh = slot.h * height;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(dx, dy, dw, dh);
+      ctx.clip();
+      try { drawCover(ctx, videoEl, dx, dy, dw, dh); }
+      catch (err) { console.warn('[capture] drawCover failed', err); }
+      ctx.restore();
+    }
 
-  if (frameSource) {
-    const frameImg = await loadImage(frameSource).catch((err) => {
-      console.warn('[capture] frame load failed, continuing without frame', err);
-      return null;
-    });
-    if (frameImg) {
-      ctx.drawImage(frameImg, 0, 0, width, height);
+    if (frameSource) {
+      const frameImg = await loadImage(frameSource).catch((err) => {
+        console.warn('[capture] frame load failed', err);
+        return null;
+      });
+      if (frameImg) {
+        try { ctx.drawImage(frameImg, 0, 0, width, height); }
+        catch (err) { console.warn('[capture] frame draw failed', err); }
+      } else {
+        console.warn('[capture] frame overlay skipped (image unavailable)');
+      }
+    }
+  } finally {
+    ctx.filter = 'none';
+    if (previousFilter !== undefined && previousFilter !== ctx.filter) {
+      ctx.filter = previousFilter;
     }
   }
 
@@ -142,17 +157,27 @@ export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {
 }
 
 export async function stripExif(blob, { type = 'image/webp', quality = 0.9 } = {}) {
-  const img = await drawFromBlob(blob).catch(() => null);
+  if (!blob) return blob;
+  let img = null;
+  try {
+    img = await drawFromBlob(blob);
+  } catch {
+    return blob;
+  }
   if (!img) return blob;
-  const canvas = createCanvas(img.naturalWidth || img.width, img.naturalHeight || img.height);
+  const w = img.naturalWidth || img.width || 1;
+  const h = img.naturalHeight || img.height || 1;
+  const canvas = createCanvas(w, h);
   const ctx = ctxOf(canvas);
   if (!ctx) return blob;
-  ctx.drawImage(img, 0, 0);
+  try { ctx.drawImage(img, 0, 0); }
+  catch (err) { console.warn('[capture] stripExif draw failed', err); return blob; }
   return canvasToBlob(canvas, type, quality);
 }
 
 export async function blobToDataURL(blob) {
   return new Promise((resolve, reject) => {
+    if (!blob) return reject(new Error('No blob provided'));
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error('Could not read blob.'));
@@ -161,7 +186,14 @@ export async function blobToDataURL(blob) {
 }
 
 export async function blobToObjectURL(blob) {
+  if (!blob) return null;
   return URL.createObjectURL(blob);
+}
+
+export function revokeObjectURL(url) {
+  if (url && typeof URL.revokeObjectURL === 'function') {
+    try { URL.revokeObjectURL(url); } catch {}
+  }
 }
 
 export const CAPTURE_DEFAULTS = DEFAULTS;

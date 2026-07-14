@@ -19,14 +19,18 @@ export async function renderAuthUI(mount) {
   subtitle.textContent = 'Take photos together, even when we are apart.';
 
   const tabs = document.createElement('div');
-  tabs.className = 'flex bg-warmth-100 dark:bg-warmth-800 rounded-2xl p-1 mb-6';
+  tabs.className = 'flex bg-warmth-100 dark:bg-warmth-200 rounded-2xl p-1 mb-6';
+  tabs.setAttribute('role', 'tablist');
   const tabLogin = makeTab('Login');
   const tabSignup = makeTab('Sign Up');
+  tabLogin.setAttribute('role', 'tab');
+  tabSignup.setAttribute('role', 'tab');
   tabs.append(tabLogin, tabSignup);
 
   const form = document.createElement('form');
   form.className = 'flex flex-col gap-4';
   form.noValidate = true;
+  form.setAttribute('aria-label', 'Authentication');
 
   const nameWrap = document.createElement('label');
   nameWrap.className = 'flex flex-col gap-1';
@@ -38,6 +42,7 @@ export async function renderAuthUI(mount) {
   nameInput.className = 'input';
   nameInput.placeholder = 'Your name';
   nameInput.autocomplete = 'name';
+  nameInput.setAttribute('aria-label', 'Display name');
   nameWrap.append(nameLabel, nameInput);
 
   const emailWrap = document.createElement('label');
@@ -51,6 +56,7 @@ export async function renderAuthUI(mount) {
   emailInput.placeholder = 'you@example.com';
   emailInput.required = true;
   emailInput.autocomplete = 'email';
+  emailInput.setAttribute('aria-label', 'Email address');
   emailWrap.append(emailLabel, emailInput);
 
   const pwWrap = document.createElement('label');
@@ -65,11 +71,13 @@ export async function renderAuthUI(mount) {
   pwInput.minLength = 6;
   pwInput.required = true;
   pwInput.autocomplete = 'current-password';
+  pwInput.setAttribute('aria-label', 'Password');
   pwWrap.append(pwLabel, pwInput);
 
   const error = document.createElement('div');
-  error.className = 'text-rose-500 text-sm hidden';
+  error.className = 'text-rose-500 dark:text-rose-400 text-sm hidden';
   error.setAttribute('role', 'alert');
+  error.setAttribute('aria-live', 'assertive');
 
   const submit = document.createElement('button');
   submit.type = 'submit';
@@ -84,13 +92,22 @@ export async function renderAuthUI(mount) {
 
   let mode = 'login';
   const setMode = (next) => {
+    if (mode === next) return;
     mode = next;
     tabLogin.classList.toggle('bg-warmth-50', mode === 'login');
     tabLogin.classList.toggle('dark:bg-warmth-900', mode === 'login');
+    tabLogin.classList.toggle('text-warmth-900', mode === 'login');
+    tabLogin.classList.toggle('dark:text-warmth-100', mode === 'login');
+    tabLogin.classList.toggle('text-warmth-500', mode !== 'login');
+    tabLogin.classList.toggle('dark:text-warmth-400', mode !== 'login');
     tabSignup.classList.toggle('bg-warmth-50', mode === 'signup');
     tabSignup.classList.toggle('dark:bg-warmth-900', mode === 'signup');
-    tabLogin.classList.toggle('text-warmth-400', mode !== 'login');
-    tabSignup.classList.toggle('text-warmth-400', mode !== 'signup');
+    tabSignup.classList.toggle('text-warmth-900', mode === 'signup');
+    tabSignup.classList.toggle('dark:text-warmth-100', mode === 'signup');
+    tabSignup.classList.toggle('text-warmth-500', mode !== 'signup');
+    tabSignup.classList.toggle('dark:text-warmth-400', mode !== 'signup');
+    tabLogin.setAttribute('aria-selected', mode === 'login');
+    tabSignup.setAttribute('aria-selected', mode === 'signup');
     nameWrap.style.display = mode === 'signup' ? 'flex' : 'none';
     submit.textContent = mode === 'signup' ? 'Create account' : 'Sign in';
     error.classList.add('hidden');
@@ -99,39 +116,31 @@ export async function renderAuthUI(mount) {
   tabLogin.addEventListener('click', () => setMode('login'));
   tabSignup.addEventListener('click', () => setMode('signup'));
 
+  emailInput.focus();
+
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     error.classList.add('hidden');
 
-    // --- Validation ---
     const email = emailInput.value.trim();
     const password = pwInput.value;
 
     if (!email) {
-      error.textContent = 'Please enter your email.';
-      error.classList.remove('hidden');
-      emailInput.focus();
+      showError('Please enter your email.', emailInput);
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      error.textContent = 'Please enter a valid email address.';
-      error.classList.remove('hidden');
-      emailInput.focus();
+      showError('Please enter a valid email address.', emailInput);
       return;
     }
     if (!password) {
-      error.textContent = 'Please enter your password.';
-      error.classList.remove('hidden');
-      pwInput.focus();
+      showError('Please enter your password.', pwInput);
       return;
     }
     if (password.length < 6) {
-      error.textContent = 'Password must be at least 6 characters.';
-      error.classList.remove('hidden');
-      pwInput.focus();
+      showError('Password must be at least 6 characters.', pwInput);
       return;
     }
-    // --- End validation ---
 
     submit.disabled = true;
     const previousText = submit.textContent;
@@ -150,17 +159,24 @@ export async function renderAuthUI(mount) {
       const msg = err?.message || 'Authentication failed.';
       error.textContent = msg;
       error.classList.remove('hidden');
+      (mode === 'signup' ? emailInput : emailInput).focus();
     } finally {
       submit.disabled = false;
       submit.textContent = previousText;
     }
   });
+
+  function showError(msg, focusEl) {
+    error.textContent = msg;
+    error.classList.remove('hidden');
+    focusEl?.focus();
+  }
 }
 
 function makeTab(label) {
   const el = document.createElement('button');
   el.type = 'button';
-  el.className = 'flex-1 py-2 rounded-xl text-sm font-medium text-warmth-400 dark:text-warmth-300 transition';
+  el.className = 'flex-1 py-2 rounded-xl text-sm font-medium text-warmth-500 dark:text-warmth-400 transition hover:text-warmth-700 dark:hover:text-warmth-200';
   el.textContent = label;
   return el;
 }

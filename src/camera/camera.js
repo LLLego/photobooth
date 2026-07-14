@@ -28,7 +28,7 @@ export async function startCamera({ facing = facingMode, width = 1080, height = 
   if (!isCameraSupported()) {
     throw new Error('Camera APIs are not available in this browser.');
   }
-  await stopCamera();
+  stopCamera();
   const constraints = {
     audio: false,
     video: deviceId
@@ -51,13 +51,16 @@ export async function startCamera({ facing = facingMode, width = 1080, height = 
     return stream;
   } catch (err) {
     if (err && err.name === 'OverconstrainedError' && !deviceId) {
-      // Retry with relaxed constraints
-      const fallback = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { facingMode: { ideal: facing } },
-      });
-      activeStream = fallback;
-      return fallback;
+      try {
+        const fallback = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: { ideal: facing } },
+        });
+        activeStream = fallback;
+        return fallback;
+      } catch (fallbackErr) {
+        throw fallbackErr;
+      }
     }
     throw err;
   }
@@ -79,10 +82,24 @@ export function attachStreamToVideo(videoEl, stream) {
     videoEl.playsInline = true;
     videoEl.autoplay = true;
     if (typeof videoEl.play === 'function') {
-      videoEl.play().catch((err) => console.warn('[camera] video.play failed', err));
+      videoEl.play().catch((err) => {
+        if (err?.name !== 'AbortError') console.warn('[camera] video.play failed', err);
+      });
     }
   } catch (err) {
     console.warn('[camera] attachStreamToVideo failed', err);
+  }
+}
+
+export function detachStreamFromVideo(videoEl) {
+  if (!videoEl) return;
+  try {
+    videoEl.pause();
+    videoEl.srcObject = null;
+    videoEl.removeAttribute('src');
+    videoEl.load?.();
+  } catch (err) {
+    console.warn('[camera] detachStreamFromVideo failed', err);
   }
 }
 
@@ -104,6 +121,8 @@ export function describeCameraError(err) {
       return 'The camera is in use by another application. Close other apps and try again.';
     case 'AbortError':
       return 'Camera start was interrupted. Please try again.';
+    case 'TypeError':
+      return 'Camera could not be initialized. Check that the page is served over HTTPS or localhost.';
     default:
       return err.message || 'Could not start the camera.';
   }

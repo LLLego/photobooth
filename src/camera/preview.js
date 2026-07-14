@@ -1,4 +1,4 @@
-import { attachStreamToVideo, startCamera, stopCamera, switchCamera, describeCameraError } from './camera.js';
+import { attachStreamToVideo, startCamera, stopCamera, switchCamera, detachStreamFromVideo, describeCameraError } from './camera.js';
 import { loadTheme } from '../themes/theme-loader.js';
 
 export async function startLivePreview({ videoEl, frameEl, themeId, onError, onStatusChange } = {}) {
@@ -20,10 +20,7 @@ export async function startLivePreview({ videoEl, frameEl, themeId, onError, onS
 }
 
 export function stopLivePreview(videoEl) {
-  if (videoEl) {
-    try { videoEl.pause(); } catch {}
-    try { videoEl.removeAttribute('src'); videoEl.load?.(); } catch {}
-  }
+  detachStreamFromVideo(videoEl);
   stopCamera();
 }
 
@@ -35,12 +32,30 @@ export async function flipCamera(videoEl) {
 
 export async function setPreviewFrame(frameEl, themeId) {
   if (!frameEl) return;
-  const theme = await loadTheme(themeId);
-  if (theme?.frame?.url) {
-    frameEl.src = theme.frame.url;
-    frameEl.style.display = '';
-  } else {
+  if (!themeId || themeId === 'none') {
     frameEl.removeAttribute('src');
+    frameEl.onerror = null;
+    frameEl.style.display = 'none';
+    return;
+  }
+  try {
+    const theme = await loadTheme(themeId);
+    if (theme?.frame?.url) {
+      frameEl.onerror = () => {
+        console.warn('[preview] frame image failed to load', themeId);
+        frameEl.style.display = 'none';
+      };
+      frameEl.src = theme.frame.url;
+      frameEl.style.display = '';
+    } else {
+      frameEl.removeAttribute('src');
+      frameEl.onerror = null;
+      frameEl.style.display = 'none';
+    }
+  } catch (err) {
+    console.warn('[preview] setPreviewFrame failed', err);
+    frameEl.removeAttribute('src');
+    frameEl.onerror = null;
     frameEl.style.display = 'none';
   }
 }

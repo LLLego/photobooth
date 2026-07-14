@@ -12,6 +12,7 @@ function resolveDuration() {
 function createOverlay(host) {
   const overlay = document.createElement('div');
   overlay.className = 'countdown-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
   const num = document.createElement('span');
   num.className = 'countdown-number';
   overlay.append(num);
@@ -19,13 +20,22 @@ function createOverlay(host) {
   return { overlay, num };
 }
 
-function tick(num, label) {
+function prefersReducedMotion() {
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  catch { return false; }
+}
+
+function tick(num, label, fast) {
   return new Promise((resolve) => {
     num.textContent = label;
-    num.style.animation = 'none';
-    void num.offsetWidth;
-    num.style.animation = '';
-    setTimeout(resolve, 900);
+    if (!fast) {
+      num.style.animation = 'none';
+      void num.offsetWidth;
+      num.style.animation = '';
+      setTimeout(resolve, 900);
+    } else {
+      setTimeout(resolve, 300);
+    }
   });
 }
 
@@ -44,6 +54,7 @@ function flash(host) {
 
 export async function startCountdown(host, { duration = resolveDuration() } = {}) {
   if (!host) throw new Error('Countdown host element is required.');
+  const fast = prefersReducedMotion();
   if (duration <= 0) {
     await flash(host);
     return;
@@ -51,12 +62,12 @@ export async function startCountdown(host, { duration = resolveDuration() } = {}
   const { overlay, num } = createOverlay(host);
   try {
     for (let i = duration; i >= 1; i--) {
-      await tick(num, String(i));
+      await tick(num, String(i), fast);
     }
     overlay.remove();
     await flash(host);
   } catch (err) {
-    overlay.remove();
+    try { overlay.remove(); } catch {}
     throw err;
   }
 }

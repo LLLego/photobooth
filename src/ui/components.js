@@ -1,4 +1,4 @@
-export function Button({ label, variant = 'primary', onClick, disabled, type = 'button', icon, className = '' } = {}) {
+export function Button({ label, variant = 'primary', onClick, disabled, type = 'button', icon, className = '', ariaLabel } = {}) {
   const btn = document.createElement('button');
   btn.type = type;
   const variantClass = {
@@ -9,6 +9,7 @@ export function Button({ label, variant = 'primary', onClick, disabled, type = '
     danger: 'btn-danger',
   }[variant] || 'btn-primary';
   btn.className = `${variantClass} ${className}`.trim();
+  if (ariaLabel) btn.setAttribute('aria-label', ariaLabel);
   if (icon) {
     const i = document.createElement('span');
     i.className = 'inline-flex items-center';
@@ -26,7 +27,7 @@ export function Button({ label, variant = 'primary', onClick, disabled, type = '
   return btn;
 }
 
-export function Modal({ title, content, actions, onClose, dismissible = true } = {}) {
+export function Modal({ title, content, actions, onClose, dismissible = true, ariaLabelledBy } = {}) {
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop fade-in';
 
@@ -34,15 +35,20 @@ export function Modal({ title, content, actions, onClose, dismissible = true } =
   dialog.className = 'card max-w-md w-full p-6 fade-up dark:bg-warmth-100 dark:border-warmth-300';
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
+  dialog.tabIndex = -1;
 
   if (title) {
     const h = document.createElement('h2');
     h.className = 'heading-display text-2xl mb-3 text-warmth-900 dark:text-warmth-100';
     h.textContent = title;
+    if (!ariaLabelledBy) ariaLabelledBy = `modal-title-${Math.random().toString(36).slice(2, 9)}`;
+    h.id = ariaLabelledBy;
+    dialog.setAttribute('aria-labelledby', ariaLabelledBy);
     dialog.append(h);
   }
   if (content) {
     const body = document.createElement('div');
+    body.setAttribute('data-body', 'true');
     if (content instanceof HTMLElement) body.append(content);
     else if (typeof content === 'string') body.innerHTML = content;
     else body.append(...content);
@@ -51,25 +57,73 @@ export function Modal({ title, content, actions, onClose, dismissible = true } =
   }
   if (actions && actions.length) {
     const row = document.createElement('div');
+    row.setAttribute('data-actions', 'true');
     row.className = 'mt-6 flex flex-wrap justify-end gap-2';
     for (const a of actions) row.append(a);
     dialog.append(row);
   }
 
   backdrop.append(dialog);
+
+  const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  let removed = false;
+
+  function getFocusable() {
+    return Array.from(dialog.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((el) => el.offsetParent !== null || el === dialog);
+  }
+
+  function trapFocus(ev) {
+    if (ev.key !== 'Tab') return;
+    const focusables = getFocusable();
+    if (!focusables.length) {
+      ev.preventDefault();
+      dialog.focus();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (ev.shiftKey && document.activeElement === first) {
+      ev.preventDefault();
+      last.focus();
+    } else if (!ev.shiftKey && document.activeElement === last) {
+      ev.preventDefault();
+      first.focus();
+    }
+  }
+
+  function escClose(ev) { if (ev.key === 'Escape') close(); }
+
   if (dismissible) {
     backdrop.addEventListener('click', (ev) => {
       if (ev.target === backdrop) close();
     });
     document.addEventListener('keydown', escClose);
   }
-  function escClose(ev) { if (ev.key === 'Escape') close(); }
+  document.addEventListener('keydown', trapFocus);
+
   function close() {
+    if (removed) return;
+    removed = true;
     document.removeEventListener('keydown', escClose);
+    document.removeEventListener('keydown', trapFocus);
     backdrop.remove();
+    if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+      previouslyFocused.focus();
+    }
     if (typeof onClose === 'function') onClose();
   }
-  return { element: backdrop, close };
+
+  // Defer focus so the modal is mounted before we move focus
+  queueMicrotask(() => {
+    if (removed) return;
+    const focusables = getFocusable();
+    if (focusables.length) focusables[0].focus();
+    else dialog.focus();
+  });
+
+  return { element: backdrop, close, dialog };
 }
 
 export function Toast({ message, type = 'info' }) {
@@ -81,6 +135,7 @@ export function Toast({ message, type = 'info' }) {
     warn: 'bg-honey-500 text-warmth-900',
   };
   root.className = `${palette[type] || palette.info} text-sm rounded-full px-4 py-2 shadow-md slide-in pointer-events-auto`;
+  root.setAttribute('role', type === 'error' ? 'alert' : 'status');
   root.textContent = message;
   return root;
 }
@@ -88,10 +143,12 @@ export function Toast({ message, type = 'info' }) {
 export function Spinner({ size = 24, label } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'inline-flex items-center gap-2 text-warmth-600 dark:text-warmth-300';
+  wrap.setAttribute('aria-live', 'polite');
   const ring = document.createElement('span');
   ring.className = 'inline-block rounded-full border-2 border-warmth-200 border-t-warmth-900 dark:border-warmth-700 dark:border-t-warmth-100 animate-spin';
   ring.style.width = `${size}px`;
   ring.style.height = `${size}px`;
+  ring.setAttribute('aria-hidden', 'true');
   wrap.append(ring);
   if (label) {
     const t = document.createElement('span');
@@ -105,11 +162,12 @@ export function Spinner({ size = 24, label } = {}) {
 export function EmptyState({ title, message, action }) {
   const root = document.createElement('div');
   root.className = 'card p-8 text-center fade-up';
+  root.setAttribute('role', 'status');
   const h = document.createElement('h3');
   h.className = 'heading-display text-xl mb-2 text-warmth-900 dark:text-warmth-100';
   h.textContent = title;
   const p = document.createElement('p');
-  p.className = 'text-warmth-600 dark:text-warmth-300';
+  p.className = 'text-warmth-600 dark:text-warmth-400 mb-4';
   p.textContent = message;
   root.append(h, p);
   if (action) root.append(action);
@@ -121,6 +179,7 @@ export function Icon({ name, size = 20 }) {
   el.className = 'inline-flex items-center justify-center';
   el.style.width = `${size}px`;
   el.style.height = `${size}px`;
+  el.setAttribute('aria-hidden', 'true');
   const map = {
     camera: '📷', gallery: '🖼️', settings: '⚙️', heart: '♥', heartFilled: '❤️',
     switch: '🔄', flash: '⚡', download: '⬇', share: '↗', close: '✕',

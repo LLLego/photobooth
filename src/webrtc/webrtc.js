@@ -8,8 +8,12 @@ const DEFAULT_CONFIG = {
   iceCandidatePoolSize: 4,
 };
 
+export function isWebRTCSupported() {
+  return typeof RTCPeerConnection !== 'undefined';
+}
+
 export function createPeerConnection(config = DEFAULT_CONFIG) {
-  if (typeof RTCPeerConnection === 'undefined') {
+  if (!isWebRTCSupported()) {
     throw new Error('WebRTC is not supported in this browser.');
   }
   return new RTCPeerConnection(config);
@@ -61,10 +65,8 @@ export async function createAnswer(pc) {
 }
 
 export async function applyRemoteDescription(pc, description) {
-  if (!description) return;
-  if (description.type === 'offer') {
-    await pc.setRemoteDescription(new RTCSessionDescription(description));
-  } else if (description.type === 'answer') {
+  if (!description || !pc) return;
+  if (description.type === 'offer' || description.type === 'answer') {
     await pc.setRemoteDescription(new RTCSessionDescription(description));
   } else {
     throw new Error('Unsupported description type: ' + description.type);
@@ -72,7 +74,7 @@ export async function applyRemoteDescription(pc, description) {
 }
 
 export async function applyRemoteCandidate(pc, candidate) {
-  if (!candidate) return;
+  if (!pc || !candidate) return;
   try {
     await pc.addIceCandidate(new RTCIceCandidate(candidate));
   } catch (err) {
@@ -82,7 +84,15 @@ export async function applyRemoteCandidate(pc, candidate) {
 
 export function closePeer(pc) {
   if (!pc) return;
-  try { pc.getSenders?.().forEach((s) => s.track && s.track.stop && s.track.stop()); } catch {}
+  try {
+    const senders = pc.getSenders?.() || [];
+    for (const s of senders) {
+      const t = s.track;
+      if (t && typeof t.stop === 'function') {
+        try { t.stop(); } catch {}
+      }
+    }
+  } catch {}
   try { pc.close(); } catch (err) { console.warn('[webrtc] close failed', err); }
 }
 

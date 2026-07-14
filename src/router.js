@@ -1,4 +1,4 @@
-import { getState, set, subscribe } from './state.js';
+import { getState, set } from './state.js';
 import { getSession } from './auth/auth.js';
 
 const routes = new Map();
@@ -15,9 +15,6 @@ export function startRouter(mount) {
   appMount = mount;
   window.addEventListener('hashchange', handleHashChange);
   window.addEventListener('popstate', handleHashChange);
-  subscribe((s) => {
-    if (s.route && s.route.name !== currentRouteName()) navigate(s.route.name, s.route.params, { replace: true });
-  });
   handleHashChange();
 }
 
@@ -26,13 +23,15 @@ export function currentRouteName() {
 }
 
 export function navigate(name, params = {}, opts = {}) {
-  const hash = params && Object.keys(params).length
-    ? `#/${name}?${new URLSearchParams(params).toString()}`
-    : `#/${name}`;
+  const qs = params && Object.keys(params).length
+    ? `?${new URLSearchParams(params).toString()}`
+    : '';
+  const hash = `#/${name}${qs}`;
+  if (location.hash === hash) return;
   if (opts.replace) {
-    if (location.hash !== hash) location.replace(hash);
+    location.replace(hash);
   } else {
-    if (location.hash !== hash) location.hash = hash;
+    location.hash = hash;
   }
 }
 
@@ -40,54 +39,82 @@ function parseHash() {
   const raw = (location.hash || '').replace(/^#\/?/, '');
   const [pathRaw, queryRaw] = raw.split('?');
   const name = pathRaw || 'home';
-  const params = Object.fromEntries(new URLSearchParams(queryRaw || ''));
+  let params = {};
+  try {
+    params = Object.fromEntries(new URLSearchParams(queryRaw || ''));
+  } catch {
+    params = {};
+  }
   return { name, params };
 }
 
+let isRendering = false;
 async function handleHashChange() {
+  if (isRendering) return;
   const { name, params } = parseHash();
   if (!routes.has(name)) {
     navigate('home', {}, { replace: true });
     return;
   }
-  set({ route: { name, params } });
 
   const session = await getSession();
   if (!session && name !== 'login') {
-    navigate('login', {}, { replace: true });
+    if (name !== 'login') navigate('login', {}, { replace: true });
     return;
   }
 
-  const render = routes.get(name);
-  if (typeof currentCleanup === 'function') {
-    try { currentCleanup(); } catch (err) { console.error('[router] cleanup failed', err); }
-    currentCleanup = null;
+  const currentRoute = getState().route;
+  if (currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) {
+    return;
   }
-  if (!appMount) return;
-  appMount.innerHTML = '';
-  currentRender = render;
+  set({ route: { name, params } });
+
+  isRendering = true;
   try {
-    const cleanup = await render(appMount, params);
-    if (typeof cleanup === 'function') currentCleanup = cleanup;
-  } catch (err) {
-    console.error(`[router] render failed for ${name}`, err);
+    const render = routes.get(name);
+    if (typeof currentCleanup === 'function') {
+      try { currentCleanup(); } catch (err) { console.error('[router] cleanup failed', err); }
+      currentCleanup = null;
+    }
+    if (!appMount) return;
     appMount.innerHTML = '';
-    const errEl = document.createElement('div');
-    errEl.className = 'min-h-dvh flex items-center justify-center p-6';
-    errEl.innerHTML = `
-      <div class="card p-8 max-w-md text-center">
-        <h2 class="heading-display text-2xl mb-2">Something went wrong</h2>
-        <p class="text-warmth-700">${escapeHtml(err?.message || 'Unknown error')}</p>
-        <a href="#/home" class="btn-accent mt-6 inline-flex">Back to home</a>
-      </div>`;
-    appMount.append(errEl);
+    currentRender = render;
+    try {
+      const cleanup = await render(appMount, params);
+      if (typeof cleanup === 'function') currentCleanup = cleanup;
+    } catch (err) {
+      console.error(`[router] render failed for ${name}`, err);
+      appMount.innerHTML = '';
+      const errEl = document.createElement('div');
+      errEl.className = 'min-h-dvh flex items-center justify-center p-6';
+      const card = document.createElement('div');
+      card.className = 'card p-8 max-w-md text-center';
+      const h = document.createElement('h2');
+      h.className = 'heading-display text-2xl mb-2';
+      h.textContent = 'Something went wrong';
+      const p = document.createElement('p');
+      p.className = 'text-warmth-700 dark:text-warmth-400';
+      p.textContent = err?.message || 'Unknown error';
+      const back = document.createElement('a');
+      back.className = 'btn-accent mt-6 inline-flex';
+      back.href = '#/home';
+      back.textContent = 'Back to home';
+      card.append(h, p, back);
+      errEl.append(card);
+      appMount.append(errEl);
+    }
+  } finally {
+    isRendering = false;
   }
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
+function shallowEqualParams(a, b) {
+  if (a === b) return true;
+  const ak = Object.keys(a || {});
+  const bk = Object.keys(b || {});
+  if (ak.length !== bk.length) return false;
+  for (const k of ak) if (a[k] !== b[k]) return false;
+  return true;
 }
 
 export function goHome() { navigate('home'); }

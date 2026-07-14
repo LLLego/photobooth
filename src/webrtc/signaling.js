@@ -23,26 +23,16 @@ export function openChannel(sessionId) {
 }
 
 export async function broadcast(channel, type, payload) {
+  if (!channel) return;
   return channel.send({ type: 'broadcast', event: type, payload: { type, payload } });
 }
 
 export function onMessage(channel, handler) {
+  if (!channel || typeof handler !== 'function') return () => {};
   return channel.on('broadcast', { event: '*' }, (msg) => {
     const payload = msg?.payload || {};
     handler({ type: payload.type || msg?.event, payload: payload.payload, raw: msg });
   });
-}
-
-export async function createRoomSession({ theme, layout }) {
-  const { createSession } = await import('../db/sessions.js');
-  const roomCode = generateRoomCode();
-  const session = await createSession({
-    mode: 'dual',
-    themeId: theme,
-    layout,
-    roomCode,
-  });
-  return { session, roomCode };
 }
 
 export async function findSessionByRoomCode(roomCode) {
@@ -62,8 +52,9 @@ export async function findSessionByRoomCode(roomCode) {
 export async function attachPartner(sessionId, partnerId) {
   if (!sessionId || !partnerId) return;
   const c = requireSupabase();
-  await c
-    .from('sessions')
-    .update({ partner_id: partnerId })
-    .eq('id', sessionId);
+  try {
+    await c.from('sessions').update({ partner_id: partnerId }).eq('id', sessionId);
+  } catch (err) {
+    console.warn('[signaling] attachPartner failed', err);
+  }
 }

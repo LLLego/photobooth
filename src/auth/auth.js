@@ -1,4 +1,4 @@
-import { requireSupabase, supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { requireSupabase, isSupabaseConfigured } from '../db/supabase.js';
 
 function client() {
   if (!isSupabaseConfigured) {
@@ -10,8 +10,15 @@ function client() {
 export async function signUp({ email, password, displayName }) {
   if (!email || !password) throw new Error('Email and password are required.');
   const c = client();
+  const trimmed = email.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    throw new Error('Please enter a valid email address.');
+  }
+  if (password.length < 6) {
+    throw new Error('Password must be at least 6 characters.');
+  }
   const { data, error } = await c.auth.signUp({
-    email: email.trim(),
+    email: trimmed,
     password,
     options: {
       data: { display_name: (displayName || '').trim() },
@@ -42,17 +49,25 @@ export async function signOut() {
 export async function getSession() {
   if (!isSupabaseConfigured) return null;
   const c = requireSupabase();
-  const { data, error } = await c.auth.getSession();
-  if (error) return null;
-  return data?.session || null;
+  try {
+    const { data, error } = await c.auth.getSession();
+    if (error) return null;
+    return data?.session || null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getUser() {
   if (!isSupabaseConfigured) return null;
   const c = requireSupabase();
-  const { data, error } = await c.auth.getUser();
-  if (error) return null;
-  return data?.user || null;
+  try {
+    const { data, error } = await c.auth.getUser();
+    if (error) return null;
+    return data?.user || null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchProfile(userId) {
@@ -85,12 +100,11 @@ export async function updateProfile(userId, patch) {
 
 export function onAuthStateChange(callback) {
   if (!isSupabaseConfigured) {
-    callback('SIGNED_OUT', null);
+    try { callback('SIGNED_OUT', null); } catch {}
     return { data: { subscription: { unsubscribe() {} } } };
   }
   const c = requireSupabase();
-  const { data } = c.auth.onAuthStateChange((event, session) => callback(event, session));
-  return data;
+  return c.auth.onAuthStateChange((event, session) => {
+    try { callback(event, session); } catch (err) { console.error('[auth] callback failed', err); }
+  });
 }
-
-export { supabase };

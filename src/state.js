@@ -36,7 +36,7 @@ const initial = {
     filterId: 'original',
   },
   themes: {
-    cache: new Map(),
+    cache: [],
     active: null,
   },
   toasts: [],
@@ -56,23 +56,32 @@ export function get(path) {
 export function set(patch) {
   if (!patch || typeof patch !== 'object') return;
   let changed = false;
-  for (const [path, value] of Object.entries(patch)) {
-    if (applyPath(state, path, value)) changed = true;
+  for (const [key, value] of Object.entries(patch)) {
+    if (applyPath(state, key, value)) changed = true;
   }
   if (changed) emit();
 }
 
-function applyPath(root, path, value) {
-  const keys = path.split('.');
-  let cursor = root;
-  for (let i = 0; i < keys.length - 1; i++) {
-    const k = keys[i];
-    if (cursor[k] == null || typeof cursor[k] !== 'object') cursor[k] = {};
-    cursor = cursor[k];
+function applyPath(root, key, value) {
+  if (key.includes('.')) {
+    const keys = key.split('.');
+    let cursor = root;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (cursor[k] == null || typeof cursor[k] !== 'object') cursor[k] = {};
+      cursor = cursor[k];
+    }
+    const last = keys[keys.length - 1];
+    if (cursor[last] === value) return false;
+    cursor[last] = value;
+    return true;
   }
-  const last = keys[keys.length - 1];
-  if (cursor[last] === value) return false;
-  cursor[last] = value;
+  if (root[key] === value) return false;
+  if (value && typeof value === 'object' && !Array.isArray(value) && root[key] && typeof root[key] === 'object' && !Array.isArray(root[key])) {
+    root[key] = { ...root[key], ...value };
+  } else {
+    root[key] = value;
+  }
   return true;
 }
 

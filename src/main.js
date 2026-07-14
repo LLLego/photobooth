@@ -1,5 +1,5 @@
 import './styles/main.css';
-import { isSupabaseConfigured, renderSupabaseMissing, supabase } from './db/supabase.js';
+import { isSupabaseConfigured, renderSupabaseMissing } from './db/supabase.js';
 import { defineRoute, startRouter, navigate } from './router.js';
 import { renderAuthUI } from './auth/auth-ui.js';
 import { renderHome } from './ui/home.js';
@@ -34,11 +34,13 @@ async function boot() {
     return;
   }
 
-  // Initialize state from storage and remote
   const stored = loadStoredPrefs();
-  set({ preferences: { ...getState().preferences, ...stored } });
+  const basePrefs = getState().preferences;
+  set({ preferences: { ...basePrefs, ...stored } });
   applyDarkMode(stored.darkMode);
-  set({ themes: { ...getState().themes, cache: getState().themes?.cache || [] } });
+
+  const themeCache = getState().themes?.cache || [];
+  set({ themes: { ...getState().themes, cache: Array.isArray(themeCache) ? themeCache : [] } });
 
   mountLoading(mount);
   await Promise.allSettled([
@@ -56,7 +58,6 @@ async function boot() {
   defineRoute('gallery', renderGallery);
   defineRoute('settings', renderSettings);
 
-  // Auth bootstrap
   onAuthStateChange(async (event, session) => {
     set({ user: session?.user || null, initialized: true });
     if (session?.user) {
@@ -79,10 +80,14 @@ async function boot() {
   const initial = await getSession();
   set({ user: initial?.user || null, initialized: true });
   if (initial?.user) {
-    try { set({ profile: await fetchProfile(initial.user.id) }); } catch {}
+    try {
+      set({ profile: await fetchProfile(initial.user.id) });
+    } catch (err) {
+      console.warn('[auth] profile fetch failed', err);
+    }
   }
   startRouter(mount);
-  mountToaster(mount);
+  mountToaster();
   mountNavigationHost();
 
   if (!initial) {
@@ -104,10 +109,12 @@ function applyDarkMode(enabled) {
 
 let toasterRoot = null;
 let toastUnsubscribe = null;
-function mountToaster(root) {
+function mountToaster() {
   if (toasterRoot) return;
   toasterRoot = document.createElement('div');
   toasterRoot.className = 'toast-root';
+  toasterRoot.setAttribute('role', 'status');
+  toasterRoot.setAttribute('aria-live', 'polite');
   document.body.append(toasterRoot);
   if (typeof toastUnsubscribe === 'function') toastUnsubscribe();
   toastUnsubscribe = subscribe(renderToasts);
@@ -115,30 +122,46 @@ function mountToaster(root) {
 }
 function renderToasts() {
   if (!toasterRoot) return;
+  const existing = new Map();
+  for (const c of toasterRoot.children) existing.set(c.dataset.toastId, c);
   const toasts = getState().toasts || [];
-  toasterRoot.innerHTML = '';
+  const seenIds = new Set();
   for (const t of toasts) {
-    toasterRoot.appendChild(Toast({ message: t.message, type: t.type }));
+    seenIds.add(t.id);
+    let node = existing.get(t.id);
+    if (!node) {
+      node = Toast({ message: t.message, type: t.type });
+      node.dataset.toastId = t.id;
+      toasterRoot.appendChild(node);
+    } else {
+      if (node.textContent !== t.message) node.textContent = t.message;
+    }
+  }
+  for (const [id, node] of existing) {
+    if (!seenIds.has(id)) node.remove();
   }
 }
 
 let navHost = null;
+let navUpdateInterval = null;
+let navUpdateHash = null;
 function mountNavigationHost() {
   if (navHost) return;
   navHost = document.createElement('div');
   navHost.id = 'nav-host';
   document.body.append(navHost);
-  // re-render when route changes
   const update = () => {
     const route = getState().route?.name;
     const show = ['home', 'gallery', 'settings'].includes(route);
+    const nextHash = show && getState().user ? `nav:${route}` : 'nav:none';
+    if (navUpdateHash === nextHash) return;
+    navUpdateHash = nextHash;
     navHost.innerHTML = '';
-    if (show && getState().user) {
-      mountNavigation(navHost);
-    }
+    if (nextHash !== 'nav:none') mountNavigation(navHost);
   };
   window.addEventListener('hashchange', update);
-  setInterval(update, 250);
+  subscribe((s) => update());
+  update();
 }
 
 async function renderLoginRoute(mount) {

@@ -8,17 +8,20 @@ const ITEMS = [
 ];
 
 export function mountNavigation(root) {
+  if (!root) return () => {};
+  root.innerHTML = '';
   const nav = document.createElement('nav');
   nav.className = 'bottom-nav';
-  nav.setAttribute('aria-label', 'Primary');
+  nav.setAttribute('aria-label', 'Primary navigation');
   const row = document.createElement('div');
   row.className = 'max-w-md mx-auto flex justify-around items-center';
 
   for (const item of ITEMS) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'flex flex-col items-center gap-1 px-4 py-2 text-xs text-warmth-600 dark:text-warmth-300 transition';
+    btn.className = 'flex flex-col items-center gap-1 px-4 py-2 text-xs text-warmth-600 dark:text-warmth-400 transition hover:text-warmth-900 dark:hover:text-warmth-100';
     btn.setAttribute('data-route', item.name);
+    btn.setAttribute('aria-label', item.label);
     const icon = Icon({ name: item.icon, size: 22 });
     const label = document.createElement('span');
     label.textContent = item.label;
@@ -44,6 +47,7 @@ export function mountNavigation(root) {
   window.addEventListener('hashchange', setActive);
   return () => {
     window.removeEventListener('hashchange', setActive);
-    nav.remove();
+    try { nav.remove(); } catch {}
+    try { root.innerHTML = ''; } catch {}
   };
 }

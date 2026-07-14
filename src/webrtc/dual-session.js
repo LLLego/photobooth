@@ -1,30 +1,38 @@
-import { openChannel, broadcast, onMessage, generateRoomCode, findSessionByRoomCode, attachPartner } from './signaling.js';
 import {
-  createPeerConnection,
-  attachLocalStream,
-  onRemoteStream,
-  onIceCandidate,
-  onConnectionStateChange,
-  createOffer,
-  createAnswer,
-  applyRemoteDescription,
-  applyRemoteCandidate,
-  closePeer,
+  openChannel, broadcast, onMessage, generateRoomCode, findSessionByRoomCode, attachPartner,
+} from './signaling.js';
+import {
+  createPeerConnection, attachLocalStream, onRemoteStream, onIceCandidate,
+  onConnectionStateChange, createOffer, createAnswer,
+  applyRemoteDescription, applyRemoteCandidate, closePeer, isWebRTCSupported,
 } from './webrtc.js';
+import { requireSupabase } from '../db/supabase.js';
 import { getState, set, pushToast } from '../state.js';
-import { startCamera, stopCamera, attachStreamToVideo, switchCamera, describeCameraError } from '../camera/camera.js';
+import {
+  startCamera, stopCamera, attachStreamToVideo, switchCamera, describeCameraError,
+} from '../camera/camera.js';
 import { startCountdown } from '../ui/countdown.js';
 import { createSession, completeSession } from '../db/sessions.js';
 import { uploadPhoto } from '../db/photos.js';
 import { uploadStrip } from '../db/strips.js';
 import { loadTheme } from '../themes/theme-loader.js';
-import { compositeStrip } from '../strips/compositor.js';
+import { compositeStrip, canvasToBlob } from '../strips/compositor.js';
 import { downloadStrip, shareStrip } from '../strips/export.js';
 import { getLayout } from '../strips/layouts.js';
-import { blobToObjectURL } from '../camera/capture.js';
+import { takePhoto } from '../camera/capture.js';
 
 const ROLE = { HOST: 'host', GUEST: 'guest' };
 const STORAGE_BUCKET_PHOTOS = 'photos';
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    if (!blob) return resolve('');
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+    reader.onerror = () => reject(new Error('Could not read blob.'));
+    reader.readAsDataURL(blob);
+  });
+}
 
 class DualSession {
   constructor() {
@@ -39,12 +47,24 @@ class DualSession {
     this.hostPhotos = [];
     this.guestPhotos = [];
     this.listeners = new Set();
+    this.capturing = false;
   }
 
-  on(event, fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
-  emit(event, data) { for (const fn of this.listeners) { try { fn(data); } catch (err) { console.warn(err); } } }
+  on(event, fn) {
+    if (typeof fn !== 'function') return () => {};
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+  emit(event, data) {
+    for (const fn of this.listeners) {
+      try { fn(data); } catch (err) { console.warn('[dual] listener error', err); }
+    }
+  }
 
   async startHost({ themeId, layout }) {
+    if (!isWebRTCSupported()) {
+      throw new Error('WebRTC is not supported in this browser. Dual camera requires WebRTC.');
+    }
     this.role = ROLE.HOST;
     const session = await createSession({ mode: 'dual', themeId, layout, roomCode: generateRoomCode() });
     this.sessionId = session.id;
@@ -55,6 +75,9 @@ class DualSession {
   }
 
   async joinGuest({ roomCode }) {
+    if (!isWebRTCSupported()) {
+      throw new Error('WebRTC is not supported in this browser. Dual camera requires WebRTC.');
+    }
     this.role = ROLE.GUEST;
     const session = await findSessionByRoomCode((roomCode || '').toUpperCase());
     if (!session) throw new Error('Room not found. Check the code with your partner.');
@@ -70,83 +93,105 @@ class DualSession {
     this.channel = channel;
     onMessage(channel, async (msg) => this.handleMessage(msg));
     await new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
       channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR') resolve();
+        if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          finish();
+        }
       });
+      setTimeout(finish, 5000);
     });
   }
 
   async handleMessage({ type, payload }) {
-    switch (type) {
-      case 'join': {
-        if (this.role !== ROLE.HOST) return;
-        this.partnerId = payload?.guestId || null;
-        await attachPartner(this.sessionId, this.partnerId);
-        await this.startHostConnection();
-        this.emit('peer-joined', { partnerId: this.partnerId });
-        break;
+    try {
+      switch (type) {
+        case 'join': {
+          if (this.role !== ROLE.HOST) return;
+          this.partnerId = payload?.guestId || null;
+          await attachPartner(this.sessionId, this.partnerId);
+          await this.startHostConnection();
+          this.emit('peer-joined', { partnerId: this.partnerId });
+          break;
+        }
+        case 'offer': {
+          if (this.role !== ROLE.GUEST) return;
+          await this.handleOffer(payload);
+          break;
+        }
+        case 'answer': {
+          if (this.role !== ROLE.HOST) return;
+          await applyRemoteDescription(this.pc, payload);
+          break;
+        }
+        case 'ice-candidate': {
+          if (this.pc && payload) await applyRemoteCandidate(this.pc, payload);
+          break;
+        }
+        case 'countdown': {
+          if (this.role !== ROLE.GUEST) return;
+          await this.startCaptureSequence({ fromBroadcast: true });
+          break;
+        }
+        case 'photo-ready': {
+          if (this.role !== ROLE.HOST) return;
+          await this.handleGuestPhoto(payload);
+          break;
+        }
+        case 'cancel': {
+          this.emit('cancelled', payload);
+          break;
+        }
+        default:
+          break;
       }
-      case 'offer': {
-        if (this.role !== ROLE.GUEST) return;
-        await this.handleOffer(payload);
-        break;
+    } catch (err) {
+      console.warn('[dual] handleMessage error', type, err);
+    }
+  }
+
+  _setupCommonPeerHandlers(pc) {
+    attachLocalStream(pc, this.localStream);
+    onRemoteStream(pc, (stream) => { this.remoteStream = stream; this.emit('remote-stream', stream); });
+    onIceCandidate(pc, (candidate) => broadcast(this.channel, 'ice-candidate', candidate));
+    onConnectionStateChange(pc, (state) => {
+      this.emit('connection-state', state);
+      if (state === 'failed' || state === 'disconnected') {
+        this.emit('disconnected', state);
       }
-      case 'answer': {
-        if (this.role !== ROLE.HOST) return;
-        await applyRemoteDescription(this.pc, payload);
-        break;
-      }
-      case 'ice-candidate': {
-        if (this.pc && payload) await applyRemoteCandidate(this.pc, payload);
-        break;
-      }
-      case 'countdown': {
-        if (this.role !== ROLE.GUEST) return;
-        await this.startCaptureSequence({ fromBroadcast: true });
-        break;
-      }
-      case 'photo-ready': {
-        if (this.role !== ROLE.HOST) return;
-        await this.handleGuestPhoto(payload);
-        break;
-      }
-      case 'result': {
-        this.emit('result', payload);
-        break;
-      }
-      case 'cancel': {
-        this.emit('cancelled', payload);
-        break;
-      }
-      default:
-        break;
+    });
+  }
+
+  async _startLocalCamera() {
+    try {
+      const local = await startCamera();
+      this.localStream = local;
+      this.emit('local-stream', local);
+      return local;
+    } catch (err) {
+      throw new Error(describeCameraError(err));
     }
   }
 
   async startHostConnection() {
-    const local = await startCamera().catch((err) => { throw new Error(describeCameraError(err)); });
-    this.localStream = local;
-    this.emit('local-stream', local);
+    await this._startLocalCamera();
     const pc = createPeerConnection();
     this.pc = pc;
-    attachLocalStream(pc, local);
-    onRemoteStream(pc, (stream) => { this.remoteStream = stream; this.emit('remote-stream', stream); });
-    onIceCandidate(pc, (candidate) => broadcast(this.channel, 'ice-candidate', candidate));
-    onConnectionStateChange(pc, (state) => this.emit('connection-state', state));
+    this._setupCommonPeerHandlers(pc);
     const offer = await createOffer(pc);
     await broadcast(this.channel, 'offer', offer);
   }
 
   async handleOffer(offer) {
-    const local = await startCamera().catch((err) => { throw new Error(describeCameraError(err)); });
-    this.localStream = local;
-    this.emit('local-stream', local);
+    await this._startLocalCamera();
     const pc = createPeerConnection();
     this.pc = pc;
-    attachLocalStream(pc, local);
-    onRemoteStream(pc, (stream) => { this.remoteStream = stream; this.emit('remote-stream', stream); });
-    onIceCandidate(pc, (candidate) => broadcast(this.channel, 'ice-candidate', candidate));
-    onConnectionStateChange(pc, (state) => this.emit('connection-state', state));
+    this._setupCommonPeerHandlers(pc);
     await applyRemoteDescription(pc, offer);
     const answer = await createAnswer(pc);
     await broadcast(this.channel, 'answer', answer);
@@ -167,50 +212,79 @@ class DualSession {
     if (this.remoteStream) attachStreamToVideo(videoEl, this.remoteStream);
   }
 
-  async captureLocalPhoto(videoEl) {
+  async captureLocalPhoto(videoEl, filter) {
     if (!videoEl) throw new Error('Video element required.');
     const themeId = getState().preferences?.themeId || getState().capture?.themeId || 'minimal';
     const theme = await loadTheme(themeId);
-    const { blob } = await import('../camera/capture.js').then((m) => m.takePhoto(videoEl, theme?.frame?.url || null, { background: theme?.palette?.stripBg }));
+    const layoutId = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
+    const slots = (theme.photoSlots || {})[layoutId] || [{ x: 0, y: 0, w: 1, h: 1 }];
+    const { blob } = await takePhoto(videoEl, theme?.frame?.url || null, theme, {
+      slots,
+      filter: filter || 'none',
+    });
     return blob;
   }
 
   async startCaptureSequence({ fromBroadcast = false, videoEl, onProgress, countdownHost = null } = {}) {
-    if (this.role === ROLE.HOST) {
-      await broadcast(this.channel, 'countdown', { startedAt: Date.now() });
-    }
-    const count = await startCountdown(countdownHost || videoEl?.parentElement, { duration: getState().preferences?.countdownDuration ?? 3 });
-    if (count === undefined) { /* counted */ }
-    const blob = await this.captureLocalPhoto(videoEl);
-    const position = (this.role === ROLE.HOST ? this.hostPhotos : this.guestPhotos).length + 1;
-    if (this.role === ROLE.HOST) this.hostPhotos.push(blob);
-    else this.guestPhotos.push(blob);
-    if (this.sessionId) {
-      try {
-        await uploadPhoto(this.sessionId, blob, position);
-      } catch (err) {
-        console.warn('[dual] upload local photo failed', err);
+    if (this.capturing) return;
+    this.capturing = true;
+    try {
+      if (this.role === ROLE.HOST) {
+        await broadcast(this.channel, 'countdown', { startedAt: Date.now() });
       }
-    }
-    onProgress?.({ role: this.role, blob, position });
-    if (this.role === ROLE.GUEST) {
-      const path = `${this.sessionId}/guest_${position}_${Date.now()}.webp`;
-      const signed = await this.uploadForHost(blob, path);
-      await broadcast(this.channel, 'photo-ready', { position, path: signed.path, url: signed.url, blob: await blobToBase64(blob) });
-    }
-    if (this.role === ROLE.HOST) {
-      const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
-      const required = (getLayout(layout)).requires;
-      if (this.hostPhotos.length >= required) {
-        await this.finalizeHost(layout);
+      const duration = getState().preferences?.countdownDuration ?? 3;
+      const host = countdownHost || videoEl?.parentElement;
+      await startCountdown(host, { duration });
+
+      const filterId = getState().preferences?.filterId || 'original';
+      const blob = await this.captureLocalPhoto(videoEl, filterId);
+      if (!blob) throw new Error('Capture returned no image.');
+
+      const isHost = this.role === ROLE.HOST;
+      const bucket = isHost ? this.hostPhotos : this.guestPhotos;
+      const position = bucket.length + 1;
+      bucket.push(blob);
+
+      if (this.sessionId) {
+        try {
+          await uploadPhoto(this.sessionId, blob, position);
+        } catch (err) {
+          console.warn('[dual] upload local photo failed', err);
+        }
       }
+      onProgress?.({ role: this.role, position });
+
+      if (!isHost) {
+        const path = `${this.sessionId}/guest_${position}_${Date.now()}.webp`;
+        try {
+          const signed = await this.uploadForHost(blob, path);
+          const b64 = await blobToBase64(blob);
+          await broadcast(this.channel, 'photo-ready', { position, path: signed.path, url: signed.url, blob: b64 });
+        } catch (err) {
+          console.warn('[dual] uploadForHost failed', err);
+          pushToast({ message: 'Could not transfer photo to host.', type: 'error' });
+        }
+      }
+
+      if (isHost) {
+        const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
+        const required = getLayout(layout).requires;
+        if (this.hostPhotos.length >= required && this.guestPhotos.length >= required) {
+          await this.finalizeHost(layout);
+        }
+      }
+    } finally {
+      this.capturing = false;
     }
   }
 
   async uploadForHost(blob, path) {
-    const { requireSupabase } = await import('../db/supabase.js');
     const c = requireSupabase();
-    const { data, error } = await c.storage.from(STORAGE_BUCKET_PHOTOS).upload(path, blob, { contentType: blob.type, upsert: true });
+    const { data, error } = await c.storage.from(STORAGE_BUCKET_PHOTOS).upload(path, blob, {
+      contentType: blob.type || 'image/webp',
+      upsert: true,
+      cacheControl: '300',
+    });
     if (error) throw error;
     const { data: signed } = await c.storage.from(STORAGE_BUCKET_PHOTOS).createSignedUrl(data.path, 300);
     return { path: data.path, url: signed?.signedUrl };
@@ -218,26 +292,36 @@ class DualSession {
 
   async handleGuestPhoto(payload) {
     if (!payload?.url) return;
-    const res = await fetch(payload.url);
-    const blob = await res.blob();
+    let blob;
+    try {
+      const res = await fetch(payload.url);
+      if (!res.ok) throw new Error(`Guest photo fetch failed: ${res.status}`);
+      blob = await res.blob();
+    } catch (err) {
+      console.warn('[dual] handleGuestPhoto fetch failed', err);
+      return;
+    }
     this.guestPhotos.push(blob);
     const layout = getState().capture?.layout || 'strip_4';
-    const required = (getLayout(layout)).requires;
+    const required = getLayout(layout).requires;
     if (this.hostPhotos.length >= required && this.guestPhotos.length >= required) {
-      await this.finalizeHost(layout);
+      try { await this.finalizeHost(layout); }
+      catch (err) { console.warn('[dual] finalize after guest photo failed', err); }
     }
   }
 
   async finalizeHost(layout) {
     const themeId = getState().preferences?.themeId || getState().capture?.themeId || 'minimal';
     const theme = await loadTheme(themeId);
-    const photos = [];
-    const required = (getLayout(layout)).requires;
+    const required = getLayout(layout).requires;
     const half = Math.ceil(required / 2);
-    for (let i = 0; i < half; i++) photos.push(this.hostPhotos[i]);
-    for (let i = 0; i < required - half; i++) photos.push(this.guestPhotos[i]);
+    const photos = [];
+    for (let i = 0; i < half && i < this.hostPhotos.length; i++) photos.push(this.hostPhotos[i]);
+    for (let i = 0; i < required - half && i < this.guestPhotos.length; i++) photos.push(this.guestPhotos[i]);
+    if (photos.length < required) {
+      throw new Error('Not enough photos yet to compose.');
+    }
     const canvas = await compositeStrip(photos, theme, layout, { mirror: true });
-    const { canvasToBlob } = await import('../strips/compositor.js');
     const blob = await canvasToBlob(canvas, { type: 'image/webp', quality: 0.9 });
     if (this.sessionId) {
       try {
@@ -268,33 +352,36 @@ class DualSession {
     this.listeners.clear();
     if (this.channel) {
       try { this.channel.unsubscribe(); } catch {}
+      try { this.channel = null; } catch {}
     }
     this.channel = null;
   }
 }
 
 let active = null;
-export function getDualSession() { return active; }
 
-export async function startDualSession({ themeId, layout }) {
+export function getDualSession() {
+  return active;
+}
+
+export async function startDualSession({ themeId, layout } = {}) {
   if (active) active.dispose();
   active = new DualSession();
   const handle = await active.startHost({ themeId, layout });
   return { session: active, ...handle };
 }
 
-export async function joinDualSession({ roomCode }) {
+export async function joinDualSession({ roomCode } = {}) {
   if (active) active.dispose();
   active = new DualSession();
   await active.joinGuest({ roomCode });
   return active;
 }
 
-async function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
-    reader.onerror = () => reject(new Error('blob read failed'));
-    reader.readAsDataURL(blob);
-  });
+export async function downloadFinalStrip(blob, filename) {
+  downloadStrip(blob, filename);
+}
+
+export async function shareFinalStrip(blob, filename) {
+  return shareStrip(blob, { filename });
 }

@@ -29,6 +29,8 @@
     --warmth-200: #2A231E;
     --warmth-300: #3A302A;
     --warmth-400: #7A5C45;
+    --warmth-500: #9A7459;
+    --warmth-600: #B58B6E;
     --warmth-700: #D4956A;
     --warmth-800: #E5C6A8;
     --warmth-900: #F5EDD6;
@@ -44,11 +46,17 @@
     background: var(--warmth-50);
     color: var(--warmth-900);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: background-color 200ms ease-out, color 200ms ease-out;
   }
 
   ::selection {
     background: var(--warmth-200);
     color: var(--warmth-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--warmth-400);
+    outline-offset: 2px;
   }
 }
 
@@ -209,6 +217,7 @@
     gap: 0.5rem;
     align-items: center;
     pointer-events: none;
+    max-width: calc(100vw - 2rem);
   }
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 50;
@@ -219,6 +228,40 @@
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
+
+  .dual-stage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+  }
+  .dual-pane {
+    position: relative;
+    overflow: hidden;
+    background: var(--warmth-900);
+  }
+  .dual-pane:first-child { border-radius: 0 0 0 1.5rem; }
+  .dual-pane:last-child { border-radius: 0 0 1.5rem 0; }
+  .dual-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .dual-pane-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 4;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
 }
 
 @keyframes pulse-scale {
@@ -244,15 +287,75 @@
 .fade-in { animation: fade-in 200ms ease-out both; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
+html.dark {
+  background: var(--warmth-900);
+  color: var(--warmth-50);
+}
+
 /* Dark mode overrides */
 html.dark .card,
-html.dark .surface { background: var(--warmth-100); border-color: var(--warmth-300); }
+html.dark .surface {
+  background: var(--warmth-100);
+  border-color: var(--warmth-300);
+}
 html.dark .btn-ghost { color: var(--warmth-900); }
 html.dark .btn-ghost:hover { background: var(--warmth-200); }
+html.dark .btn-primary {
+  background: var(--warmth-50);
+  color: var(--warmth-900);
+}
+html.dark .btn-primary:hover {
+  background: var(--warmth-100);
+}
+html.dark .btn-accent {
+  background: var(--warmth-400);
+  color: var(--warmth-900);
+}
+html.dark .btn-accent:hover {
+  background: var(--warmth-500);
+  color: var(--warmth-50);
+}
+html.dark .btn-honey {
+  background: var(--honey-500);
+  color: var(--warmth-900);
+}
+html.dark .btn-honey:hover {
+  background: var(--honey-600);
+  color: var(--warmth-50);
+}
+html.dark .btn-danger {
+  background: var(--rose-500);
+  color: var(--warmth-50);
+}
+html.dark .btn-danger:hover {
+  opacity: 0.9;
+}
 html.dark .input { background: var(--warmth-100); border-color: var(--warmth-300); color: var(--warmth-900); }
-html.dark .input::placeholder { color: var(--warmth-600); }
+html.dark .input::placeholder { color: var(--warmth-500); }
 html.dark .camera-stage { background: var(--warmth-800); }
 html.dark .camera-overlay-grid { background-image: linear-gradient(to bottom, rgba(0,0,0,0.0), rgba(0,0,0,0.55)); }
-html.dark .bottom-nav { background: color-mix(in srgb, var(--warmth-50) 92%, transparent); border-top-color: var(--warmth-300); }
+html.dark .camera-controls { color: var(--warmth-50); }
+html.dark .bottom-nav {
+  background: color-mix(in srgb, var(--warmth-50) 92%, transparent);
+  border-top-color: var(--warmth-300);
+}
 html.dark .chip { background: var(--warmth-200); color: var(--warmth-900); }
-html.dark .capture-button { box-shadow: 0 0 0 6px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.5); }
+html.dark .capture-button {
+  box-shadow: 0 0 0 6px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.5);
+}
+html.dark .toast-root { color: var(--warmth-50); }
+html.dark .modal-backdrop { background: rgba(0,0,0,0.7); }
+html.dark .countdown-overlay { background: rgba(0,0,0,0.15); }
+html.dark .countdown-number { color: var(--warmth-50); text-shadow: 0 6px 24px rgba(0,0,0,0.7); }
+html.dark .flash-overlay { background: white; }
+html.dark .strip-preview { background: var(--warmth-200); box-shadow: 0 18px 48px -16px rgba(0,0,0,0.5); }
+html.dark .heading-display { color: var(--warmth-50); }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

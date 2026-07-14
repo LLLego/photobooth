@@ -52,5 +52,5 @@ export function listLayouts() {
 }
 
 export function requiredPhotoCount(id) {
-  return (getLayout(id)).requires;
+  return getLayout(id).requires;
 }
