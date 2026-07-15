@@ -105,7 +105,6 @@ export async function renderHome(mount) {
     try {
       const { fetchStrips } = await import('../gallery/gallery.js');
       await fetchStrips({ limit: 1, reset: true });
-
       if (badge.isConnected) {
         badge.textContent = String(getState().gallery?.total ?? 0);
       }

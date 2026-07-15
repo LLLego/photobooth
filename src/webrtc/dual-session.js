@@ -223,11 +223,8 @@ class DualSession {
     const themeId = getState().preferences?.themeId || getState().capture?.themeId || 'minimal';
     const theme = await loadTheme(themeId);
     const layoutId = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
-    const slots = (theme.photoSlots || {})[layoutId] || [{ x: 0, y: 0, w: 1, h: 1 }];
-    const { blob } = await takePhoto(videoEl, theme?.frame?.url || null, theme, {
-      slots,
-      filter: filter || 'none',
-    });
+    const filterId = getState().preferences?.filterId || 'original';
+    const { blob } = await takePhoto(videoEl, null, theme, { filter: filterId });
     return blob;
   }
 
