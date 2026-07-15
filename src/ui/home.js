@@ -3,13 +3,11 @@ import { Button, Icon } from './components.js';
 import { navigate } from '../router.js';
 
 export async function renderHome(mount) {
-  mount.textContent = 'HOME LOADED';  // diagnostic — remove after verify
   const state = getState();
   const displayName = state.profile?.display_name || state.user?.user_metadata?.display_name || 'you';
   const firstName = displayName.split(' ')[0];
 
   mount.innerHTML = '';
-  mount.textContent = '⏳ loading...';
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md md:max-w-lg mx-auto px-6 pt-12 md:pt-16 pb-40';
   wrap.setAttribute('role', 'main');
