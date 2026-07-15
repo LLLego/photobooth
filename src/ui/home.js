@@ -146,13 +146,20 @@ export async function renderHome(mount) {
   };
   
   themes.forEach((slug) => {
+    const name = slug.replace('-', ' ').replace(/(^|\s)\S/g, c => c.toUpperCase());
     const chip = document.createElement('button');
-    chip.className = 'shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-transparent hover:border-warmth-300 dark:hover:border-warmth-400 transition';
-    chip.style.background = themeColors[slug];
-    chip.style.opacity = '0.6';
-    chip.title = slug.replace('-', ' ');
+    chip.className = 'shrink-0 flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95';
+    
+    const swatch = document.createElement('span');
+    swatch.className = 'w-12 h-16 rounded-2xl border-2 border-warmth-200 dark:border-warmth-300 hover:border-warmth-400 dark:hover:border-warmth-500 transition-colors shadow-sm';
+    swatch.style.background = themeColors[slug];
+    
+    const label = document.createElement('span');
+    label.className = 'text-[10px] text-warmth-600 dark:text-warmth-400 leading-tight text-center';
+    label.textContent = slug === 'hundred-acre-gang' ? 'Hundred Acre' : name;
+    
+    chip.append(swatch, label);
     chip.addEventListener('click', () => {
-      // Select this theme and navigate to camera
       import('../state.js').then(({ set, getState: gs }) => {
         set({ preferences: { ...gs().preferences, themeId: slug } });
         navigate('single');

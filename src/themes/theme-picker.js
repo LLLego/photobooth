@@ -80,11 +80,33 @@ export async function renderThemePicker(mount) {
         const showAccentFallback = () => {
           if (img.parentNode) img.remove();
           previewWrap.style.background = accent;
-          previewWrap.classList.add('flex', 'items-center', 'justify-center');
+          previewWrap.classList.add('flex', 'flex-col', 'items-center', 'justify-center', 'gap-0.5');
+          
+          const themeIcons = {
+            'minimal': '✦',
+            'hundred-acre-gang': '🍯',
+            'pucca': '❤️',
+            'hello-kitty': '🎀',
+            'all-together': '🍯',
+            'winnie-the-pooh': '🐻',
+            'piglet': '🐷',
+            'tigger': '🐯',
+            'eeyore': '🫏',
+            'pucca-garu': '❤️',
+            'kitty': '🐱',
+            'bows-ribbons': '🎀',
+          };
+          const icon = themeIcons[t.id] || themeIcons[v.id] || '✦';
+          
+          const iconEl = document.createElement('span');
+          iconEl.className = 'text-lg leading-none';
+          iconEl.textContent = icon;
+          
           const fallbackLabel = document.createElement('span');
-          fallbackLabel.className = 'text-[10px] font-semibold text-warmth-900 dark:text-warmth-50 text-center px-1 leading-tight';
-          fallbackLabel.textContent = v.name;
-          previewWrap.append(fallbackLabel);
+          fallbackLabel.className = 'text-[9px] font-medium text-warmth-900 dark:text-warmth-50 text-center px-1 leading-tight';
+          fallbackLabel.textContent = v.name.length > 12 ? v.name.slice(0, 11) + '…' : v.name;
+          
+          previewWrap.append(iconEl, fallbackLabel);
         };
 
         const tryNext = () => {
