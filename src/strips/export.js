@@ -128,12 +128,13 @@ export async function printStrip(blob, { filename = 'photobooth-strip', title = 
 
   document.body.append(frame);
 
+  let cleaned = false;
   const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
     const node = document.getElementById('photobooth-print-frame');
     if (node) node.remove();
-    setTimeout(() => {
-      try { URL.revokeObjectURL(objectUrl); } catch {}
-    }, 5000);
+    try { URL.revokeObjectURL(objectUrl); } catch {}
   };
 
   try {

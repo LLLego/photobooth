@@ -146,10 +146,7 @@ export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {
       }
     }
   } finally {
-    ctx.filter = 'none';
-    if (previousFilter !== undefined && previousFilter !== ctx.filter) {
-      ctx.filter = previousFilter;
-    }
+    ctx.filter = previousFilter || 'none';
   }
 
   const blob = await canvasToBlob(canvas, type, quality);
