@@ -3,7 +3,7 @@ import { Button, Icon } from './components.js';
 import { navigate } from '../router.js';
 
 export async function renderHome(mount) {
-  console.log('[renderHome] called, mount:', mount?.tagName);
+  mount.textContent = 'HOME LOADED';  // diagnostic — remove after verify
   const state = getState();
   const displayName = state.profile?.display_name || state.user?.user_metadata?.display_name || 'you';
   const firstName = displayName.split(' ')[0];
