@@ -81,7 +81,7 @@
   .header{
     text-align:center;
     position:relative;
-    z-index:3;
+    z-index:12;
     margin-bottom:14px;
     padding-top:4px;
   }
@@ -173,10 +173,11 @@
     gap:14px;
     aspect-ratio:1/1;
     position:relative;
-    z-index:2;
+    z-index:8;
   }
 
   .slot{
+    z-index:9;
     position:relative;
     background:#fff;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='1' seed='3'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -233,7 +234,7 @@
   .slot:nth-child(4) .lbl{ transform:rotate(3deg); color:var(--red);}
 
   /* ====== FLOATING DECORATIONS ====== */
-  .deco{ position:absolute; pointer-events:none; z-index:1; }
+  .deco{ position:absolute; pointer-events:none; z-index:4; }
 
   /* corner flowers */
   .flower{
