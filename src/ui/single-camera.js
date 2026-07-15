@@ -135,6 +135,68 @@ export async function renderSingleCamera(mount) {
   filterBar.append(filterScroller);
   wrap.append(filterBar);
 
+  // Camera controls: zoom + mirror + flash
+  const cameraBar = document.createElement('div');
+  cameraBar.className = 'mt-4 flex items-center gap-3 text-xs text-warmth-600 dark:text-warmth-400';
+  
+  // Zoom slider
+  const zoomLabel = document.createElement('span');
+  zoomLabel.textContent = '🔍';
+  zoomLabel.className = 'shrink-0';
+  const zoomSlider = document.createElement('input');
+  zoomSlider.type = 'range';
+  zoomSlider.min = '1';
+  zoomSlider.max = '4';
+  zoomSlider.step = '0.1';
+  zoomSlider.value = String(initialZoom);
+  zoomSlider.className = 'flex-1 accent-warmth-800 dark:accent-warmth-200 h-1';
+  const zoomValue = document.createElement('span');
+  zoomValue.className = 'w-10 text-right font-mono shrink-0';
+  zoomValue.textContent = `${initialZoom.toFixed(1)}x`;
+  
+  zoomSlider.addEventListener('input', () => {
+    const z = parseFloat(zoomSlider.value);
+    zoomValue.textContent = `${z.toFixed(1)}x`;
+    applyTransform(videoEl, { zoom: z, mirror: getState().preferences.mirror });
+    set({ preferences: { ...getState().preferences, zoom: z } });
+  });
+  
+  // Mirror toggle
+  const mirrorBtn = document.createElement('button');
+  mirrorBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 dark:border-warmth-300 text-xs';
+  mirrorBtn.textContent = initialMirror ? '🪞' : '📷';
+  mirrorBtn.title = 'Toggle mirror';
+  mirrorBtn.addEventListener('click', () => {
+    const m = !getState().preferences.mirror;
+    mirrorBtn.textContent = m ? '🪞' : '📷';
+    applyTransform(videoEl, { zoom: getState().preferences.zoom || 1, mirror: m });
+    set({ preferences: { ...getState().preferences, mirror: m } });
+  });
+  
+  // Flash toggle
+  const flashBtn = document.createElement('button');
+  flashBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 dark:border-warmth-300 text-xs';
+  flashBtn.textContent = activeFlashEnabled ? '⚡' : '🌑';
+  flashBtn.title = 'Toggle flash';
+  flashBtn.addEventListener('click', () => {
+    activeFlashEnabled = !activeFlashEnabled;
+    flashBtn.textContent = activeFlashEnabled ? '⚡' : '🌑';
+    set({ preferences: { ...getState().preferences, flashEnabled: activeFlashEnabled } });
+  });
+  
+  cameraBar.append(zoomLabel, zoomSlider, zoomValue, mirrorBtn, flashBtn);
+  wrap.append(cameraBar);
+
+  // Show flash on capture
+  const originalOnCapture = null; // Will be set below
+  // Double-tap to reset zoom
+  stage.addEventListener('dblclick', () => {
+    zoomSlider.value = '1';
+    zoomValue.textContent = '1.0x';
+    applyTransform(videoEl, { zoom: 1, mirror: getState().preferences.mirror });
+    set({ preferences: { ...getState().preferences, zoom: 1 } });
+  });
+
   const review = document.createElement('div');
   review.className = 'mt-6 space-y-3';
   review.setAttribute('data-review', 'true');
@@ -252,6 +314,7 @@ export async function renderSingleCamera(mount) {
     status.textContent = 'Get ready…';
     try {
       await startCountdown(stage, { duration: getState().preferences.countdownDuration });
+      await showFlash(stage);
       const theme = await loadTheme(getState().preferences.themeId || 'minimal');
       const { blob } = await takePhoto(videoEl, null, theme, { filter: getFilterCSS(getState().preferences.filterId || 'original') });
       localPhotos.push(blob);

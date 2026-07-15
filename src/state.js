@@ -35,6 +35,9 @@ const initial = {
     countdownDuration: 3,
     displayName: '',
     filterId: 'original',
+    zoom: 1,
+    mirror: null,
+    flashEnabled: true,
   },
   themes: {
     cache: [],
