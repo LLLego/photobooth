@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>our photobooth — Frame Gallery</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #2D1B11;
+    color: #FFFAF0;
+    font-family: Georgia, serif;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #FFB400;
+  }
+  .subtitle {
+    text-align: center;
+    color: #D4956A;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+  .theme-section {
+    margin-bottom: 3rem;
+  }
+  .theme-title {
+    font-size: 1.5rem;
+    color: #FFB400;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #D4956A33;
+  }
+  .frames-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+  .frame-card {
+    background: #3D2B1B;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #D4956A33;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .frame-card:hover {
+    transform: translateY(-4px);
+    border-color: #D4956A;
+  }
+  .frame-preview {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: repeating-linear-gradient(45deg, #FFF8 0, #FFF8 10px, #DDD8 10px, #DDD8 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .frame-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+  }
+  /* Sample photo behind the frame */
+  .frame-preview .sample {
+    position: absolute;
+    inset: 15%;
+    background: linear-gradient(135deg, #FFE4C4, #E8F0FE, #FFF0F0, #FFF8E7);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    z-index: 0;
+  }
+  .frame-label {
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #FFFAF0;
+  }
+  .frame-filename {
+    font-size: 0.7rem;
+    color: #D4956A;
+    margin-top: 0.25rem;
+  }
+  .stats {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #D4956A33;
+    color: #D4956A;
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎞️ our photobooth</h1>
+<p class="subtitle">Frame Gallery — all 11 variants across 4 themes</p>
+
+<div id="gallery"></div>
+<div class="stats" id="stats"></div>
+
+<script>
+const THEMES = {
+  "Hundred Acre Gang 🍯": [
+    { name: "All Together", file: "frame.svg" },
+    { name: "Winnie the Pooh", file: "pooh.svg" },
+    { name: "Piglet", file: "piglet.svg" },
+    { name: "Tigger", file: "tigger.svg" },
+    { name: "Eeyore", file: "eeyore.svg" },
+  ],
+  "Pucca ❤️": [
+    { name: "Pucca & Garu", file: "frame.svg" },
+    { name: "Pucca", file: "pucca-only.svg" },
+    { name: "Garu", file: "garu-only.svg" },
+  ],
+  "Hello Kitty 🎀": [
+    { name: "Hello Kitty", file: "frame.svg" },
+    { name: "Kitty", file: "kitty-only.svg" },
+    { name: "Bows & Ribbons", file: "bows-only.svg" },
+  ],
+};
+
+const BASE = "https://lllego.github.io/photobooth/themes/";
+const gallery = document.getElementById("gallery");
+let total = 0;
+let loaded = 0;
+
+Object.entries(THEMES).forEach(([theme, frames]) => {
+  const section = document.createElement("div");
+  section.className = "theme-section";
+  section.innerHTML = `<h2 class="theme-title">${theme}</h2><div class="frames-grid"></div>`;
+  const grid = section.querySelector(".frames-grid");
+
+  frames.forEach(({ name, file }) => {
+    total++;
+    const slug = theme.split(" ")[0].toLowerCase().replace("🍯","").trim();
+    const themeMap = {
+      "hundred": "hundred-acre-gang",
+      "pucca": "pucca",
+      "hello": "hello-kitty",
+    };
+    const themeId = themeMap[slug];
+    const src = `${BASE}${themeId}/${file}`;
+
+    const card = document.createElement("div");
+    card.className = "frame-card";
+    card.innerHTML = `
+      <div class="frame-preview">
+        <div class="sample">📷</div>
+        <img src="${src}" alt="${name}" loading="lazy"
+             onload="document.getElementById('loaded-count').textContent=++${loaded}; if(${loaded}===${total})document.getElementById('all-loaded').style.display='block'"
+             onerror="this.style.display='none'; this.parentElement.querySelector('.sample').textContent='❌'; document.getElementById('failed').style.display='block'; document.getElementById('failed-list').textContent+='${name} (${file})\\n'">
+      </div>
+      <div class="frame-label">
+        <div>${name}</div>
+        <div class="frame-filename">${file}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  gallery.appendChild(section);
+});
+
+// Add minimal separately
+const minimalSection = document.createElement("div");
+minimalSection.className = "theme-section";
+minimalSection.innerHTML = `<h2 class="theme-title">Minimal ✨</h2><div class="frames-grid"></div>`;
+const minimalGrid = minimalSection.querySelector(".frames-grid");
+["frame.webp", "frame_v2.webp", "frame_v3.webp"].forEach((file, i) => {
+  total++;
+  const names = ["Diamonds", "Corners", "Washi Tape"];
+  const card = document.createElement("div");
+  card.className = "frame-card";
+  card.innerHTML = `
+    <div class="frame-preview">
+      <div class="sample">📷</div>
+      <img src="${BASE}minimal/${file}" alt="${names[i]}" loading="lazy"
+           onload="document.getElementById('loaded-count').textContent=++loaded; if(loaded===total)document.getElementById('all-loaded').style.display='block'"
+           onerror="this.style.display='none'; this.parentElement.querySelector('.sample').textContent='❌'; document.getElementById('failed').style.display='block'; document.getElementById('failed-list').textContent+='${names[i]} (${file})\\n'">
+    </div>
+    <div class="frame-label">
+      <div>${names[i]}</div>
+      <div class="frame-filename">${file}</div>
+    </div>
+  `;
+  minimalGrid.appendChild(card);
+});
+gallery.appendChild(minimalSection);
+
+document.getElementById("stats").innerHTML = `
+  <span id="loaded-count">0</span>/${total} frames loaded
+  <div id="all-loaded" style="display:none;color:#4CAF50;margin-top:0.5rem">✅ All frames loaded successfully!</div>
+  <div id="failed" style="display:none;color:#E8443A;margin-top:0.5rem">❌ Some frames failed to load:</div>
+  <pre id="failed-list" style="color:#E8443A;font-size:0.8rem;white-space:pre-wrap"></pre>
+`;
+</script>
+
+</body>
+</html>
