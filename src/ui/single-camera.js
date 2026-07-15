@@ -398,7 +398,7 @@ export async function renderSingleCamera(mount) {
     const theme = await loadTheme(themeId);
     try {
       const canvas = await compositeStrip(localPhotos, theme, layoutId);
-      const { blob, suggestedName } = await exportStrip(canvas, { format: 'image/webp', quality: 0.9 });
+      const { blob, suggestedName } = await exportStrip(canvas, { format: 'image/png' });
       const preview = document.createElement('div');
       preview.className = 'strip-preview mt-4';
       const img = document.createElement('img');

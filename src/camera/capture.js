@@ -2,7 +2,7 @@ const DEFAULTS = {
   width: 1200,
   height: 1600,
   quality: 0.85,
-  type: 'image/webp',
+  type: 'image/png',
 };
 
 function createCanvas(width, height) {
@@ -153,7 +153,7 @@ export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {
   return { blob, width, height, type };
 }
 
-export async function stripExif(blob, { type = 'image/webp', quality = 0.9 } = {}) {
+export async function stripExif(blob, { type = 'image/png' } = {}) {
   if (!blob) return blob;
   let img = null;
   try {

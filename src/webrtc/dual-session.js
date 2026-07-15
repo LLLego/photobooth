@@ -327,7 +327,7 @@ class DualSession {
       throw new Error('Not enough photos yet to compose.');
     }
     const canvas = await compositeStrip(photos, theme, layout, { mirror: true });
-    const blob = await canvasToBlob(canvas, { type: 'image/webp', quality: 0.9 });
+    const blob = await canvasToBlob(canvas, { type: 'image/png' });
     if (this.sessionId) {
       try {
         await uploadStrip({ sessionId: this.sessionId, blob, layout, themeId, isPrivate: false });

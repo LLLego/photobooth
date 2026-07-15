@@ -179,7 +179,7 @@ export async function compositeStrip(photos = [], theme, layoutId, opts = {}) {
   return canvas;
 }
 
-export async function canvasToBlob(canvas, { type = 'image/webp', quality = 0.9 } = {}) {
+export async function canvasToBlob(canvas, { type = 'image/png' } = {}) {
   const opts = type.includes('png') ? { type } : { type, quality };
   if (canvas instanceof HTMLCanvasElement) {
     return new Promise((resolve, reject) => {
