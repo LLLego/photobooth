@@ -20,6 +20,7 @@ let stage = null;
 let videoEl = null;
 let frameEl = null;
 let currentSessionId = null;
+let handleThemeChanged = null;
 
 export async function renderSingleCamera(mount) {
   const prefs = getState().preferences;
@@ -132,13 +133,20 @@ export async function renderSingleCamera(mount) {
   const reviewList = review;
   let localPhotos = [];
 
+  // Load frame overlay immediately — independent of camera permission
+  try {
+    await setPreviewFrame(frameEl, themeId);
+    status.textContent = 'Camera starting…';
+  } catch (e) {
+    console.warn('[single] frame load failed', e);
+  }
+
   try {
     activeStream = await startLivePreview({ videoEl, frameEl, themeId, onError: (msg) => pushToast({ message: msg, type: 'error' }) });
     status.textContent = 'Ready';
   } catch (err) {
-    status.textContent = describeCameraError(err);
+    status.textContent = err.name === 'NotAllowedError' ? 'Camera blocked — grant permission to capture' : 'Camera unavailable';
   }
-
   captureBtn.addEventListener('click', onCapture);
 
   // Live theme switching — update frame overlay when user picks a new theme
@@ -157,7 +165,7 @@ export async function renderSingleCamera(mount) {
     set({ preferences: { ...getState().preferences, filterId: id } });
   }
 
-  const handleThemeChanged = async (ev) => {
+  handleThemeChanged = async (ev) => {
     const newThemeId = ev.detail?.themeId;
     if (newThemeId && frameEl) {
       await setPreviewFrame(frameEl, newThemeId);
@@ -310,6 +318,10 @@ export async function renderSingleCamera(mount) {
 function cleanupAndExit(mount) {
   try { stopLivePreview(videoEl); } catch {}
   activeStream = null;
+  if (handleThemeChanged) {
+    window.removeEventListener('theme-changed', handleThemeChanged);
+    handleThemeChanged = null;
+  }
   navigate('home');
 }
 
