@@ -54,6 +54,7 @@ function showFlash(host) {
 }
 
 export async function renderSingleCamera(mount) {
+  const RATIO_MAP = { '1:1': '1 / 1', '3:4': '3 / 4', '4:3': '4 / 3', '16:9': '16 / 9' };
   const prefs = getState().preferences;
   const layout = prefs.layout || 'strip_4';
   const themeId = prefs.themeId || 'minimal';
@@ -75,9 +76,9 @@ export async function renderSingleCamera(mount) {
   wrap.append(header);
 
   const aspectRatio = getState().preferences.aspectRatio || '3:4';
-  const ratioClass = `aspect-[${aspectRatio.replace(':', '/')}]`;
   stage = document.createElement('div');
-  stage.className = `camera-stage ${ratioClass} w-full mx-auto`;
+  stage.className = 'camera-stage w-full mx-auto';
+  stage.style.aspectRatio = RATIO_MAP[aspectRatio] || '3 / 4';
   stage.setAttribute('data-ratio', aspectRatio);
   videoEl = document.createElement('video');
   videoEl.className = 'camera-video';
@@ -323,13 +324,16 @@ export async function renderSingleCamera(mount) {
   };
   window.addEventListener('theme-changed', handleThemeChanged);
 
-  // Live aspect ratio switching
   window.addEventListener('ratio-changed', (ev) => {
     const newRatio = ev.detail?.aspectRatio;
     if (newRatio && stage) {
-      const rc = `aspect-[${newRatio.replace(':', '/')}]`;
-      stage.className = `camera-stage ${rc} w-full mx-auto`;
+      stage.style.aspectRatio = RATIO_MAP[newRatio] || '3 / 4';
       stage.setAttribute('data-ratio', newRatio);
+      // Also resize video
+      if (videoEl) {
+        videoEl.style.width = '100%';
+        videoEl.style.height = '100%';
+      }
     }
   });
 
