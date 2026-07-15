@@ -94,8 +94,9 @@ async function boot() {
   mountToaster();
   mountNavigationHost();
 
+  // Default to home — no auth required
   if (!initial) {
-    navigate('login', {}, { replace: true });
+    navigate('home', {}, { replace: true });
   }
 }
 

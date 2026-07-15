@@ -437,14 +437,22 @@ export async function renderSingleCamera(mount) {
         try {
           saveBtn.disabled = true;
           status.textContent = 'Saving…';
-          // Extract base theme from variant keys like "hundred-acre-gang/pooh"
-          const baseThemeId = themeId.includes('/') ? themeId.split('/')[0] : themeId;
-          const session = await createSession({ mode: 'single', themeId: baseThemeId, layout: layoutId });
-          currentSessionId = session.id;
-          await uploadStrip({ sessionId: session.id, blob, layout: layoutId, themeId: baseThemeId, isPrivate: false });
-          await completeSession(session.id);
-          pushToast({ message: 'Saved to gallery.', type: 'success' });
-          navigate('gallery', {}, { replace: true, force: true });
+          const user = getState().user;
+          if (user) {
+            const baseThemeId = themeId.includes('/') ? themeId.split('/')[0] : themeId;
+            const session = await createSession({ mode: 'single', themeId: baseThemeId, layout: layoutId });
+            currentSessionId = session.id;
+            await uploadStrip({ sessionId: session.id, blob, layout: layoutId, themeId: baseThemeId, isPrivate: false });
+            await completeSession(session.id);
+            pushToast({ message: 'Saved to gallery.', type: 'success' });
+            navigate('gallery');
+          } else {
+            // No auth — save locally
+            downloadStrip(blob, suggestedName);
+            pushToast({ message: 'Downloaded! Sign in to save to gallery.', type: 'success' });
+            status.textContent = 'Ready';
+            saveBtn.disabled = false;
+          }
         } catch (err) {
           pushToast({ message: err.message, type: 'error' });
           saveBtn.disabled = false;
