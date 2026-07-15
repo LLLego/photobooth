@@ -83,7 +83,7 @@ async function boot() {
       }
     });
 
-    const initial = await getSession();
+    initial = await getSession();
     set({ user: initial?.user || null, session: initial?.session || null });
     if (initial?.user) {
       try {
