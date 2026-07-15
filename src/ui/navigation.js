@@ -2,9 +2,10 @@ import { currentRouteName, navigate } from '../router.js';
 import { Icon } from './components.js';
 
 const ITEMS = [
-  { name: 'home', label: 'Capture', icon: 'camera' },
+  { name: 'home', label: 'Home', icon: 'home' },
+  { name: 'single', label: 'Camera', icon: 'camera' },
+  { name: 'dual', label: 'Together', icon: 'dual-camera' },
   { name: 'gallery', label: 'Gallery', icon: 'gallery' },
-  { name: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
 export function mountNavigation(root) {

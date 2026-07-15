@@ -22,11 +22,11 @@ export async function renderHome(mount) {
   hi.textContent = `Hey ${firstName} 👋`;
   
   const title = document.createElement('h1');
-  title.className = 'heading-display text-3xl md:text-4xl leading-tight';
+  title.className = 'heading-display text-5xl md:text-6xl leading-none tracking-tight';
   title.innerHTML = 'our<br>photobooth';
   
   const tagline = document.createElement('p');
-  tagline.className = 'text-warmth-500 dark:text-warmth-400 text-sm mt-2 italic';
+  tagline.className = 'text-warmth-400 dark:text-warmth-500 text-sm mt-3 opacity-80';
   tagline.textContent = 'moments together, wherever you are';
   
   greeting.append(hi, title, tagline);
@@ -169,8 +169,8 @@ function createFeatureCard({ icon, title, desc, variant, delay, onClick }) {
   const iconWrap = document.createElement('span');
   iconWrap.className = `w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
     variant === 'primary' 
-      ? 'bg-warmth-900 dark:bg-warmth-100 text-warmth-50 dark:text-warmth-900' 
-      : 'bg-accent/10 dark:bg-accent/20 text-accent'
+      ? 'bg-honey-500 dark:bg-honey-600 text-warmth-50' 
+      : 'bg-rose-500 dark:bg-rose-600 text-warmth-50'
   }`;
   iconWrap.append(Icon({ name: icon, size: 22 }));
   

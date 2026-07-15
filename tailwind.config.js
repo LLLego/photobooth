@@ -33,7 +33,7 @@ export default {
         }
       },
       fontFamily: {
-        display: ['Georgia', 'Times New Roman', 'serif'],
+        display: ['Playfair Display', 'Georgia', 'Times New Roman', 'serif'],
         body: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         mono: ['Courier New', 'Courier', 'monospace'],
       },

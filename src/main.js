@@ -162,7 +162,7 @@ function mountNavigationHost() {
   document.body.append(navHost);
   const update = () => {
     const route = getState().route?.name;
-    const show = ['home', 'gallery', 'settings'].includes(route);
+    const show = ['home', 'gallery', 'single', 'dual'].includes(route);
     const nextHash = show && getState().user ? `nav:${route}` : 'nav:none';
     if (navUpdateHash === nextHash) return;
     navUpdateHash = nextHash;
