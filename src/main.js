@@ -29,9 +29,9 @@ async function boot() {
     return;
   }
 
+  // Supabase optional — app works offline
   if (!isSupabaseConfigured) {
-    renderSupabaseMissing(mount);
-    return;
+    console.warn('[boot] Supabase not configured — running in offline mode');
   }
 
   const stored = loadStoredPrefs();
@@ -62,33 +62,37 @@ async function boot() {
   defineRoute('gallery', renderGallery);
   defineRoute('settings', renderSettings);
 
-  onAuthStateChange(async (event, session) => {
-    set({ user: session?.user || null, initialized: true });
-    if (session?.user) {
+  if (isSupabaseConfigured) {
+    onAuthStateChange(async (event, session) => {
+      set({ user: session?.user || null, initialized: true });
+      if (session?.user) {
+        try {
+          const profile = await fetchProfile(session.user.id);
+          set({ profile });
+        } catch (err) {
+          console.warn('[auth] profile fetch failed', err);
+        }
+      } else {
+        set({ profile: null });
+      }
+      if (event === 'SIGNED_IN') {
+        navigate('home', {}, { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        navigate('home', {}, { replace: true });
+      }
+    });
+
+    const initial = await getSession();
+    set({ user: initial?.user || null, session: initial?.session || null });
+    if (initial?.user) {
       try {
-        const profile = await fetchProfile(session.user.id);
-        set({ profile });
+        set({ profile: await fetchProfile(initial.user.id) });
       } catch (err) {
         console.warn('[auth] profile fetch failed', err);
       }
-    } else {
-      set({ profile: null });
     }
-    if (event === 'SIGNED_IN') {
-      navigate('home', {}, { replace: true });
-    } else if (event === 'SIGNED_OUT') {
-      navigate('home', {}, { replace: true });
-    }
-  });
-
-  const initial = await getSession();
-  set({ user: initial?.user || null, initialized: true });
-  if (initial?.user) {
-    try {
-      set({ profile: await fetchProfile(initial.user.id) });
-    } catch (err) {
-      console.warn('[auth] profile fetch failed', err);
-    }
+  } else {
+    set({ user: null, initialized: true });
   }
   startRouter(mount);
   mountToaster();
