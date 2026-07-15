@@ -1,656 +1,874 @@
-Here's the photobooth frame — warm minimal with terracotta accents, classic Polaroid proportions, hand-drawn CSS characters (sun, leaf, daisies, butterflies, hearts, dashed trails) decorating the edges while the center stays clean and open.
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>our photobooth</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { min-height: 100vh; }
-body {
-  background: #f0e2cd;
-  background-image: radial-gradient(ellipse at 50% 0%, rgba(212,149,106,0.10) 0%, transparent 55%);
-  font-family: 'Georgia', 'Times New Roman', serif;
-  padding: 44px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #5c4a32;
-}
-/* Stage with dotted corner registers */
-.stage { position: relative; padding: 36px; max-width: 460px; width: 100%; }
-.reg {
-  position: absolute; width: 12px; height: 12px;
-  border: 1.5px solid rgba(92,74,50,0.45);
-  border-radius: 50%;
-}
-.reg.tl { top: 6px; left: 6px; }
-.reg.tr { top: 6px; right: 6px; }
-.reg.bl { bottom: 6px; left: 6px; }
-.reg.br { bottom: 6px; right: 6px; }
-
-/* Tiny outer label */
-.stage-label {
-  position: absolute;
-  top: 14px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  letter-spacing: 5px;
-  color: rgba(92,74,50,0.5);
-  text-transform: uppercase;
-  font-family: 'Courier New', monospace;
-}
-
-/* Polaroid */
-.polaroid {
-  background: #fdf8ef;
-  padding: 18px 18px 78px;
-  position: relative;
-  box-shadow:
-    0 1px 0 rgba(92,74,50,0.06),
-    0 6px 14px rgba(92,74,50,0.10),
-    0 18px 32px rgba(92,74,50,0.08),
-    0 32px 60px rgba(92,74,50,0.05);
-  border: 1px solid rgba(92,74,50,0.12);
-}
-/* Clean double border */
-.polaroid::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid #d4956a;
-  pointer-events: none;
-  z-index: 1;
-}
-/* Inner cream wash on the white border to feel warm */
-.polaroid::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 0%, transparent 70%, rgba(212,149,106,0.04) 100%);
-  pointer-events: none;
-}
-
-/* Photo well — remains empty/transparent */
-.photo-area {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background:
-    repeating-linear-gradient(45deg,
-      rgba(212,149,106,0.05) 0px,
-      rgba(212,149,106,0.05) 1px,
-      transparent 1px,
-      transparent 12px);
-  background-color: #f6ebd6;
-  position: relative;
-  border: 1px dashed rgba(92,74,50,0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 2;
-}
-.photo-area .ph-num {
-  font-size: 10px;
-  letter-spacing: 4px;
-  color: rgba(92,74,50,0.4);
-  text-transform: uppercase;
-  font-family: 'Courier New', monospace;
-}
-.photo-area .ph-icon {
-  width: 28px; height: 28px;
-  border: 1.5px solid rgba(92,74,50,0.3);
-  border-radius: 50%;
-  position: relative;
-}
-.photo-area .ph-icon::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(92,74,50,0.3);
-  border-radius: 50%;
-}
-.photo-area .ph-icon::after {
-  content: '';
-  position: absolute;
-  top: 3px; right: 3px;
-  width: 4px; height: 4px;
-  background: rgba(92,74,50,0.3);
-  border-radius: 50%;
-}
-
-/* Handwriting line area */
-.handwriting {
-  position: absolute;
-  left: 26px; right: 26px; bottom: 22px;
-  height: 46px;
-  z-index: 2;
-}
-.hw-line {
-  position: absolute;
-  bottom: 16px; left: 0; right: 0;
-  height: 1px;
-  background: repeating-linear-gradient(to right,
-    rgba(92,74,50,0.32) 0 5px,
-    transparent 5px 9px);
-}
-.hw-line2 {
-  position: absolute;
-  bottom: 0; left: 30%; right: 30%;
-  height: 1px;
-  background: repeating-linear-gradient(to right,
-    rgba(212,149,106,0.55) 0 3px,
-    transparent 3px 7px);
-}
-.hw-month {
-  position: absolute;
-  bottom: 20px; right: 0;
-  font-size: 9px;
-  letter-spacing: 2.5px;
-  color: rgba(92,74,50,0.45);
-  text-transform: uppercase;
-  font-family: 'Courier New', monospace;
-}
-
-/* Header */
-.header {
-  text-align: center;
-  margin-bottom: 26px;
-  position: relative;
-  z-index: 5;
-}
-.title {
-  font-size: 26px;
-  letter-spacing: 14px;
-  font-weight: 400;
-  color: #5c4a32;
-  text-transform: lowercase;
-  padding-left: 14px;
-  font-style: italic;
-}
-.title .amp {
-  color: #d4956a;
-  font-style: normal;
-  margin: 0 4px;
-}
-.subtitle {
-  margin-top: 10px;
-  font-size: 9px;
-  letter-spacing: 5px;
-  color: #d4956a;
-  text-transform: uppercase;
-  font-family: 'Courier New', monospace;
-}
-.subtitle .dot { margin: 0 8px; color: rgba(212,149,106,0.5); }
-
-/* Floating decorations */
-.deco { position: absolute; pointer-events: none; z-index: 3; }
-
-/* SUN — top left, hand-drawn radiating lines + circle */
-.sun { top: 2px; left: -14px; width: 64px; height: 64px; }
-.sun-core {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 18px; height: 18px;
-  border: 2px solid #d4956a;
-  border-radius: 50%;
-  background: rgba(212,149,106,0.08);
-}
-.sun-ray {
-  position: absolute; top: 50%; left: 50%;
-  width: 1.5px; height: 9px;
-  background: #d4956a;
-  transform-origin: 50% 26px;
-  border-radius: 2px;
-}
-
-/* LEAF cluster — top right */
-.leaf { top: -2px; right: -22px; width: 70px; height: 70px; }
-.leaf-vein {
-  position: absolute;
-  background: #b88560;
-}
-.leaf-shape {
-  position: absolute;
-  width: 0; height: 0;
-  border-style: solid;
-}
-.leaf-1 {
-  top: 16px; left: 14px;
-  width: 30px; height: 48px;
-  background: #d4956a;
-  border-radius: 50% 0 50% 0;
-  transform: rotate(-18deg);
-  opacity: 0.92;
-}
-.leaf-1::before {
-  content:'';
-  position: absolute;
-  top: 4px; left: 50%;
-  width: 1px; height: 38px;
-  background: rgba(92,74,50,0.45);
-  transform: translateX(-50%);
-}
-.leaf-2 {
-  top: 4px; left: 32px;
-  width: 22px; height: 36px;
-  background: #c98b5e;
-  border-radius: 0 50% 0 50%;
-  transform: rotate(28deg);
-  opacity: 0.88;
-}
-.leaf-2::before {
-  content:'';
-  position: absolute;
-  top: 4px; left: 50%;
-  width: 1px; height: 28px;
-  background: rgba(92,74,50,0.45);
-  transform: translateX(-50%) rotate(8deg);
-}
-.leaf-stem {
-  position: absolute;
-  top: 2px; left: 18px;
-  width: 1.5px; height: 22px;
-  background: #8b6240;
-  transform: rotate(-22deg);
-  transform-origin: top;
-  border-radius: 2px;
-}
-
-/* BUTTERFLY 1 — left side */
-.bfly-l {
-  top: 42%; left: -34px;
-  width: 42px; height: 30px;
-  transform: rotate(-15deg);
-}
-.bfly-l .wing {
-  position: absolute;
-  width: 16px; height: 20px;
-  background: #d4956a;
-  border: 1.5px solid #8b5e3c;
-  border-radius: 80% 20% 70% 30%;
-  top: 5px;
-}
-.bfly-l .wing.left {
-  left: 0;
-  transform: rotate(-12deg);
-}
-.bfly-l .wing.right {
-  right: 0;
-  border-radius: 20% 80% 30% 70%;
-  transform: rotate(12deg);
-}
-.bfly-l .wing::after {
-  content: '';
-  position: absolute;
-  width: 4px; height: 4px;
-  background: #fdf8ef;
-  border-radius: 50%;
-  border: 1px solid #8b5e3c;
-  top: 4px; left: 5px;
-}
-.bfly-l .body {
-  position: absolute;
-  top: 4px; left: 50%;
-  transform: translateX(-50%);
-  width: 2px; height: 22px;
-  background: #5c4a32;
-  border-radius: 2px;
-}
-.bfly-l .antenna {
-  position: absolute;
-  top: -2px; left: 50%;
-  width: 1px; height: 6px;
-  background: #5c4a32;
-}
-.bfly-l .antenna.l { transform: translateX(-50%) rotate(-25deg); transform-origin: bottom; }
-.bfly-l .antenna.r { transform: translateX(-50%) rotate(25deg); transform-origin: bottom; }
-
-/* BUTTERFLY 2 — right side */
-.bfly-r {
-  top: 60%; right: -34px;
-  width: 36px; height: 26px;
-  transform: rotate(15deg) scaleX(-1);
-}
-.bfly-r .wing {
-  position: absolute;
-  width: 14px; height: 18px;
-  background: #e0aa83;
-  border: 1.5px solid #8b5e3c;
-  border-radius: 80% 20% 70% 30%;
-  top: 4px;
-}
-.bfly-r .wing.left { left: 0; transform: rotate(-10deg); }
-.bfly-r .wing.right {
-  right: 0;
-  border-radius: 20% 80% 30% 70%;
-  transform: rotate(10deg);
-}
-.bfly-r .body {
-  position: absolute;
-  top: 3px; left: 50%;
-  transform: translateX(-50%);
-  width: 2px; height: 20px;
-  background: #5c4a32;
-  border-radius: 2px;
-}
-
-/* DAISY 1 — bottom left */
-.daisy-bl {
-  bottom: -16px; left: -22px;
-  width: 56px; height: 56px;
-}
-.petal {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 10px; height: 18px;
-  background: #fdf8ef;
-  border: 1.5px solid #c9946a;
-  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
-  transform-origin: 50% 22px;
-  margin-left: -5px;
-  margin-top: -22px;
-}
-.daisy-center {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 12px; height: 12px;
-  background: #d4956a;
-  border: 1.5px solid #8b5e3c;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-}
-
-/* DAISY 2 — bottom right (smaller) */
-.daisy-br {
-  bottom: -8px; right: -16px;
-  width: 44px; height: 44px;
-}
-.daisy-br .petal {
-  width: 8px; height: 14px;
-  transform-origin: 50% 17px;
-  margin-left: -4px;
-  margin-top: -17px;
-}
-.daisy-br .daisy-center {
-  width: 9px; height: 9px;
-}
-
-/* HEART — bottom center left */
-.heart {
-  bottom: 18px; left: 32px;
-  width: 14px; height: 13px;
-  transform: rotate(-8deg);
-}
-.heart::before, .heart::after {
-  content: '';
-  position: absolute;
-  width: 8px; height: 12px;
-  background: #d4956a;
-  border-radius: 8px 8px 0 0;
-  top: 0;
-}
-.heart::before {
-  left: 0;
-  transform: rotate(-45deg);
-  transform-origin: 50% 100%;
-}
-.heart::after {
-  right: 0;
-  transform: rotate(45deg);
-  transform-origin: 50% 100%;
-}
-
-/* Small dashed trail under butterfly */
-.trail {
-  position: absolute;
-  height: 1px;
-  background: repeating-linear-gradient(to right,
-    #d4956a 0 3px,
-    transparent 3px 7px);
-  z-index: 3;
-}
-.trail-1 {
-  top: calc(42% + 14px);
-  left: -60px;
-  width: 24px;
-  transform: rotate(-8deg);
-}
-.trail-2 {
-  top: calc(60% + 12px);
-  right: -60px;
-  width: 22px;
-  transform: rotate(8deg);
-}
-
-/* Tiny scattered dots */
-.dot {
-  position: absolute;
-  width: 4px; height: 4px;
-  background: #d4956a;
-  border-radius: 50%;
-  z-index: 3;
-}
-.dot.d1 { top: 22%; left: -10px; opacity: 0.7; }
-.dot.d2 { top: 78%; left: -8px; width: 3px; height: 3px; opacity: 0.5; }
-.dot.d3 { top: 28%; right: -10px; opacity: 0.6; width: 3px; height: 3px; }
-.dot.d4 { top: 14%; right: 18px; opacity: 0.4; width: 2px; height: 2px; }
-.dot.d5 { bottom: 30%; left: 18px; opacity: 0.5; width: 2px; height: 2px; }
-
-/* Tiny cross marks */
-.cross {
-  position: absolute;
-  width: 8px; height: 8px;
-  z-index: 3;
-}
-.cross::before, .cross::after {
-  content: '';
-  position: absolute;
-  background: #d4956a;
-}
-.cross::before {
-  top: 50%; left: 0;
-  width: 100%; height: 1px;
-  transform: translateY(-50%);
-}
-.cross::after {
-  left: 50%; top: 0;
-  height: 100%; width: 1px;
-  transform: translateX(-50%);
-}
-.cross.c1 { top: 30%; left: -16px; }
-.cross.c2 { bottom: 24%; right: -14px; }
-.cross.c3 { top: 8%; left: 30%; opacity: 0.6; }
-
-/* Bottom signature label */
-.footer-strip {
-  position: absolute;
-  bottom: -26px; left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 8px;
-  letter-spacing: 3px;
-  color: rgba(92,74,50,0.5);
-  text-transform: uppercase;
-  font-family: 'Courier New', monospace;
-  white-space: nowrap;
-}
-.footer-strip .line {
-  width: 28px;
-  height: 1px;
-  background: rgba(92,74,50,0.35);
-}
-
-/* Small frame number stamp */
-.stamp {
-  position: absolute;
-  top: 30px; right: 30px;
-  font-size: 8px;
-  letter-spacing: 2px;
-  color: rgba(212,149,106,0.7);
-  font-family: 'Courier New', monospace;
-  border: 1px solid rgba(212,149,106,0.5);
-  padding: 3px 6px;
-  z-index: 4;
-  transform: rotate(-3deg);
-}
-
-/* Responsive */
-@media (max-width: 520px) {
-  .stage { padding: 28px 18px; }
-  .title { font-size: 20px; letter-spacing: 10px; }
-  .sun, .leaf { width: 50px; height: 50px; }
-  .bfly-l { left: -22px; }
-  .bfly-r { right: -22px; }
-  .daisy-bl { left: -14px; }
-  .daisy-br { right: -10px; }
-}
+  :root {
+    --terracotta: #D4956A;
+    --terracotta-deep: #B5794F;
+    --terracotta-soft: #E5B58A;
+    --terracotta-shadow: rgba(180, 120, 75, 0.18);
+    --cream: #F4E8D8;
+    --cream-light: #FAF3E6;
+    --cream-deep: #E8D7BC;
+    --ink: #3C2818;
+    --ink-soft: #6B4F38;
+    --ink-faded: #9B8060;
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: 
+      repeating-linear-gradient(45deg, transparent 0, transparent 2px, rgba(140,90,50,0.025) 2px, rgba(140,90,50,0.025) 3px),
+      repeating-linear-gradient(-45deg, transparent 0, transparent 2px, rgba(140,90,50,0.025) 2px, rgba(140,90,50,0.025) 3px),
+      linear-gradient(135deg, #2A1A10 0%, #3C2818 50%, #2A1A10 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+  
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.7 0 0 0 0 0.5 0 0 0 0 0.3 0 0 0 0.3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: overlay;
+  }
+  
+  /* Main stage */
+  .stage {
+    position: relative;
+    width: 1180px;
+    max-width: 100%;
+    aspect-ratio: 0.82;
+    max-height: 92vh;
+  }
+  
+  /* Outer mat - paper texture */
+  .mat {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 15%, rgba(255, 245, 220, 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 85% 85%, rgba(180, 130, 80, 0.12) 0%, transparent 50%),
+      repeating-linear-gradient(90deg, transparent 0, transparent 3px, rgba(140,90,50,0.015) 3px, rgba(140,90,50,0.015) 4px),
+      repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(140,90,50,0.015) 3px, rgba(140,90,50,0.015) 4px),
+      linear-gradient(135deg, var(--cream-light) 0%, var(--cream) 50%, var(--cream-deep) 100%);
+    box-shadow: 
+      0 0 0 1px rgba(140, 90, 50, 0.15),
+      0 4px 12px rgba(60, 30, 10, 0.3),
+      0 30px 60px rgba(0, 0, 0, 0.5),
+      inset 0 0 80px rgba(140, 90, 50, 0.08);
+  }
+  
+  /* Deckle / fiber edges on mat */
+  .mat::before, .mat::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+  }
+  .mat::before {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.4 0 0 0 0 0.2 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+  }
+  
+  /* Layered decorative border */
+  .border-frame {
+    position: absolute;
+    inset: 28px;
+    pointer-events: none;
+  }
+  
+  .border-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--terracotta-deep);
+    opacity: 0.5;
+  }
+  
+  .border-frame::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--terracotta);
+    opacity: 0.7;
+    border-style: solid solid solid solid;
+    background-image: 
+      linear-gradient(to right, var(--terracotta) 50%, transparent 50%),
+      linear-gradient(to right, var(--terracotta) 50%, transparent 50%),
+      linear-gradient(to bottom, var(--terracotta) 50%, transparent 50%),
+      linear-gradient(to bottom, var(--terracotta) 50%, transparent 50%);
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    background-size: 8px 1px, 8px 1px, 1px 8px, 1px 8px;
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-color: transparent;
+    border: none;
+  }
+  
+  /* Innermost thin double border */
+  .inner-border {
+    position: absolute;
+    inset: 44px;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 1px rgba(180, 120, 75, 0.35),
+      inset 0 0 0 4px transparent,
+      inset 0 0 0 5px rgba(180, 120, 75, 0.25),
+      inset 0 0 0 8px transparent,
+      inset 0 0 0 9px rgba(180, 120, 75, 0.15);
+  }
+  
+  /* Corner ornaments - hand-drawn flourishes */
+  .corner {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .corner svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--terracotta-deep);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.85;
+  }
+  .corner-tl { top: 50px; left: 50px; }
+  .corner-tr { top: 50px; right: 50px; transform: scaleX(-1); }
+  .corner-bl { bottom: 50px; left: 50px; transform: scaleY(-1); }
+  .corner-br { bottom: 50px; right: 50px; transform: scale(-1, -1); }
+  
+  /* Top bar - title */
+  .header-zone {
+    position: absolute;
+    top: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: 80%;
+    z-index: 5;
+  }
+  
+  .ornament-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 14px;
+    color: var(--terracotta-deep);
+  }
+  
+  .ornament-line .dash {
+    width: 60px;
+    height: 1px;
+    background: var(--terracotta-deep);
+    position: relative;
+  }
+  .ornament-line .dash::before {
+    content: '';
+    position: absolute;
+    inset: -2px -4px;
+    background: 
+      repeating-linear-gradient(90deg, var(--terracotta-deep) 0 2px, transparent 2px 4px);
+    opacity: 0.4;
+  }
+  
+  .ornament-line .diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--terracotta-deep);
+    transform: rotate(45deg);
+    position: relative;
+  }
+  .ornament-line .diamond::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 1px solid var(--terracotta-deep);
+    opacity: 0.4;
+    transform: rotate(0deg);
+  }
+  
+  .ornament-line .star {
+    font-size: 16px;
+    color: var(--terracotta-deep);
+    transform: rotate(0deg);
+    letter-spacing: 4px;
+  }
+  
+  .title-script {
+    font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+    font-size: 96px;
+    line-height: 0.95;
+    color: var(--terracotta-deep);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -1px;
+    transform: rotate(-2deg);
+    text-shadow: 
+      1px 1px 0 rgba(140, 90, 50, 0.15),
+      0 0 30px rgba(244, 232, 216, 0.5);
+    position: relative;
+    display: inline-block;
+  }
+  
+  .title-script::before {
+    content: 'our';
+    position: absolute;
+    top: -20px;
+    left: -40px;
+    font-size: 32px;
+    color: var(--ink-soft);
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-weight: 300;
+    transform: rotate(-8deg);
+    letter-spacing: 1px;
+    opacity: 0.7;
+  }
+  
+  .subtitle {
+    margin-top: 12px;
+    font-family: 'Georgia', serif;
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-style: italic;
+    font-weight: 400;
+    opacity: 0.85;
+  }
+  
+  .subtitle::before, .subtitle::after {
+    content: '·';
+    margin: 0 12px;
+    color: var(--terracotta-deep);
+    font-weight: bold;
+  }
+  
+  /* Decorative botanical sprig (top) */
+  .sprig-top {
+    position: absolute;
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 30px;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  
+  /* Photo slot - the polaroid */
+  .photo-zone {
+    position: absolute;
+    top: 250px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 78%;
+    height: 58%;
+    z-index: 3;
+  }
+  
+  .polaroid {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(170deg, #FDF8EE 0%, #F5EAD3 100%);
+    padding: 32px 32px 0 32px;
+    box-shadow:
+      0 0 0 1px rgba(140, 90, 50, 0.15),
+      0 1px 0 rgba(255,255,255,0.5),
+      0 12px 28px rgba(40, 20, 10, 0.25),
+      0 30px 60px rgba(0, 0, 0, 0.15),
+      inset 0 0 0 1px rgba(255,255,255,0.3);
+    transform: rotate(-0.8deg);
+  }
+  
+  .polaroid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.7 0 0 0 0 0.5 0 0 0 0 0.3 0 0 0 0.2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+  
+  /* tape on top of polaroid */
+  .tape {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    width: 130px;
+    height: 32px;
+    background: 
+      repeating-linear-gradient(45deg, 
+        rgba(220, 190, 130, 0.55) 0, 
+        rgba(220, 190, 130, 0.55) 6px, 
+        rgba(210, 175, 110, 0.55) 6px, 
+        rgba(210, 175, 110, 0.55) 12px);
+    border: 1px solid rgba(180, 140, 80, 0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 2;
+  }
+  .tape::before, .tape::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 8px;
+    background-image: 
+      linear-gradient(45deg, transparent 50%, rgba(180, 140, 80, 0.4) 50%),
+      linear-gradient(-45deg, transparent 50%, rgba(180, 140, 80, 0.4) 50%);
+    background-size: 4px 4px;
+  }
+  .tape::before { left: 0; }
+  .tape::after { right: 0; }
+  
+  .photo-area {
+    position: relative;
+    width: 100%;
+    height: 75%;
+    background: #2A1A10;
+    box-shadow: 
+      inset 0 0 0 1px rgba(0,0,0,0.4),
+      inset 0 2px 8px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  
+  .photo-area::after {
+    content: 'PHOTO PLACEHOLDER';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(244, 232, 216, 0.3);
+    font-family: 'Georgia', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    font-style: italic;
+  }
+  
+  /* Caption area */
+  .caption-area {
+    position: relative;
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 30px;
+    gap: 4px;
+  }
+  
+  .caption-area::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 30%;
+    right: 30%;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, 
+      var(--terracotta-deep) 0 3px, 
+      transparent 3px 6px);
+    opacity: 0.4;
+  }
+  
+  .caption-handwritten {
+    font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+    font-size: 32px;
+    color: var(--ink);
+    font-style: italic;
+    transform: rotate(-1deg);
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+  }
+  
+  .caption-date {
+    font-family: 'Georgia', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--ink-faded);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  
+  /* Side flourishes */
+  .side-flourish {
+    position: absolute;
+    width: 60px;
+    pointer-events: none;
+    opacity: 0.55;
+    color: var(--terracotta-deep);
+    z-index: 2;
+  }
+  
+  .side-flourish svg {
+    width: 100%;
+    height: auto;
+    stroke: var(--terracotta-deep);
+    fill: none;
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+  
+  .side-left { 
+    top: 50%; 
+    left: 70px; 
+    transform: translateY(-50%); 
+  }
+  .side-right { 
+    top: 50%; 
+    right: 70px; 
+    transform: translateY(-50%) scaleX(-1); 
+  }
+  
+  /* Vertical text on sides */
+  .vertical-text {
+    position: absolute;
+    font-family: 'Georgia', serif;
+    font-size: 10px;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: var(--terracotta-deep);
+    opacity: 0.6;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-style: italic;
+  }
+  .vertical-text.left {
+    top: 50%;
+    left: 56px;
+    transform: translateY(-50%) rotate(180deg);
+  }
+  .vertical-text.right {
+    top: 50%;
+    right: 56px;
+    transform: translateY(-50%) rotate(180deg);
+  }
+  
+  /* Bottom zone */
+  .footer-zone {
+    position: absolute;
+    bottom: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: 80%;
+    z-index: 5;
+  }
+  
+  .quote {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    max-width: 460px;
+    margin: 0 auto 18px;
+    font-weight: 400;
+    position: relative;
+  }
+  
+  .quote::before {
+    content: '"';
+    font-size: 42px;
+    color: var(--terracotta-deep);
+    position: absolute;
+    top: -16px;
+    left: -8px;
+    font-family: 'Georgia', serif;
+    opacity: 0.5;
+    line-height: 1;
+  }
+  
+  .footer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    font-family: 'Georgia', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--terracotta-deep);
+    opacity: 0.75;
+  }
+  
+  .footer-meta .dot {
+    width: 4px; height: 4px;
+    background: var(--terracotta-deep);
+    border-radius: 50%;
+  }
+  
+  .footer-meta .est {
+    font-style: italic;
+    font-weight: 300;
+  }
+  
+  /* Stickers scattered around */
+  .sticker {
+    position: absolute;
+    pointer-events: none;
+    z-index: 6;
+  }
+  
+  .sticker-1 {
+    top: 22%;
+    left: 4%;
+    transform: rotate(-15deg);
+    width: 70px;
+  }
+  .sticker-2 {
+    top: 18%;
+    right: 6%;
+    transform: rotate(12deg);
+    width: 56px;
+  }
+  .sticker-3 {
+    bottom: 22%;
+    left: 5%;
+    transform: rotate(8deg);
+    width: 64px;
+  }
+  .sticker-4 {
+    bottom: 24%;
+    right: 4%;
+    transform: rotate(-10deg);
+    width: 58px;
+  }
+  
+  .sticker svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Coffee stain */
+  .stain {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+  }
+  .stain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: 
+      radial-gradient(circle at 40% 40%, transparent 60%, rgba(140, 80, 40, 0.25) 62%, transparent 72%);
+    filter: blur(0.5px);
+  }
+  .stain::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 1px solid rgba(140, 80, 40, 0.2);
+    background: 
+      radial-gradient(circle at 35% 35%, transparent 70%, rgba(140, 80, 40, 0.15) 75%);
+  }
+  .stain-1 { top: 8%; right: 12%; transform: rotate(20deg) scale(0.7); }
+  .stain-2 { bottom: 10%; left: 18%; transform: rotate(-30deg) scale(0.5); }
+  
+  /* Subtle star sparkles */
+  .sparkle {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0.55;
+  }
+  .sparkle svg { width: 100%; height: 100%; }
+  .sparkle-1 { top: 30%; left: 12%; transform: rotate(15deg); }
+  .sparkle-2 { top: 28%; right: 11%; transform: rotate(-20deg); }
+  .sparkle-3 { top: 14%; left: 30%; }
+  .sparkle-4 { top: 16%; right: 32%; transform: rotate(45deg) scale(0.7); }
+  .sparkle-5 { bottom: 32%; left: 14%; transform: scale(0.8); }
+  .sparkle-6 { bottom: 30%; right: 13%; transform: rotate(30deg) scale(0.6); }
+  
+  /* Tiny dot accents */
+  .dot-accent {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: var(--terracotta-deep);
+    border-radius: 50%;
+    opacity: 0.5;
+    z-index: 3;
+  }
+  
+  @media (max-width: 900px) {
+    .stage { width: 100%; }
+    .title-script { font-size: 64px; }
+    .title-script::before { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="stage">
-  <div class="reg tl"></div>
-  <div class="reg tr"></div>
-  <div class="reg bl"></div>
-  <div class="reg br"></div>
-  <div class="stage-label">— film roll no. 07 —</div>
-
-  <header class="header">
-    <div class="title">our<span class="amp">·</span>photobooth</div>
-    <div class="subtitle">
-      <span>memories</span>
-      <span class="dot">●</span>
-      <span>kept warm</span>
-      <span class="dot">●</span>
-      <span>forever</span>
+  <div class="mat"></div>
+  
+  <div class="border-frame"></div>
+  <div class="inner-border"></div>
+  
+  <!-- Corner flourishes -->
+  <div class="corner corner-tl">
+    <svg viewBox="0 0 90 90">
+      <path d="M 10 4 Q 8 30 14 50 Q 18 60 28 65" />
+      <path d="M 4 14 Q 28 12 48 18 Q 58 22 62 30" />
+      <path d="M 18 18 Q 20 26 24 32" />
+      <path d="M 18 18 Q 26 20 32 24" />
+      <circle cx="22" cy="22" r="2" fill="currentColor" stroke="none" opacity="0.6"/>
+      <path d="M 35 8 L 38 11 L 41 8 L 38 5 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+      <path d="M 8 35 L 11 38 L 8 41 L 5 38 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+      <path d="M 50 14 Q 56 16 60 20" opacity="0.5"/>
+      <path d="M 14 50 Q 16 56 20 60" opacity="0.5"/>
+    </svg>
+  </div>
+  
+  <div class="corner corner-tr">
+    <svg viewBox="0 0 90 90">
+      <path d="M 10 4 Q 8 30 14 50 Q 18 60 28 65" />
+      <path d="M 4 14 Q 28 12 48 18 Q 58 22 62 30" />
+      <path d="M 18 18 Q 20 26 24 32" />
+      <path d="M 18 18 Q 26 20 32 24" />
+      <circle cx="22" cy="22" r="2" fill="currentColor" stroke="none" opacity="0.6"/>
+      <path d="M 35 8 L 38 11 L 41 8 L 38 5 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+      <path d="M 8 35 L 11 38 L 8 41 L 5 38 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+    </svg>
+  </div>
+  
+  <div class="corner corner-bl">
+    <svg viewBox="0 0 90 90">
+      <path d="M 10 4 Q 8 30 14 50 Q 18 60 28 65" />
+      <path d="M 4 14 Q 28 12 48 18 Q 58 22 62 30" />
+      <path d="M 18 18 Q 20 26 24 32" />
+      <path d="M 18 18 Q 26 20 32 24" />
+      <circle cx="22" cy="22" r="2" fill="currentColor" stroke="none" opacity="0.6"/>
+      <path d="M 35 8 L 38 11 L 41 8 L 38 5 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+      <path d="M 8 35 L 11 38 L 8 41 L 5 38 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+    </svg>
+  </div>
+  
+  <div class="corner corner-br">
+    <svg viewBox="0 0 90 90">
+      <path d="M 10 4 Q 8 30 14 50 Q 18 60 28 65" />
+      <path d="M 4 14 Q 28 12 48 18 Q 58 22 62 30" />
+      <path d="M 18 18 Q 20 26 24 32" />
+      <path d="M 18 18 Q 26 20 32 24" />
+      <circle cx="22" cy="22" r="2" fill="currentColor" stroke="none" opacity="0.6"/>
+      <path d="M 35 8 L 38 11 L 41 8 L 38 5 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+      <path d="M 8 35 L 11 38 L 8 41 L 5 38 Z" fill="currentColor" stroke="none" opacity="0.4"/>
+    </svg>
+  </div>
+  
+  <!-- Coffee stains -->
+  <div class="stain stain-1"></div>
+  <div class="stain stain-2"></div>
+  
+  <!-- Sparkles -->
+  <div class="sparkle sparkle-1">
+    <svg viewBox="0 0 14 14">
+      <path d="M 7 0 L 8 6 L 14 7 L 8 8 L 7 14 L 6 8 L 0 7 L 6 6 Z" fill="#B5794F" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="sparkle sparkle-2">
+    <svg viewBox="0 0 14 14">
+      <path d="M 7 0 L 8 6 L 14 7 L 8 8 L 7 14 L 6 8 L 0 7 L 6 6 Z" fill="#B5794F" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="sparkle sparkle-3">
+    <svg viewBox="0 0 14 14">
+      <path d="M 7 0 L 8 6 L 14 7 L 8 8 L 7 14 L 6 8 L 0 7 L 6 6 Z" fill="#B5794F" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="sparkle sparkle-4">
+    <svg viewBox="0 0 14 14">
+      <path d="M 7 0 L 8 6 L 14 7 L 8 8 L 7 14 L 6 8 L 0 7 L 6 6 Z" fill="#B5794F" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="sparkle sparkle-5">
+    <svg viewBox="0 0 14 14">
+      <path d="M 7 0 L 8 6 L 14 7 L 8 8 L 7 14 L 6 8 L 0 7 L 6 6 Z" fill="#B5794F" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="sparkle sparkle-6">
+    <svg viewBox="0 0 14 14">
+      <path d="M 7 0 L 8 6 L 14 7 L 8 8 L 7 14 L 6 8 L 0 7 L 6 6 Z" fill="#B5794F" opacity="0.7"/>
+    </svg>
+  </div>
+  
+  <!-- Dot accents -->
+  <div class="dot-accent" style="top: 35%; left: 8%;"></div>
+  <div class="dot-accent" style="top: 33%; right: 9%;"></div>
+  <div class="dot-accent" style="bottom: 38%; left: 8.5%;"></div>
+  <div class="dot-accent" style="bottom: 36%; right: 8.5%;"></div>
+  
+  <!-- Vertical text -->
+  <div class="vertical-text left">forever · frames · memory</div>
+  <div class="vertical-text right">souvenirs · moments · love</div>
+  
+  <!-- Side flourishes -->
+  <div class="side-flourish side-left">
+    <svg viewBox="0 0 60 200">
+      <path d="M 30 20 Q 28 60 32 100 Q 34 140 30 180" />
+      <path d="M 30 40 Q 22 45 18 52" />
+      <path d="M 30 40 Q 38 45 42 52" />
+      <path d="M 32 70 Q 22 75 16 84" />
+      <path d="M 32 70 Q 42 75 46 82" />
+      <path d="M 33 100 Q 24 105 18 114" />
+      <path d="M 33 100 Q 42 105 48 112" />
+      <path d="M 32 130 Q 22 135 16 144" />
+      <path d="M 32 130 Q 42 135 46 142" />
+      <path d="M 30 160 Q 22 165 18 172" />
+      <path d="M 30 160 Q 38 165 42 172" />
+      <circle cx="30" cy="20" r="2.5" fill="#B5794F" stroke="none"/>
+      <circle cx="30" cy="180" r="2.5" fill="#B5794F" stroke="none"/>
+    </svg>
+  </div>
+  
+  <div class="side-flourish side-right">
+    <svg viewBox="0 0 60 200">
+      <path d="M 30 20 Q 28 60 32 100 Q 34 140 30 180" />
+      <path d="M 30 40 Q 22 45 18 52" />
+      <path d="M 30 40 Q 38 45 42 52" />
+      <path d="M 32 70 Q 22 75 16 84" />
+      <path d="M 32 70 Q 42 75 46 82" />
+      <path d="M 33 100 Q 24 105 18 114" />
+      <path d="M 33 100 Q 42 105 48 112" />
+      <path d="M 32 130 Q 22 135 16 144" />
+      <path d="M 32 130 Q 42 135 46 142" />
+      <path d="M 30 160 Q 22 165 18 172" />
+      <path d="M 30 160 Q 38 165 42 172" />
+      <circle cx="30" cy="20" r="2.5" fill="#B5794F" stroke="none"/>
+      <circle cx="30" cy="180" r="2.5" fill="#B5794F" stroke="none"/>
+    </svg>
+  </div>
+  
+  <!-- HEADER -->
+  <div class="header-zone">
+    <div class="ornament-line">
+      <div class="dash"></div>
+      <div class="diamond"></div>
+      <div class="dash"></div>
     </div>
-  </header>
-
-  <div class="polaroid">
-
-    <!-- Stamp -->
-    <div class="stamp">N°&nbsp;07</div>
-
-    <!-- Photo well: empty, transparent-feeling -->
-    <div class="photo-area">
-      <div class="ph-icon"></div>
-      <div class="ph-num">— place your photo here —</div>
+    
+    <div class="title-script">photobooth</div>
+    
+    <div class="subtitle">memories in the making</div>
+  </div>
+  
+  <!-- PHOTO ZONE -->
+  <div class="photo-zone">
+    <div class="polaroid">
+      <div class="tape"></div>
+      
+      <div class="photo-area">
+        <!-- PHOTO GOES HERE -->
+      </div>
+      
+      <div class="caption-area">
+        <div class="caption-handwritten">write your story here</div>
+        <div class="caption-date">— · — · —</div>
+      </div>
     </div>
-
-    <!-- Handwriting zone -->
-    <div class="handwriting">
-      <div class="hw-line"></div>
-      <div class="hw-line2"></div>
-      <div class="hw-month">· month · year ·</div>
+  </div>
+  
+  <!-- Decorative stickers -->
+  <div class="sticker sticker-1">
+    <svg viewBox="0 0 70 70">
+      <!-- Dried flower -->
+      <path d="M 35 65 L 35 30" stroke="#6B4F38" stroke-width="1.2" fill="none"/>
+      <path d="M 35 45 Q 28 42 25 36" stroke="#6B4F38" stroke-width="1" fill="none"/>
+      <path d="M 35 50 Q 42 47 45 41" stroke="#6B4F38" stroke-width="1" fill="none"/>
+      <ellipse cx="25" cy="36" rx="4" ry="2" fill="#B5794F" opacity="0.7" transform="rotate(-30 25 36)"/>
+      <ellipse cx="45" cy="41" rx="4" ry="2" fill="#B5794F" opacity="0.7" transform="rotate(30 45 41)"/>
+      <!-- Flower petals -->
+      <ellipse cx="35" cy="22" rx="6" ry="9" fill="#D4956A" opacity="0.8"/>
+      <ellipse cx="30" cy="25" rx="4" ry="7" fill="#B5794F" opacity="0.7" transform="rotate(-30 30 25)"/>
+      <ellipse cx="40" cy="25" rx="4" ry="7" fill="#B5794F" opacity="0.7" transform="rotate(30 40 25)"/>
+      <circle cx="35" cy="24" r="3" fill="#6B4F38"/>
+      <circle cx="35" cy="24" r="1.5" fill="#D4956A"/>
+    </svg>
+  </div>
+  
+  <div class="sticker sticker-2">
+    <svg viewBox="0 0 56 56">
+      <!-- Star burst stamp -->
+      <circle cx="28" cy="28" r="20" fill="none" stroke="#B5794F" stroke-width="0.8" stroke-dasharray="2 2"/>
+      <circle cx="28" cy="28" r="16" fill="#F4E8D8" stroke="#B5794F" stroke-width="0.5"/>
+      <path d="M 28 14 L 30 24 L 40 24 L 32 30 L 35 40 L 28 34 L 21 40 L 24 30 L 16 24 L 26 24 Z" fill="#D4956A" opacity="0.85"/>
+      <text x="28" y="48" text-anchor="middle" font-family="Georgia" font-size="5" fill="#B5794F" letter-spacing="1">EST · MMXXIV</text>
+    </svg>
+  </div>
+  
+  <div class="sticker sticker-3">
+    <svg viewBox="0 0 64 64">
+      <!-- Wax seal style -->
+      <circle cx="32" cy="32" r="26" fill="#B5794F" opacity="0.85"/>
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#6B4F38" stroke-width="0.5"/>
+      <circle cx="32" cy="32" r="22" fill="none" stroke="#F4E8D8" stroke-width="0.8" stroke-dasharray="1 2"/>
+      <text x="32" y="28" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="9" fill="#F4E8D8" font-weight="bold">P</text>
+      <text x="32" y="40" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="6" fill="#F4E8D8" letter-spacing="2">BOOTHI</text>
+      <!-- Uneven edge bumps -->
+      <circle cx="32" cy="6" r="1.5" fill="#B5794F"/>
+      <circle cx="58" cy="32" r="1.5" fill="#B5794F"/>
+      <circle cx="32" cy="58" r="1.5" fill="#B5794F"/>
+      <circle cx="6" cy="32" r="1.5" fill="#B5794F"/>
+    </svg>
+  </div>
+  
+  <div class="sticker sticker-4">
+    <svg viewBox="0 0 58 58">
+      <!-- Sprig of leaves -->
+      <path d="M 29 55 Q 28 30 30 8" stroke="#6B4F38" stroke-width="1" fill="none"/>
+      <path d="M 29 45 Q 22 42 18 35 Q 24 33 29 38" fill="#D4956A" opacity="0.75" stroke="#6B4F38" stroke-width="0.6"/>
+      <path d="M 30 38 Q 36 35 40 28 Q 34 26 30 31" fill="#D4956A" opacity="0.75" stroke="#6B4F38" stroke-width="0.6"/>
+      <path d="M 29 30 Q 23 27 19 21 Q 25 19 29 23" fill="#D4956A" opacity="0.75" stroke="#6B4F38" stroke-width="0.6"/>
+      <path d="M 30 23 Q 35 20 38 14 Q 33 13 30 17" fill="#D4956A" opacity="0.75" stroke="#6B4F38" stroke-width="0.6"/>
+      <ellipse cx="30" cy="8" rx="3" ry="5" fill="#B5794F"/>
+      <ellipse cx="27" cy="6" rx="2" ry="3" fill="#D4956A" opacity="0.7"/>
+    </svg>
+  </div>
+  
+  <!-- FOOTER -->
+  <div class="footer-zone">
+    <div class="quote">
+      The best things in life are the people we love, the places we've been, and the memories we've made along the way.
     </div>
-
-    <!-- Sun, top left -->
-    <div class="deco sun">
-      <div class="sun-core"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(0deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(30deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(60deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(90deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(120deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(150deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(180deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(210deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(240deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(270deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(300deg) translateY(-26px);"></div>
-      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(330deg) translateY(-26px);"></div>
-    </div>
-
-    <!-- Leaves, top right -->
-    <div class="deco leaf">
-      <div class="leaf-stem"></div>
-      <div class="leaf-1"></div>
-      <div class="leaf-2"></div>
-    </div>
-
-    <!-- Butterfly, left -->
-    <div class="deco bfly-l">
-      <div class="antenna l"></div>
-      <div class="antenna r"></div>
-      <div class="wing left"></div>
-      <div class="wing right"></div>
-      <div class="body"></div>
-    </div>
-    <div class="trail trail-1"></div>
-
-    <!-- Butterfly, right -->
-    <div class="deco bfly-r">
-      <div class="wing left"></div>
-      <div class="wing right"></div>
-      <div class="body"></div>
-    </div>
-    <div class="trail trail-2"></div>
-
-    <!-- Daisy, bottom left -->
-    <div class="deco daisy-bl">
-      <div class="petal" style="transform: rotate(0deg);"></div>
-      <div class="petal" style="transform: rotate(45deg);"></div>
-      <div class="petal" style="transform: rotate(90deg);"></div>
-      <div class="petal" style="transform: rotate(135deg);"></div>
-      <div class="petal" style="transform: rotate(180deg);"></div>
-      <div class="petal" style="transform: rotate(225deg);"></div>
-      <div class="petal" style="transform: rotate(270deg);"></div>
-      <div class="petal" style="transform: rotate(315deg);"></div>
-      <div class="daisy-center"></div>
-    </div>
-
-    <!-- Daisy, bottom right -->
-    <div class="deco daisy-br">
-      <div class="petal" style="transform: rotate(0deg);"></div>
-      <div class="petal" style="transform: rotate(45deg);"></div>
-      <div class="petal" style="transform: rotate(90deg);"></div>
-      <div class="petal" style="transform: rotate(135deg);"></div>
-      <div class="petal" style="transform: rotate(180deg);"></div>
-      <div class="petal" style="transform: rotate(225deg);"></div>
-      <div class="petal" style="transform: rotate(270deg);"></div>
-      <div class="petal" style="transform: rotate(315deg);"></div>
-      <div class="daisy-center"></div>
-    </div>
-
-    <!-- Heart -->
-    <div class="deco heart"></div>
-
-    <!-- Scattered dots -->
-    <div class="dot d1"></div>
-    <div class="dot d2"></div>
-    <div class="dot d3"></div>
-    <div class="dot d4"></div>
-    <div class="dot d5"></div>
-
-    <!-- Cross marks -->
-    <div class="deco cross c1"></div>
-    <div class="deco cross c2"></div>
-    <div class="deco cross c3"></div>
-
-    <!-- Footer strip -->
-    <div class="footer-strip">
-      <span class="line"></span>
-      <span>developed with love</span>
-      <span class="line"></span>
+    
+    <div class="footer-meta">
+      <span class="est">est</span>
+      <span class="dot"></span>
+      <span>a keepsake</span>
+      <span class="dot"></span>
+      <span>moment · captured</span>
+      <span class="dot"></span>
+      <span class="est">forever</span>
     </div>
   </div>
 </div>
 
 </body>
 </html>
-
-
-A few notes on the build:
-
-- **Polaroid proportions** follow the real thing: 18px white border on top/sides, ~78px at the bottom for the handwriting zone — that's where the iconic bottom-heavy white lip comes from.
-- **Double border** is the outer cream edge plus the inset terracotta line at 6px (`::before`) — clean and structural rather than decorative.
-- **Center stays open** as a soft tonal wash with a dashed outline and a small circle guide icon, so it reads as "drop a photo here" without ever filling the space.
-- **CSS-only characters** dotting the edges: a radiating sun, two leaves on a stem, two daisies, two butterflies with dashed flight trails, a tiny heart, and small crosses and dots for rhythm. Every piece is built from `div`s with `border-radius`, `transform`, and `clip-path`-style rotation — no SVG, no images.
