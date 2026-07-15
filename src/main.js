@@ -97,6 +97,16 @@ async function boot() {
   }
   startRouter(mount);
   mountToaster();
+
+  // Bypass router — directly call renderHome for testing
+  try {
+    await renderHome(mount);
+    console.log('[boot] renderHome completed');
+  } catch(e) {
+    console.error('[boot] renderHome failed', e);
+  }
+  return;  // stop here for testing
+
   mountNavigationHost();
 
   // Default to home — no auth required
