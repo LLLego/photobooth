@@ -77,7 +77,7 @@ async function boot() {
     if (event === 'SIGNED_IN') {
       navigate('home', {}, { replace: true });
     } else if (event === 'SIGNED_OUT') {
-      navigate('login', {}, { replace: true });
+      navigate('home', {}, { replace: true });
     }
   });
 
