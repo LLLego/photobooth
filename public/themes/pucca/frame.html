@@ -1,290 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Pucca × Garu — Love Photobooth Frame</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --cherry: #E8443A;
-    --cherry-deep: #B82820;
-    --pink: #FFB6C1;
-    --pink-soft: #FFD6DD;
-    --cream: #FFF0F0;
-    --navy: #1A1A2E;
-    --yellow: #FFD93D;
-  }
+<!DOCTYPE html><html><body style='margin:0;background:transparent'><div>Here's a complete photobooth frame with Pucca and Garu built entirely from styled divs — no images, no SVG, everything is pure CSS geometry:
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body {
-    width: 100%;
-    min-height: 100vh;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(232,68,58,0.12) 0%, transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(255,182,193,0.15) 0%, transparent 45%),
-      #1a1a22;
-    background-attachment: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fredoka', sans-serif;
-    overflow-x: hidden;
-  }
+<div id="pucca-frame" style="position: relative; width: 1200px; height: 1600px; background: linear-gradient(135deg, #FFD9DF 0%, #FFB6C1 50%, #FF8FA8 100%); overflow: hidden; margin: 0 auto; font-family: 'Comic Sans MS', 'Quicksand', 'Nunito', system-ui, sans-serif;">
 
-  .stage {
-    position: relative;
-    width: 1200px;
-    height: 1600px;
-    flex-shrink: 0;
-  }
+  <!-- Pattern layer: scattered dots -->
+  <div style="position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.5) 1.8px, transparent 2px); background-size: 36px 36px; opacity: 0.7; pointer-events: none;"></div>
 
-  .photozone-label {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Bungee', sans-serif;
-    font-size: 14px;
-    letter-spacing: 6px;
-    color: rgba(26,26,46,0.25);
-    text-transform: uppercase;
-    pointer-events: none;
-    z-index: 1;
-  }
+  <!-- Corner red triangles -->
+  <div style="position: absolute; top: 0; left: 0; width: 0; height: 0; border-top: 90px solid #E63946; border-right: 90px solid transparent; opacity: 0.55; pointer-events: none;"></div>
+  <div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-top: 90px solid #E63946; border-left: 90px solid transparent; opacity: 0.55; pointer-events: none;"></div>
+  <div style="position: absolute; bottom: 0; left: 0; width: 0; height: 0; border-bottom: 90px solid #E63946; border-right: 90px solid transparent; opacity: 0.55; pointer-events: none;"></div>
+  <div style="position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-bottom: 90px solid #E63946; border-left: 90px solid transparent; opacity: 0.55; pointer-events: none;"></div>
 
-  .frame {
-    position: absolute;
-    inset: 0;
-    width: 1200px;
-    height: 1600px;
-    pointer-events: none;
-    overflow: visible;
-  }
+  <!-- Photo opening -->
+  <div style="position: absolute; top: 200px; left: 100px; width: 1000px; height: 1200px; background-color: #FFF0F3; background-image: linear-gradient(rgba(255,255,255,0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.45) 1px, transparent 1px); background-size: 50px 50px; border: 8px solid #FFFFFF; box-shadow: 0 0 0 4px #E63946, 0 0 0 9px #FFFFFF, 0 0 0 13px #FF6B8A, 0 12px 32px rgba(200,30,60,0.35); box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+    <span style="font-size: 32px; color: rgba(200,30,60,0.3); letter-spacing: 4px; font-weight: 700;">PHOTO HERE</span>
+  </div>
 
-  .frame svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    overflow: visible;
-  }
+  <!-- ============ PUCCA (top-left) ============ -->
+  <div style="position: absolute; top: 30px; left: 55px; width: 220px; height: 200px; z-index: 5;">
+    <!-- Hair base (under face) -->
+    <div style="position: absolute; top: 48px; left: 50%; transform: translateX(-50%); width: 168px; height: 142px; background: #1A1A1A; border-radius: 80px 80px 30px 30px;"></div>
 
-  /* === Floating Hearts Animation === */
-  .heart-float {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: heartFloat 4s ease-in-out infinite;
-  }
-  .heart-float:nth-child(odd) { animation-duration: 5s; animation-delay: -1.5s; }
-  .heart-float:nth-child(3n)  { animation-duration: 3.5s; animation-delay: -0.8s; }
+    <!-- Two buns on top -->
+    <div style="position: absolute; top: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2;">
+      <div style="width: 64px; height: 64px; background: #1A1A1A; border-radius: 50%; box-shadow: inset -6px -6px 0 rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.2);"></div>
+      <div style="width: 64px; height: 64px; background: #1A1A1A; border-radius: 50%; box-shadow: inset -6px -6px 0 rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.2);"></div>
+    </div>
 
-  @keyframes heartFloat {
-    0%, 100% { transform: translateY(0) rotate(-3deg); }
-    50%      { transform: translateY(-8px) rotate(3deg); }
-  }
+    <!-- Bun ornaments (red dots on each bun) -->
+    <div style="position: absolute; top: 38px; left: 50%; transform: translateX(-50%); display: flex; gap: 46px; z-index: 3;">
+      <div style="width: 10px; height: 10px; background: #E63946; border-radius: 50%; box-shadow: 0 0 0 2px #FF8FA8;"></div>
+      <div style="width: 10px; height: 10px; background: #E63946; border-radius: 50%; box-shadow: 0 0 0 2px #FF8FA8;"></div>
+    </div>
 
-  .sparkle-pulse {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: sparkle 2.2s ease-in-out infinite;
-  }
-  @keyframes sparkle {
-    0%, 100% { opacity: 0.4; transform: scale(0.85); }
-    50%      { opacity: 1;   transform: scale(1.15); }
-  }
+    <!-- Face -->
+    <div style="position: absolute; top: 58px; left: 50%; transform: translateX(-50%); width: 128px; height: 112px; background: #FFE4CC; border-radius: 50%; z-index: 1;"></div>
 
-  .ribbon-sway {
-    transform-box: fill-box;
-    transform-origin: center bottom;
-    animation: sway 6s ease-in-out infinite;
-  }
-  @keyframes sway {
-    0%, 100% { transform: rotate(-1deg); }
-    50%      { transform: rotate(1deg); }
-  }
+    <!-- Eyes -->
+    <div style="position: absolute; top: 92px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; z-index: 2;">
+      <div style="width: 22px; height: 26px; background: #1A1A1A; border-radius: 50%;"></div>
+      <div style="width: 22px; height: 26px; background: #1A1A1A; border-radius: 50%;"></div>
+    </div>
 
-  /* Decorative page background hearts */
-  .bg-deco {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .bg-deco span {
-    position: absolute;
-    color: rgba(232,68,58,0.08);
-    font-size: 24px;
-    animation: drift 18s linear infinite;
-  }
-  @keyframes drift {
-    from { transform: translateY(100vh) rotate(0deg); }
-    to   { transform: translateY(-20vh) rotate(360deg); }
-  }
+    <!-- Eye sparkle -->
+    <div style="position: absolute; top: 97px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; z-index: 3;">
+      <div style="width: 7px; height: 7px; background: #FFFFFF; border-radius: 50%; margin-left: 4px;"></div>
+      <div style="width: 7px; height: 7px; background: #FFFFFF; border-radius: 50%; margin-left: 11px;"></div>
+    </div>
 
-  @media (max-width: 1240px) {
-    .stage { transform: scale(0.85); }
-  }
-  @media (max-width: 1024px) {
-    .stage { transform: scale(0.65); }
-  }
-  @media (max-width: 768px) {
-    .stage { transform: scale(0.45); }
-  }
-</style>
-</head>
-<body>
+    <!-- Cheeks -->
+    <div style="position: absolute; top: 118px; left: 50%; transform: translateX(-50%); display: flex; justify-content: space-between; width: 110px; z-index: 2;">
+      <div style="width: 18px; height: 12px; background: #FF9DB1; border-radius: 50%; opacity: 0.85;"></div>
+      <div style="width: 18px; height: 12px; background: #FF9DB1; border-radius: 50%; opacity: 0.85;"></div>
+    </div>
 
-<div class="bg-deco">
-  <span style="left:5%;animation-delay:0s">♥</span>
-  <span style="left:18%;animation-delay:-4s">♥</span>
-  <span style="left:32%;animation-delay:-9s">♥</span>
-  <span style="left:48%;animation-delay:-2s">♥</span>
-  <span style="left:62%;animation-delay:-7s">♥</span>
-  <span style="left:78%;animation-delay:-12s">♥</span>
-  <span style="left:92%;animation-delay:-5s">♥</span>
-</div>
+    <!-- Big happy smile -->
+    <div style="position: absolute; top: 132px; left: 50%; transform: translateX(-50%); width: 50px; height: 26px; border-bottom: 5px solid #C2185B; border-radius: 0 0 25px 25px; z-index: 2;"></div>
 
-<div class="stage">
-  <div class="photozone-label">— photo area —</div>
+    <!-- Red outfit collar / shoulders -->
+    <div style="position: absolute; top: 168px; left: 50%; transform: translateX(-50%); width: 140px; height: 40px; background: #E63946; border-radius: 70px 70px 0 0; z-index: 0; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15);"></div>
+  </div>
 
-  <div class="frame">
-    <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <!-- Gradients -->
-        <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#FF6B5B"/>
-          <stop offset="100%" stop-color="#C8281E"/>
-        </linearGradient>
-        <linearGradient id="puccaHair" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#3A3A52"/>
-          <stop offset="100%" stop-color="#1A1A2E"/>
-        </linearGradient>
-        <radialGradient id="cheekGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#FF8FA0" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#FF8FA0" stop-opacity="0"/>
-        </radialGradient>
+  <!-- Pucca speech heart -->
+  <div style="position: absolute; top: 65px; left: 280px; font-size: 38px; color: #E63946; transform: rotate(-15deg); text-shadow: 0 0 0 rgba(0,0,0,0), 2px 2px 0 #FFFFFF; line-height: 1; z-index: 6;">♥</div>
 
-        <!-- Reusable heart shapes -->
-        <symbol id="heart" viewBox="0 0 100 100">
-          <path d="M50,88 C50,88 8,58 8,32 C8,18 19,8 32,8 C42,8 48,14 50,22 C52,14 58,8 68,8 C81,8 92,18 92,32 C92,58 50,88 50,88 Z"/>
-        </symbol>
-        <symbol id="heartOutline" viewBox="0 0 100 100">
-          <path d="M50,88 C50,88 8,58 8,32 C8,18 19,8 32,8 C42,8 48,14 50,22 C52,14 58,8 68,8 C81,8 92,18 92,32 C92,58 50,88 50,88 Z" fill="none" stroke-width="5"/>
-        </symbol>
-        <symbol id="sparkle" viewBox="0 0 100 100">
-          <path d="M50,5 L58,40 L95,50 L58,60 L50,95 L42,60 L5,50 L42,40 Z"/>
-        </symbol>
-      </defs>
+  <!-- ============ GARU (top-right) ============ -->
+  <div style="position: absolute; top: 30px; right: 55px; width: 220px; height: 200px; z-index: 5;">
+    <!-- Hair base -->
+    <div style="position: absolute; top: 50px; left: 50%; transform: translateX(-50%); width: 168px; height: 132px; background: #1A1A1A; border-radius: 80px 80px 25px 25px;"></div>
 
-      <!-- ============================================ -->
-      <!-- TOP-LEFT: PUCCA (blowing kiss, heart eyes)   -->
-      <!-- ============================================ -->
-      <g transform="translate(-30, -10)">
+    <!-- Top hair peak -->
+    <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 50px solid transparent; border-right: 50px solid transparent; border-bottom: 42px solid #1A1A1A; z-index: 2;"></div>
 
-        <!-- Hair back layer (behind head) -->
-        <path d="M 95,140 Q 60,95 75,55 Q 100,30 150,35 L 245,40 Q 285,50 290,90 L 295,140 Q 290,175 270,190 L 270,210 L 110,210 L 110,190 Q 95,170 95,140 Z"
-              fill="url(#puccaHair)" stroke="#000" stroke-width="5" stroke-linejoin="round"/>
+    <!-- Side bangs -->
+    <div style="position: absolute; top: 52px; left: 22px; width: 28px; height: 65px; background: #1A1A1A; border-radius: 14px 0 30px 14px; transform: rotate(-12deg); z-index: 3;"></div>
+    <div style="position: absolute; top: 52px; right: 22px; width: 28px; height: 65px; background: #1A1A1A; border-radius: 0 14px 14px 30px; transform: rotate(12deg); z-index: 3;"></div>
 
-        <!-- Two iconic red buns -->
-        <g>
-          <circle cx="80" cy="55" r="42" fill="#E8443A" stroke="#000" stroke-width="5"/>
-          <circle cx="80" cy="55" r="28" fill="none" stroke="#000" stroke-width="2.5" opacity="0.35"/>
-          <circle cx="68" cy="45" r="8" fill="#FFB6C1" opacity="0.6"/>
-        </g>
-        <g>
-          <circle cx="275" cy="65" r="42" fill="#E8443A" stroke="#000" stroke-width="5"/>
-          <circle cx="275" cy="65" r="28" fill="none" stroke="#000" stroke-width="2.5" opacity="0.35"/>
-          <circle cx="263" cy="55" r="8" fill="#FFB6C1" opacity="0.6"/>
-        </g>
+    <!-- Hair shine streak -->
+    <div style="position: absolute; top: 38px; left: 50%; transform: translateX(-50%); width: 30px; height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; z-index: 3;"></div>
 
-        <!-- Face -->
-        <ellipse cx="180" cy="160" rx="92" ry="82" fill="#FFE5D9" stroke="#000" stroke-width="5"/>
+    <!-- Face -->
+    <div style="position: absolute; top: 72px; left: 50%; transform: translateX(-50%); width: 118px; height: 100px; background: #FFE4CC; border-radius: 50%; z-index: 1;"></div>
 
-        <!-- Side bangs swooping over forehead -->
-        <path d="M 95,140 Q 100,80 165,75 Q 215,72 265,100 Q 275,130 268,160 Q 245,110 200,105 Q 145,108 110,150 Q 100,148 95,140 Z"
-              fill="#1A1A2E"/>
-
-        <!-- Front swoop bangs -->
-        <path d="M 130,100 Q 165,72 220,95 Q 250,108 268,140 Q 240,118 210,115 Q 175,113 145,128 Q 135,118 130,100 Z"
-              fill="#1A1A2E"/>
-
-        <!-- Two short pigtails peeking out from buns -->
-        <path d="M 50,90 Q 35,110 38,135 Q 42,150 50,145 Q 55,130 55,110 Z" fill="#1A1A2E" stroke="#000" stroke-width="3"/>
-        <path d="M 305,100 Q 320,120 317,145 Q 313,160 305,155 Q 300,140 300,120 Z" fill="#1A1A2E" stroke="#000" stroke-width="3"/>
-
-        <!-- HEART EYES (iconic Pucca) -->
-        <g>
-          <path d="M 142,160 C 142,148 132,142 124,148 C 116,154 116,168 142,182 C 168,168 168,154 160,148 C 152,142 142,148 142,160 Z"
-                fill="#E8443A" stroke="#000" stroke-width="3.5" stroke-linejoin="round"/>
-          <ellipse cx="132" cy="155" rx="5" ry="7" fill="#FFF" opacity="0.9"/>
-          <ellipse cx="138" cy="166" rx="2" ry="3" fill="#FFF" opacity="0.7"/>
-        </g>
-        <g>
-          <path d="M 218,160 C 218,148 208,142 200,148 C 192,154 192,168 218,182 C 244,168 244,154 236,148 C 228,142 218,148 218,160 Z"
-                fill="#E8443A" stroke="#000" stroke-width="3.5" stroke-linejoin="round"/>
-          <ellipse cx="208" cy="155" rx="5" ry="7" fill="#FFF" opacity="0.9"/>
-          <ellipse cx="214" cy="166" rx="2" ry="3" fill="#FFF" opacity="0.7"/>
-        </g>
-
-        <!-- Blush cheeks -->
-        <ellipse cx="120" cy="195" rx="18" ry="11" fill="url(#cheekGrad)"/>
-        <ellipse cx="240" cy="195" rx="18" ry="11" fill="url(#cheekGrad)"/>
-
-        <!-- Happy mouth (slight smile, blowing kiss) -->
-        <path d="M 165,205 Q 180,216 195,205" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
-
-        <!-- Tiny hand near mouth blowing kiss -->
-        <g transform="translate(225, 210)">
-          <ellipse cx="0" cy="0" rx="14" ry="11" fill="#FFE5D9" stroke="#000" stroke-width="3.5"/>
-          <path d="M -8,-6 Q -10,-2 -6,0 M -3,-8 Q -4,-3 0,0 M 4,-7 Q 3,-2 6,0" stroke="#000" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        </g>
-
-        <!-- Kiss heart leaving mouth -->
-        <g class="heart-float">
-          <path d="M 250,232 C 250,224 244,220 238,224 C 232,228 232,238 250,248 C 268,238 268,228 262,224 C 256,220 250,224 250,232 Z"
-                fill="#E8443A" stroke="#000" stroke-width="3"/>
-        </g>
-
-      </g>
-
-      <!-- ============================================ -->
-      <!-- TOP-RIGHT: GARU (cool / slightly flustered)  -->
-      <!-- ============================================ -->
-      <g transform="translate(910, -20)">
-
-        <!-- Hair back -->
-        <path d="M 80,180 Q 75,80 160,55 Q 240,40 290,90 Q 315,140 308,200 L 308,225 L 80,225 L 80,180 Z"
-              fill="#1A1A2E" stroke="#000" stroke-width="5" stroke-linejoin="round"/>
-
-        <!-- Slight hair tuft sticking up -->
-        <path d="M 180,55 Q 175,30 195,25 Q 205,28 200,50 Z" fill="#1A1A2E" stroke="#000" stroke-width="3.5"/>
-
-        <!-- Face -->
-        <ellipse cx="190" cy="170" rx="88" ry="80" fill="#FFE5D9" stroke="#000" stroke-width="5"/>
-
-        <!-- Ninja headband (purple/maroon) -->
-        <path d="M 95,118 Q 190,98 290,120 L 295,150 Q 190,130 90,148 Z"
-              fill="#5C2A4D" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
-
-        <!-- Headband tails flowing left (toward Pucca) -->
-        <path d="M 95,135 Q 50,140 25,160 Q 5,180 -15,175 Q 5,165 20,158 Q 40,150 65,145 Q 80,140 95,142 Z"
-              fill="#5C2A4D" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
-        <path d="M 90,148 Q 55,165 30,190 Q 10,210 -10,210 Q 15,195 35,180 Q 60,165 88,155 Z"
-              fill="#5C2A4D" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
-
-        <!-- Circle emblem on headband -->
-        <circle cx="190" cy="132" r="15" fill="#FFD93D" stroke="#000" stroke-width="3"/>
-        <circle cx="190" cy="132" r="6" fill="#E8443A" stroke="#000" stroke-width="2"/>
-
-        <!-- Hair peeking below headband -->
-        <path d="M 100,155 Q 145,148 190,150 Q 235,148 285,158 Q 280,175 260,170 Q 220,162 190,164 Q 160,162 130,168 Q 110,170 100,155 Z"
-              fill="#1A1A2E"/>
-
-        <!-- Eyes (looking down-left, flustered) -->
-        <ellipse cx="155" cy="185" rx="11" ry="13" fill="#1A1A2E"/>
-        <ellipse cx="225" cy="185" rx="11" ry="13" fill="#1A1A2E"/>
-        <!-- Eye highlights -->
-        <ellipse cx="158" cy="180" rx="3.5" ry="4.5" fill="#FFF"/>
-        <ellipse cx
+    <!-- Eyes (smaller, determined look) -->
+    <div style="position: absolute;</div></body></html>
