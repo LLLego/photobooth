@@ -64,6 +64,8 @@ export async function renderThemePicker(mount) {
         img.decoding = 'async';
         const baseUrl = `${import.meta.env.BASE_URL}themes/${t.id}`;
         const candidates = [];
+        const variantPreviewUrl = `${baseUrl}/${v.id}/preview.svg`;
+        candidates.push(variantPreviewUrl);
         candidates.push(`${baseUrl}/preview.svg`);
         if (v.preview) candidates.push(`${baseUrl}/${v.preview}`);
         candidates.push(`${baseUrl}/preview.png`);
