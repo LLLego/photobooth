@@ -146,17 +146,30 @@ export async function renderHome(mount) {
   };
   
   themes.forEach((slug) => {
-    const name = slug.replace('-', ' ').replace(/(^|\s)\S/g, c => c.toUpperCase());
+    const name = slug === 'hundred-acre-gang' ? 'Hundred Acre' 
+      : slug.replace('-', ' ').replace(/(^|\\s)\\S/g, c => c.toUpperCase());
     const chip = document.createElement('button');
     chip.className = 'shrink-0 flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95';
     
+    // Use actual frame preview image, not just a solid color
     const swatch = document.createElement('span');
-    swatch.className = 'w-12 h-16 rounded-2xl border-2 border-warmth-200 dark:border-warmth-300 hover:border-warmth-400 dark:hover:border-warmth-500 transition-colors shadow-sm';
-    swatch.style.background = themeColors[slug];
+    swatch.className = 'w-12 h-16 rounded-2xl border-2 border-warmth-200 dark:border-warmth-300 overflow-hidden shadow-sm relative';
+    
+    const previewImg = document.createElement('img');
+    previewImg.src = `${import.meta.env.BASE_URL}themes/${slug}/preview.svg`;
+    previewImg.alt = name;
+    previewImg.className = 'absolute inset-0 w-full h-full object-cover';
+    previewImg.loading = 'lazy';
+    previewImg.onerror = () => {
+      // Fallback: solid color if preview.svg fails
+      previewImg.style.display = 'none';
+      swatch.style.background = themeColors[slug];
+    };
+    swatch.append(previewImg);
     
     const label = document.createElement('span');
-    label.className = 'text-[10px] text-warmth-600 dark:text-warmth-400 leading-tight text-center';
-    label.textContent = slug === 'hundred-acre-gang' ? 'Hundred Acre' : name;
+    label.className = 'text-[10px] text-warmth-600 dark:text-warmth-400 leading-tight text-center font-medium';
+    label.textContent = name;
     
     chip.append(swatch, label);
     chip.addEventListener('click', () => {
