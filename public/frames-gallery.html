@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>our photobooth — Frame Gallery</title>
+<title>our photobooth — Frames</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -11,200 +11,287 @@
     color: #FFFAF0;
     font-family: Georgia, serif;
     padding: 2rem;
-    min-height: 100vh;
   }
-  h1 {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    color: #FFB400;
-  }
-  .subtitle {
-    text-align: center;
-    color: #D4956A;
-    margin-bottom: 3rem;
-    font-style: italic;
-  }
-  .theme-section {
-    margin-bottom: 3rem;
-  }
-  .theme-title {
-    font-size: 1.5rem;
-    color: #FFB400;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #D4956A33;
-  }
-  .frames-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
-  }
-  .frame-card {
+  h1 { text-align: center; font-size: 2.5rem; margin-bottom: 0.25rem; color: #FFB400; }
+  .sub { text-align: center; color: #D4956A; margin-bottom: 2.5rem; font-style: italic; }
+  .theme-section { margin-bottom: 2.5rem; }
+  .theme-title { font-size: 1.4rem; color: #FFB400; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #D4956A33; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
+  .card {
     background: #3D2B1B;
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #D4956A33;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform 0.2s;
   }
-  .frame-card:hover {
-    transform: translateY(-4px);
-    border-color: #D4956A;
-  }
-  .frame-preview {
+  .card:hover { transform: translateY(-4px); border-color: #D4956A; }
+  .preview {
     width: 100%;
     aspect-ratio: 3/4;
-    background: repeating-linear-gradient(45deg, #FFF8 0, #FFF8 10px, #DDD8 10px, #DDD8 20px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: relative;
     overflow: hidden;
+    background: repeating-linear-gradient(45deg, #FFF2 0, #FFF2 8px, transparent 8px, transparent 16px);
   }
-  .frame-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    position: relative;
-    z-index: 1;
-  }
-  /* Sample photo behind the frame */
-  .frame-preview .sample {
+  .preview svg { width: 100%; height: 100%; position: relative; z-index: 1; }
+  .preview .photo-hint {
     position: absolute;
-    inset: 15%;
-    background: linear-gradient(135deg, #FFE4C4, #E8F0FE, #FFF0F0, #FFF8E7);
+    inset: 18%;
+    background: linear-gradient(135deg, #FFE4C4, #FFF8E7, #FFF0F0);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 2.5rem;
     z-index: 0;
+    opacity: 0.6;
   }
-  .frame-label {
-    padding: 0.75rem;
-    text-align: center;
-    font-size: 0.85rem;
-    color: #FFFAF0;
-  }
-  .frame-filename {
-    font-size: 0.7rem;
-    color: #D4956A;
-    margin-top: 0.25rem;
-  }
-  .stats {
-    text-align: center;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid #D4956A33;
-    color: #D4956A;
-    font-size: 0.85rem;
-  }
+  .label { padding: 0.6rem 0.75rem; text-align: center; font-size: 0.85rem; }
+  .filename { font-size: 0.7rem; color: #D4956A; margin-top: 0.2rem; }
 </style>
 </head>
 <body>
 
 <h1>🎞️ our photobooth</h1>
-<p class="subtitle">Frame Gallery — all 11 variants across 4 themes</p>
+<p class="sub">13 frame variants across 4 themes</p>
 
-<div id="gallery"></div>
-<div class="stats" id="stats"></div>
-
-<script>
-const THEMES = {
-  "Hundred Acre Gang 🍯": [
-    { name: "All Together", file: "frame.svg" },
-    { name: "Winnie the Pooh", file: "pooh.svg" },
-    { name: "Piglet", file: "piglet.svg" },
-    { name: "Tigger", file: "tigger.svg" },
-    { name: "Eeyore", file: "eeyore.svg" },
-  ],
-  "Pucca ❤️": [
-    { name: "Pucca & Garu", file: "frame.svg" },
-    { name: "Pucca", file: "pucca-only.svg" },
-    { name: "Garu", file: "garu-only.svg" },
-  ],
-  "Hello Kitty 🎀": [
-    { name: "Hello Kitty", file: "frame.svg" },
-    { name: "Kitty", file: "kitty-only.svg" },
-    { name: "Bows & Ribbons", file: "bows-only.svg" },
-  ],
-};
-
-const BASE = "https://lllego.github.io/photobooth/themes/";
-const gallery = document.getElementById("gallery");
-let total = 0;
-let loaded = 0;
-
-Object.entries(THEMES).forEach(([theme, frames]) => {
-  const section = document.createElement("div");
-  section.className = "theme-section";
-  section.innerHTML = `<h2 class="theme-title">${theme}</h2><div class="frames-grid"></div>`;
-  const grid = section.querySelector(".frames-grid");
-
-  frames.forEach(({ name, file }) => {
-    total++;
-    const slug = theme.split(" ")[0].toLowerCase().replace("🍯","").trim();
-    const themeMap = {
-      "hundred": "hundred-acre-gang",
-      "pucca": "pucca",
-      "hello": "hello-kitty",
-    };
-    const themeId = themeMap[slug];
-    const src = `${BASE}${themeId}/${file}`;
-
-    const card = document.createElement("div");
-    card.className = "frame-card";
-    card.innerHTML = `
-      <div class="frame-preview">
-        <div class="sample">📷</div>
-        <img src="${src}" alt="${name}" loading="lazy"
-             onload="document.getElementById('loaded-count').textContent=++${loaded}; if(${loaded}===${total})document.getElementById('all-loaded').style.display='block'"
-             onerror="this.style.display='none'; this.parentElement.querySelector('.sample').textContent='❌'; document.getElementById('failed').style.display='block'; document.getElementById('failed-list').textContent+='${name} (${file})\\n'">
+<!-- ==================== HUNDRED ACRE GANG ==================== -->
+<div class="theme-section">
+  <h2 class="theme-title">🍯 Hundred Acre Gang</h2>
+  <div class="grid">
+    <!-- All Together -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="35" width="1120" height="1530" rx="30" fill="none" stroke="#E8C547" stroke-width="4"/>
+          <rect x="55" y="50" width="1090" height="1500" rx="24" fill="none" stroke="#E8C547" stroke-width="1.5" opacity="0.5"/>
+          <!-- Pooh top left -->
+          <g transform="translate(160,120)"><ellipse cx="0" cy="0" rx="42" ry="36" fill="#D4A050"/><circle cx="-10" cy="-20" r="14" fill="#D4A050"/><circle cx="10" cy="-20" r="14" fill="#D4A050"/><ellipse cx="0" cy="8" rx="16" ry="10" fill="#F5DEB3"/><circle cx="-8" cy="-20" r="2.5" fill="#333"/><circle cx="8" cy="-20" r="2.5" fill="#333"/><ellipse cx="0" cy="-8" rx="4" ry="2" fill="#C44D4D"/><rect x="-18" y="22" width="36" height="18" rx="7" fill="#C44D4D"/></g>
+          <!-- Piglet top right -->
+          <g transform="translate(1020,130)"><ellipse cx="0" cy="0" rx="22" ry="28" fill="#FFB6C1"/><circle cx="0" cy="-18" r="10" fill="#FFB6C1"/><ellipse cx="-9" cy="-18" r="5" fill="#FF69B4"/><ellipse cx="9" cy="-18" r="5" fill="#FF69B4"/><circle cx="-4" cy="-18" r="1.5" fill="#333"/><circle cx="4" cy="-18" r="1.5" fill="#333"/><ellipse cx="0" cy="-6" rx="7" ry="5" fill="#FF69B4"/></g>
+          <!-- Tigger bottom left -->
+          <g transform="translate(180,1420)"><ellipse cx="0" cy="0" rx="28" ry="36" fill="#F4A460"/><circle cx="0" cy="-26" r="13" fill="#F4A460"/><ellipse cx="0" cy="-4" rx="15" ry="12" fill="#FFF8DC"/><circle cx="-5" cy="-26" r="2.5" fill="#333"/><circle cx="5" cy="-26" r="2.5" fill="#333"/><ellipse cx="0" cy="-14" rx="4" ry="2.5" fill="#E891A0"/></g>
+          <!-- Eeyore bottom right -->
+          <g transform="translate(1000,1410)"><ellipse cx="0" cy="0" rx="26" ry="32" fill="#A0A0B0"/><circle cx="0" cy="-22" r="11" fill="#A0A0B0"/><ellipse cx="-11" cy="-22" rx="6" ry="10" fill="#808090"/><ellipse cx="11" cy="-22" rx="6" ry="10" fill="#808090"/><circle cx="-4" cy="-22" r="2" fill="#333"/><circle cx="4" cy="-22" r="2" fill="#333"/><ellipse cx="0" cy="-6" rx="5" ry="2.5" fill="#666"/><rect x="-4" y="28" width="8" height="8" rx="3" fill="#E891A0"/></g>
+          <!-- Honey drips -->
+          <ellipse cx="300" cy="30" rx="10" ry="14" fill="#FFB400" opacity="0.4"/><ellipse cx="700" cy="28" rx="8" ry="12" fill="#FFB400" opacity="0.4"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#8B6914" font-family="Georgia,serif" opacity="0.7">Hundred Acre Gang</text>
+        </svg>
       </div>
-      <div class="frame-label">
-        <div>${name}</div>
-        <div class="frame-filename">${file}</div>
+      <div class="label">All Together<div class="filename">frame.svg</div></div>
+    </div>
+
+    <!-- Pooh -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8C547" stroke-width="3"/>
+          <rect x="62" y="52" width="1076" height="1456" rx="24" fill="none" stroke="#E8C547" stroke-width="1" opacity="0.4"/>
+          <g transform="translate(180,120)"><ellipse cx="0" cy="0" rx="45" ry="38" fill="#D4A050"/><circle cx="-12" cy="-22" r="15" fill="#D4A050"/><circle cx="12" cy="-22" r="15" fill="#D4A050"/><ellipse cx="0" cy="8" rx="18" ry="12" fill="#F5DEB3"/><circle cx="-9" cy="-22" r="3" fill="#333"/><circle cx="9" cy="-22" r="3" fill="#333"/><ellipse cx="0" cy="-10" rx="5" ry="3" fill="#C44D4D"/><rect x="-20" y="25" width="40" height="20" rx="8" fill="#C44D4D"/></g>
+          <ellipse cx="200" cy="30" rx="8" ry="12" fill="#FFB400" opacity="0.6"/><ellipse cx="500" cy="28" rx="6" ry="10" fill="#FFB400" opacity="0.5"/><ellipse cx="800" cy="32" rx="7" ry="11" fill="#FFB400" opacity="0.6"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#8B6914" font-family="Georgia,serif" opacity="0.7">Pooh</text>
+        </svg>
       </div>
-    `;
-    grid.appendChild(card);
-  });
-
-  gallery.appendChild(section);
-});
-
-// Add minimal separately
-const minimalSection = document.createElement("div");
-minimalSection.className = "theme-section";
-minimalSection.innerHTML = `<h2 class="theme-title">Minimal ✨</h2><div class="frames-grid"></div>`;
-const minimalGrid = minimalSection.querySelector(".frames-grid");
-["frame.webp", "frame_v2.webp", "frame_v3.webp"].forEach((file, i) => {
-  total++;
-  const names = ["Diamonds", "Corners", "Washi Tape"];
-  const card = document.createElement("div");
-  card.className = "frame-card";
-  card.innerHTML = `
-    <div class="frame-preview">
-      <div class="sample">📷</div>
-      <img src="${BASE}minimal/${file}" alt="${names[i]}" loading="lazy"
-           onload="document.getElementById('loaded-count').textContent=++loaded; if(loaded===total)document.getElementById('all-loaded').style.display='block'"
-           onerror="this.style.display='none'; this.parentElement.querySelector('.sample').textContent='❌'; document.getElementById('failed').style.display='block'; document.getElementById('failed-list').textContent+='${names[i]} (${file})\\n'">
+      <div class="label">Winnie the Pooh<div class="filename">pooh.svg</div></div>
     </div>
-    <div class="frame-label">
-      <div>${names[i]}</div>
-      <div class="frame-filename">${file}</div>
-    </div>
-  `;
-  minimalGrid.appendChild(card);
-});
-gallery.appendChild(minimalSection);
 
-document.getElementById("stats").innerHTML = `
-  <span id="loaded-count">0</span>/${total} frames loaded
-  <div id="all-loaded" style="display:none;color:#4CAF50;margin-top:0.5rem">✅ All frames loaded successfully!</div>
-  <div id="failed" style="display:none;color:#E8443A;margin-top:0.5rem">❌ Some frames failed to load:</div>
-  <pre id="failed-list" style="color:#E8443A;font-size:0.8rem;white-space:pre-wrap"></pre>
-`;
-</script>
+    <!-- Piglet -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8C547" stroke-width="3"/>
+          <g transform="translate(180,130)"><ellipse cx="0" cy="0" rx="28" ry="34" fill="#FFB6C1"/><circle cx="0" cy="-24" r="14" fill="#FFB6C1"/><ellipse cx="-11" cy="-24" r="7" fill="#FF69B4"/><ellipse cx="11" cy="-24" r="7" fill="#FF69B4"/><circle cx="-5" cy="-24" r="2.5" fill="#333"/><circle cx="5" cy="-24" r="2.5" fill="#333"/><ellipse cx="0" cy="-10" rx="9" ry="7" fill="#FF69B4"/><rect x="-10" y="28" width="20" height="16" rx="6" fill="#FF69B4"/></g>
+          <g transform="translate(120,260)"><circle cx="0" cy="0" r="4" fill="#FFD700"/><circle cx="-6" cy="-5" r="5" fill="#FFB6C1"/><circle cx="6" cy="-5" r="5" fill="#FFB6C1"/><circle cx="-7" cy="5" r="5" fill="#FFB6C1"/><circle cx="7" cy="5" r="5" fill="#FFB6C1"/></g>
+          <g transform="translate(1080,280)"><circle cx="0" cy="0" r="3" fill="#FFD700"/><circle cx="-4" cy="-4" r="4" fill="#FFB6C1"/><circle cx="4" cy="-4" r="4" fill="#FFB6C1"/></g>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#8B6914" font-family="Georgia,serif" opacity="0.7">Piglet</text>
+        </svg>
+      </div>
+      <div class="label">Piglet<div class="filename">piglet.svg</div></div>
+    </div>
+
+    <!-- Tigger -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8C547" stroke-width="3"/>
+          <g transform="translate(180,140)"><ellipse cx="0" cy="0" rx="34" ry="42" fill="#F4A460"/><circle cx="0" cy="-32" r="16" fill="#F4A460"/><ellipse cx="0" cy="-8" rx="18" ry="16" fill="#FFF8DC"/><circle cx="-7" cy="-32" r="3.5" fill="#333"/><circle cx="7" cy="-32" r="3.5" fill="#333"/><ellipse cx="0" cy="-18" rx="6" ry="3.5" fill="#E891A0"/></g>
+          <!-- Bouncing stripes -->
+          <path d="M 140,180 Q 160,168 170,180" stroke="#F4A460" stroke-width="2.5" fill="none"/><path d="M 140,170 Q 155,152 165,170" stroke="#FFD700" stroke-width="2" fill="none"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#8B6914" font-family="Georgia,serif" opacity="0.7">Tigger</text>
+        </svg>
+      </div>
+      <div class="label">Tigger<div class="filename">tigger.svg</div></div>
+    </div>
+
+    <!-- Eeyore -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8C547" stroke-width="3"/>
+          <g transform="translate(180,140)"><ellipse cx="0" cy="0" rx="30" ry="36" fill="#A0A0B0"/><circle cx="0" cy="-26" r="14" fill="#A0A0B0"/><ellipse cx="-13" cy="-26" rx="8" ry="13" fill="#808090"/><ellipse cx="13" cy="-26" rx="8" ry="13" fill="#808090"/><circle cx="-6" cy="-26" r="3" fill="#333"/><circle cx="6" cy="-26" r="3" fill="#333"/><ellipse cx="0" cy="-10" rx="7" ry="3.5" fill="#666"/><rect x="-5" y="32" width="10" height="10" rx="3" fill="#E891A0"/></g>
+          <g transform="translate(950,100)"><ellipse cx="0" cy="0" rx="35" ry="18" fill="#CCC8"/><ellipse cx="-18" cy="-6" rx="18" ry="12" fill="#CCC8"/><ellipse cx="18" cy="-6" rx="18" ry="12" fill="#CCC8"/></g>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#8B6914" font-family="Georgia,serif" opacity="0.7">Eeyore</text>
+        </svg>
+      </div>
+      <div class="label">Eeyore<div class="filename">eeyore.svg</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PUCCA ==================== -->
+<div class="theme-section">
+  <h2 class="theme-title">❤️ Pucca</h2>
+  <div class="grid">
+    <!-- Pucca & Garu -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
+          <!-- Pucca top left -->
+          <g transform="translate(160,120)"><rect x="-22" y="22" width="44" height="40" rx="10" fill="#E8443A"/><ellipse cx="0" cy="0" rx="30" ry="28" fill="#FFE4C4"/><circle cx="-24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="-24" cy="-12" r="9" fill="#E8443A"/><circle cx="24" cy="-12" r="9" fill="#E8443A"/><circle cx="-10" cy="-5" r="3.5" fill="#333"/><circle cx="10" cy="-5" r="3.5" fill="#333"/><path d="M-7 6 Q0 15 7 6" stroke="#E8443A" stroke-width="2.5" fill="none"/></g>
+          <!-- Garu top right -->
+          <g transform="translate(1000,130)"><rect x="-18" y="22" width="36" height="36" rx="8" fill="#1A1A2E"/><ellipse cx="0" cy="0" rx="26" ry="24" fill="#FFE4C4"/><rect x="-24" y="-16" width="48" height="14" rx="4" fill="#1A1A2E"/><circle cx="-8" cy="-4" r="3" fill="#333"/><circle cx="8" cy="-4" r="3" fill="#333"/><rect x="24" y="22" width="6" height="26" rx="3" fill="#999"/></g>
+          <!-- Hearts -->
+          <path d="M400 100 C400 88 412 86 416 94 C420 86 432 88 432 100 C432 110 416 118 416 118 C416 118 400 110 400 100Z" fill="#E8443A" opacity="0.3"/>
+          <path d="M800 100 C800 90 810 88 814 94 C818 88 828 90 828 100 C828 108 814 114 814 114 C814 114 800 108 800 100Z" fill="#FF6B6B" opacity="0.3"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#4A2020" font-family="Georgia,serif" opacity="0.7">Pucca &amp; Garu</text>
+        </svg>
+      </div>
+      <div class="label">Pucca &amp; Garu<div class="filename">frame.svg</div></div>
+    </div>
+
+    <!-- Pucca -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
+          <g transform="translate(160,120)"><rect x="-22" y="22" width="44" height="40" rx="10" fill="#E8443A"/><ellipse cx="0" cy="0" rx="30" ry="28" fill="#FFE4C4"/><circle cx="-24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="-24" cy="-12" r="9" fill="#E8443A"/><circle cx="24" cy="-12" r="9" fill="#E8443A"/><circle cx="-10" cy="-5" r="3.5" fill="#333"/><circle cx="10" cy="-5" r="3.5" fill="#333"/><path d="M-7 6 Q0 15 7 6" stroke="#E8443A" stroke-width="2.5" fill="none"/></g>
+          <path d="M350 90 C350 78 362 76 366 84 C370 76 382 78 382 90 C382 100 366 108 366 108 C366 108 350 100 350 90Z" fill="#E8443A" opacity="0.4"/>
+          <path d="M850 90 C850 80 860 78 864 84 C868 78 878 80 878 90 C878 98 864 104 864 104 C864 104 850 98 850 90Z" fill="#FF6B6B" opacity="0.4"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#4A2020" font-family="Georgia,serif" opacity="0.7">Pucca</text>
+        </svg>
+      </div>
+      <div class="label">Pucca<div class="filename">pucca-only.svg</div></div>
+    </div>
+
+    <!-- Garu -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
+          <g transform="translate(180,120)"><rect x="-18" y="22" width="36" height="36" rx="8" fill="#1A1A2E"/><ellipse cx="0" cy="0" rx="26" ry="24" fill="#FFE4C4"/><rect x="-24" y="-16" width="48" height="14" rx="4" fill="#1A1A2E"/><circle cx="-8" cy="-4" r="3" fill="#333"/><circle cx="8" cy="-4" r="3" fill="#333"/><rect x="24" y="22" width="6" height="26" rx="3" fill="#999"/><rect x="22" y="46" width="10" height="4" rx="2" fill="#999"/></g>
+          <text x="900" y="100" font-size="24" opacity="0.25">✦</text><text x="300" y="100" font-size="18" opacity="0.25">✦</text>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#4A2020" font-family="Georgia,serif" opacity="0.7">Garu</text>
+        </svg>
+      </div>
+      <div class="label">Garu<div class="filename">garu-only.svg</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== HELLO KITTY ==================== -->
+<div class="theme-section">
+  <h2 class="theme-title">🎀 Hello Kitty</h2>
+  <div class="grid">
+    <!-- Hello Kitty -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E891A0" stroke-width="3"/>
+          <g transform="translate(180,120)"><ellipse cx="0" cy="0" rx="34" ry="30" fill="#FFF" stroke="#DDD" stroke-width="2"/><ellipse cx="-22" cy="-24" rx="15" ry="17" fill="#FFF" stroke="#DDD" stroke-width="1.5"/><ellipse cx="22" cy="-24" rx="15" ry="17" fill="#FFF" stroke="#DDD" stroke-width="1.5"/><ellipse cx="-20" cy="-22" rx="8" ry="10" fill="#FFE8EC"/><ellipse cx="20" cy="-22" rx="8" ry="10" fill="#FFE8EC"/><circle cx="-11" cy="-6" r="3" fill="#333"/><circle cx="11" cy="-6" r="3" fill="#333"/><ellipse cx="0" cy="2" rx="4.5" ry="3.5" fill="#FFD700"/><g transform="translate(28,-26)"><circle cx="0" cy="0" r="8" fill="#E8443A"/><ellipse cx="-11" cy="2" rx="11" ry="7" fill="#E8443A" transform="rotate(-20)"/><ellipse cx="11" cy="2" rx="11" ry="7" fill="#E8443A" transform="rotate(20)"/></g></g>
+          <text x="900" y="80" font-size="20" fill="#FFD700" opacity="0.3">★</text><text x="350" y="75" font-size="16" fill="#FFD700" opacity="0.3">★</text>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#E891A0" font-family="Georgia,serif" opacity="0.7">Hello Kitty</text>
+        </svg>
+      </div>
+      <div class="label">Hello Kitty<div class="filename">frame.svg</div></div>
+    </div>
+
+    <!-- Kitty only -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E891A0" stroke-width="3"/>
+          <g transform="translate(180,120)"><ellipse cx="0" cy="0" rx="34" ry="30" fill="#FFF" stroke="#DDD" stroke-width="2"/><ellipse cx="-22" cy="-24" rx="15" ry="17" fill="#FFF" stroke="#DDD" stroke-width="1.5"/><ellipse cx="22" cy="-24" rx="15" ry="17" fill="#FFF" stroke="#DDD" stroke-width="1.5"/><ellipse cx="-20" cy="-22" rx="8" ry="10" fill="#FFE8EC"/><ellipse cx="20" cy="-22" rx="8" ry="10" fill="#FFE8EC"/><circle cx="-11" cy="-6" r="3" fill="#333"/><circle cx="11" cy="-6" r="3" fill="#333"/><ellipse cx="0" cy="2" rx="4.5" ry="3.5" fill="#FFD700"/><g transform="translate(28,-26)"><circle cx="0" cy="0" r="8" fill="#E8443A"/><ellipse cx="-11" cy="2" rx="11" ry="7" fill="#E8443A" transform="rotate(-20)"/><ellipse cx="11" cy="2" rx="11" ry="7" fill="#E8443A" transform="rotate(20)"/></g></g>
+          <text x="900" y="80" font-size="20" fill="#FFD700" opacity="0.3">★</text><text x="350" y="75" font-size="16" fill="#FFD700" opacity="0.3">★</text>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#E891A0" font-family="Georgia,serif" opacity="0.7">Kitty</text>
+        </svg>
+      </div>
+      <div class="label">Kitty<div class="filename">kitty-only.svg</div></div>
+    </div>
+
+    <!-- Bows & Ribbons -->
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E891A0" stroke-width="3"/>
+          <!-- Bows -->
+          <g transform="translate(160,120)"><circle cx="0" cy="0" r="12" fill="#E8443A"/><ellipse cx="-20" cy="3" rx="20" ry="11" fill="#E8443A" transform="rotate(-25)"/><ellipse cx="20" cy="3" rx="20" ry="11" fill="#E8443A" transform="rotate(25)"/><rect x="-6" y="12" width="12" height="14" rx="3" fill="#E8443A"/></g>
+          <g transform="translate(1000,120)"><circle cx="0" cy="0" r="8" fill="#FFB6C1"/><ellipse cx="-14" cy="2" rx="14" ry="8" fill="#FFB6C1" transform="rotate(-20)"/><ellipse cx="14" cy="2" rx="14" ry="8" fill="#FFB6C1" transform="rotate(20)"/></g>
+          <g transform="translate(500,80)"><circle cx="0" cy="0" r="6" fill="#E891A0" opacity="0.6"/><ellipse cx="-9" cy="1" rx="9" ry="5" fill="#E891A0" opacity="0.6" transform="rotate(-20)"/><ellipse cx="9" cy="1" rx="9" ry="5" fill="#E891A0" opacity="0.6" transform="rotate(20)"/></g>
+          <!-- Polka dots -->
+          <circle cx="200" cy="50" r="5" fill="#FFB6C1" opacity="0.35"/><circle cx="600" cy="45" r="4" fill="#E891A0" opacity="0.3"/><circle cx="900" cy="50" r="5" fill="#FFB6C1" opacity="0.35"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#E891A0" font-family="Georgia,serif" opacity="0.7">Bows &amp; Ribbons</text>
+        </svg>
+      </div>
+      <div class="label">Bows &amp; Ribbons<div class="filename">bows-only.svg</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MINIMAL ==================== -->
+<div class="theme-section">
+  <h2 class="theme-title">✨ Minimal</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="30" width="1120" height="1540" rx="20" fill="none" stroke="#D4956A" stroke-width="3"/>
+          <rect x="55" y="45" width="1090" height="1510" rx="14" fill="none" stroke="#D4956A" stroke-width="1" opacity="0.4"/>
+          <rect x="20" y="500" width="14" height="14" fill="#D4956A" opacity="0.6"/>
+          <rect x="20" y="820" width="14" height="14" fill="#D4956A" opacity="0.4"/>
+          <rect x="1166" y="500" width="14" height="14" fill="#D4956A" opacity="0.6"/>
+          <rect x="1166" y="820" width="14" height="14" fill="#D4956A" opacity="0.4"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="24" fill="#D4956A" font-family="Georgia,serif" opacity="0.6">Minimal</text>
+        </svg>
+      </div>
+      <div class="label">Diamonds<div class="filename">frame.webp</div></div>
+    </div>
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="25" width="1140" height="1550" rx="8" fill="none" stroke="#D4956A" stroke-width="2"/>
+          <rect x="20" y="20" width="40" height="40" fill="none" stroke="#D4956A" stroke-width="4" rx="2"/><rect x="1140" y="20" width="40" height="40" fill="none" stroke="#D4956A" stroke-width="4" rx="2"/>
+          <rect x="20" y="1540" width="40" height="40" fill="none" stroke="#D4956A" stroke-width="4" rx="2"/><rect x="1140" y="1540" width="40" height="40" fill="none" stroke="#D4956A" stroke-width="4" rx="2"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="24" fill="#D4956A" font-family="Georgia,serif" opacity="0.6">Corners</text>
+        </svg>
+      </div>
+      <div class="label">Corners<div class="filename">frame_v2.webp</div></div>
+    </div>
+    <div class="card">
+      <div class="preview">
+        <div class="photo-hint">📷</div>
+        <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="35" y="30" width="1130" height="1540" rx="6" fill="none" stroke="#D4956A" stroke-width="2" stroke-dasharray="12 6"/>
+          <rect x="45" y="40" width="1110" height="1520" rx="4" fill="none" stroke="#D4956A" stroke-width="1" stroke-dasharray="8 8" opacity="0.5"/>
+          <text x="600" y="1565" text-anchor="middle" font-size="24" fill="#D4956A" font-family="Georgia,serif" opacity="0.6">Washi Tape</text>
+        </svg>
+      </div>
+      <div class="label">Washi Tape<div class="filename">frame_v3.webp</div></div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
