@@ -60,19 +60,40 @@ export async function renderSingleCamera(mount) {
   controls.className = 'camera-controls';
   const flipBtn = document.createElement('button');
   flipBtn.className = 'btn-ghost w-12 h-12 rounded-full p-0';
+  flipBtn.disabled = true;
   flipBtn.append(Icon({ name: 'switch', size: 22 }));
   flipBtn.addEventListener('click', async () => {
     flipBtn.disabled = true;
-    try { activeStream = await flipCamera(videoEl); }
-    catch (err) { pushToast({ message: err.message, type: 'error' }); }
-    finally { flipBtn.disabled = false; }
+    try {
+      activeStream = await flipCamera(videoEl);
+    } catch (err) {
+      showCameraFallback(err);
+    } finally {
+      if (cameraReady) flipBtn.disabled = false;
+    }
   });
   const captureBtn = document.createElement('button');
   captureBtn.className = 'capture-button';
+  captureBtn.disabled = true;
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
   captureBtn.setAttribute('aria-label', 'Capture photo');
   controls.append(flipBtn, captureBtn, document.createElement('span'));
-  stage.append(videoEl, frameEl, overlay, controls);
+
+  const cameraFallback = document.createElement('div');
+  cameraFallback.className = 'camera-fallback hidden';
+  cameraFallback.setAttribute('role', 'alert');
+  const fallbackTitle = document.createElement('h2');
+  fallbackTitle.className = 'heading-display text-2xl';
+  const fallbackMessage = document.createElement('p');
+  fallbackMessage.className = 'mt-2 max-w-xs text-sm leading-relaxed text-warmth-200';
+  const retryCameraBtn = Button({
+    label: 'Try camera again',
+    variant: 'honey',
+    icon: Icon({ name: 'refresh' }),
+    className: 'mt-5',
+  });
+  cameraFallback.append(fallbackTitle, fallbackMessage, retryCameraBtn);
+  stage.append(videoEl, frameEl, overlay, cameraFallback, controls);
   wrap.append(stage);
 
   const status = document.createElement('p');
@@ -145,7 +166,39 @@ export async function renderSingleCamera(mount) {
     activeStream = await startLivePreview({ videoEl, frameEl, themeId, onError: (msg) => pushToast({ message: msg, type: 'error' }) });
     status.textContent = 'Ready';
   } catch (err) {
-    status.textContent = err.name === 'NotAllowedError' ? 'Camera blocked — grant permission to capture' : 'Camera unavailable';
+    const isBlocked = err.name === 'NotAllowedError' || err.message?.includes('Permission');
+    status.textContent = '';
+    status.innerHTML = isBlocked
+      ? '<span class="text-amber-600 dark:text-amber-400">🔒 Camera access needed — tap the lock/camera icon in your browser address bar, then try again.</span>'
+      : '<span class="text-rose-600 dark:text-rose-400">⚠️ Camera unavailable — check your device connection.</span>';
+    
+    // Add retry button
+    const retryBtn = Button({ 
+      label: 'Try again', 
+      variant: 'primary', 
+      icon: Icon({ name: 'camera' }),
+      onClick: async () => {
+        retryBtn.disabled = true;
+        retryBtn.textContent = 'Connecting…';
+        try {
+          activeStream = await startLivePreview({ videoEl, frameEl, themeId, onError: (msg) => pushToast({ message: msg, type: 'error' }) });
+          status.textContent = 'Ready';
+          status.innerHTML = '';
+          captureBtn.disabled = false;
+          flipBtn.disabled = false;
+          retryBtn.remove();
+        } catch (e2) {
+          retryBtn.textContent = 'Try again';
+          retryBtn.disabled = false;
+          status.textContent = 'Still unavailable — check browser settings.';
+        }
+      }
+    });
+    status.append(document.createElement('br'), retryBtn);
+    
+    // Disable capture but keep theme picker + filter bar working
+    captureBtn.disabled = true;
+    flipBtn.disabled = true;
   }
   captureBtn.addEventListener('click', onCapture);
 

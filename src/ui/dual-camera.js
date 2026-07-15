@@ -245,7 +245,7 @@ export async function renderDualCamera(mount) {
     const dl = Button({ label: 'Download', variant: 'primary', icon: Icon({ name: 'download' }) });
     const share = Button({ label: 'Share', variant: 'ghost', icon: Icon({ name: 'share' }) });
     const again = Button({ label: 'New strip', variant: 'honey', icon: Icon({ name: 'camera' }) });
-    const gallery = Button({ label: 'View gallery', variant: 'ghost', icon: Icon({ name: 'image' }) });
+    const gallery = Button({ label: 'View gallery', variant: 'ghost', icon: Icon({ name: 'gallery' }) });
     bar.append(dl, share, again, gallery);
     resultWrap.append(bar);
 
