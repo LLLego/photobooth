@@ -365,7 +365,7 @@ html.dark {
 html.dark .card,
 html.dark .surface {
   background: var(--warmth-100);
-  border-color: var(--warmth-300);
+  border-color: var(--warmth-500);
 }
 html.dark .btn-ghost { color: var(--warmth-900); }
 html.dark .btn-ghost:hover { background: var(--warmth-200); }

@@ -42,9 +42,7 @@ export async function renderHome(mount) {
   const topWrap = document.createElement('div');
   topWrap.className = 'relative';
   topWrap.append(wrap, settingsBtn);
-  // We'll restructure — settings goes on the outer mount
-  mount.style.position = 'relative';
-  mount.append(wrap, settingsBtn);
+  mount.append(topWrap);
 
   // === Feature Cards ===
   const cardsWrap = document.createElement('div');
@@ -103,13 +101,24 @@ export async function renderHome(mount) {
   badge.textContent = '0';
   galleryBtn.append(badge);
   
-  // Try to get photo count
-  import('../gallery/gallery.js').then(({ fetchStrips }) => {
-    fetchStrips({ limit: 1, reset: true }).then(() => {
-      const count = getState().gallery?.total ?? 0;
-      badge.textContent = String(count);
-    }).catch(() => {});
-  });
+  async function updateGalleryBadge() {
+    try {
+      const { fetchStrips } = await import('../gallery/gallery.js');
+      await fetchStrips({ limit: 1, reset: true });
+
+      if (badge.isConnected) {
+        badge.textContent = String(getState().gallery?.total ?? 0);
+      }
+    } catch {
+      if (badge.isConnected) {
+        badge.textContent = '—';
+        badge.setAttribute('aria-label', 'Gallery count unavailable');
+      }
+    }
+  }
+
+  updateGalleryBadge();
+  window.addEventListener('pageshow', updateGalleryBadge, { once: true });
   
   galleryRow.append(galleryBtn);
   wrap.append(galleryRow);
