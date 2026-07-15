@@ -21,11 +21,45 @@ let videoEl = null;
 let frameEl = null;
 let currentSessionId = null;
 let handleThemeChanged = null;
+let cameraReady = false;
+let activeFlashEnabled = true;
+
+function computeTransform({ zoom, mirror }) {
+  const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  const m = mirror ? ' scaleX(-1)' : '';
+  return `scale(${z})${m}`;
+}
+
+function applyTransform(el, { zoom, mirror }) {
+  if (!el) return;
+  el.style.transform = computeTransform({ zoom, mirror });
+}
+
+function defaultMirrorForFacing(facing) {
+  return facing === 'user' || facing == null;
+}
+
+function showFlash(host) {
+  if (!activeFlashEnabled) return Promise.resolve();
+  return new Promise((resolve) => {
+    const f = document.createElement('div');
+    f.className = 'flash-overlay';
+    host.append(f);
+    requestAnimationFrame(() => f.classList.add('active'));
+    setTimeout(() => {
+      try { f.remove(); } catch {}
+      resolve();
+    }, 200);
+  });
+}
 
 export async function renderSingleCamera(mount) {
   const prefs = getState().preferences;
   const layout = prefs.layout || 'strip_4';
   const themeId = prefs.themeId || 'minimal';
+  const initialZoom = typeof prefs.zoom === 'number' && prefs.zoom >= 1 && prefs.zoom <= 4 ? prefs.zoom : 1;
+  const initialMirror = typeof prefs.mirror === 'boolean' ? prefs.mirror : true;
+  activeFlashEnabled = typeof prefs.flashEnabled === 'boolean' ? prefs.flashEnabled : true;
   set({ capture: { ...getState().capture, mode: 'single', layout, themeId, photos: [], status: 'idle' } });
 
   mount.innerHTML = '';
