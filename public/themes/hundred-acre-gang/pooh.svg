@@ -1,7 +1,7 @@
 <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
-          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8C547" stroke-width="3"/>
-          <rect x="62" y="52" width="1076" height="1456" rx="24" fill="none" stroke="#E8C547" stroke-width="1" opacity="0.4"/>
-          <g transform="translate(180,120)"><ellipse cx="0" cy="0" rx="45" ry="38" fill="#D4A050"/><circle cx="-12" cy="-22" r="15" fill="#D4A050"/><circle cx="12" cy="-22" r="15" fill="#D4A050"/><ellipse cx="0" cy="8" rx="18" ry="12" fill="#F5DEB3"/><circle cx="-9" cy="-22" r="3" fill="#333"/><circle cx="9" cy="-22" r="3" fill="#333"/><ellipse cx="0" cy="-10" rx="5" ry="3" fill="#C44D4D"/><rect x="-20" y="25" width="40" height="20" rx="8" fill="#C44D4D"/></g>
-          <ellipse cx="200" cy="30" rx="8" ry="12" fill="#FFB400" opacity="0.6"/><ellipse cx="500" cy="28" rx="6" ry="10" fill="#FFB400" opacity="0.5"/><ellipse cx="800" cy="32" rx="7" ry="11" fill="#FFB400" opacity="0.6"/>
-          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#8B6914" font-family="Georgia,serif" opacity="0.7">Pooh</text>
-        </svg>
+<rect x="40" y="35" width="1120" height="1530" rx="28" fill="none" stroke="#E8C547" stroke-width="3"/>
+<g transform="translate(180,120) scale(2)"><ellipse cx="0" cy="0" rx="42" ry="36" fill="#D4A050"/><circle cx="-10" cy="-20" r="14" fill="#D4A050"/><circle cx="10" cy="-20" r="14" fill="#D4A050"/><ellipse cx="0" cy="8" rx="16" ry="10" fill="#F5DEB3"/><circle cx="-8" cy="-20" r="3" fill="#333"/><circle cx="8" cy="-20" r="3" fill="#333"/><ellipse cx="0" cy="-8" rx="5" ry="2.5" fill="#C44D4D"/><rect x="-18" y="22" width="36" height="18" rx="7" fill="#C44D4D"/></g>
+<ellipse cx="200" cy="30" rx="10" ry="15" fill="#FFB400" opacity="0.5"/><ellipse cx="500" cy="28" rx="8" ry="12" fill="#FFB400" opacity="0.4"/><ellipse cx="800" cy="32" rx="9" ry="13" fill="#FFB400" opacity="0.5"/>
+<g transform="translate(600,80)"><ellipse cx="0" cy="0" rx="10" ry="6" fill="#FFD700"/><rect x="-10" y="-2" width="20" height="2" fill="#333"/><ellipse cx="-10" cy="-5" rx="6" ry="4" fill="#FFF" opacity="0.6"/></g>
+<text x="600" y="1575" text-anchor="middle" font-size="26" fill="#8B6914" font-family="Georgia,serif" opacity="0.6">Winnie the Pooh</text>
+</svg>

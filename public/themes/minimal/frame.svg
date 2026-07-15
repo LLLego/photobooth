@@ -1,9 +1,7 @@
 <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
-          <rect x="40" y="30" width="1120" height="1540" rx="20" fill="none" stroke="#D4956A" stroke-width="3"/>
-          <rect x="55" y="45" width="1090" height="1510" rx="14" fill="none" stroke="#D4956A" stroke-width="1" opacity="0.4"/>
-          <rect x="20" y="500" width="14" height="14" fill="#D4956A" opacity="0.6"/>
-          <rect x="20" y="820" width="14" height="14" fill="#D4956A" opacity="0.4"/>
-          <rect x="1166" y="500" width="14" height="14" fill="#D4956A" opacity="0.6"/>
-          <rect x="1166" y="820" width="14" height="14" fill="#D4956A" opacity="0.4"/>
-          <text x="600" y="1565" text-anchor="middle" font-size="24" fill="#D4956A" font-family="Georgia,serif" opacity="0.6">Minimal</text>
-        </svg>
+<rect x="35" y="30" width="1130" height="1540" rx="20" fill="none" stroke="#D4956A" stroke-width="3"/>
+<rect x="50" y="45" width="1100" height="1510" rx="14" fill="none" stroke="#D4956A" stroke-width="1" opacity="0.4"/>
+<rect x="18" y="500" width="16" height="16" fill="#D4956A" opacity="0.5"/><rect x="18" y="820" width="16" height="16" fill="#D4956A" opacity="0.3"/>
+<rect x="1166" y="500" width="16" height="16" fill="#D4956A" opacity="0.5"/><rect x="1166" y="820" width="16" height="16" fill="#D4956A" opacity="0.3"/>
+<text x="600" y="1575" text-anchor="middle" font-size="24" fill="#D4956A" font-family="Georgia,serif" opacity="0.5">Diamonds</text>
+</svg>

@@ -1,7 +1,6 @@
 <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
-          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
-          <g transform="translate(160,120)"><rect x="-22" y="22" width="44" height="40" rx="10" fill="#E8443A"/><ellipse cx="0" cy="0" rx="30" ry="28" fill="#FFE4C4"/><circle cx="-24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="-24" cy="-12" r="9" fill="#E8443A"/><circle cx="24" cy="-12" r="9" fill="#E8443A"/><circle cx="-10" cy="-5" r="3.5" fill="#333"/><circle cx="10" cy="-5" r="3.5" fill="#333"/><path d="M-7 6 Q0 15 7 6" stroke="#E8443A" stroke-width="2.5" fill="none"/></g>
-          <path d="M350 90 C350 78 362 76 366 84 C370 76 382 78 382 90 C382 100 366 108 366 108 C366 108 350 100 350 90Z" fill="#E8443A" opacity="0.4"/>
-          <path d="M850 90 C850 80 860 78 864 84 C868 78 878 80 878 90 C878 98 864 104 864 104 C864 104 850 98 850 90Z" fill="#FF6B6B" opacity="0.4"/>
-          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#4A2020" font-family="Georgia,serif" opacity="0.7">Pucca</text>
-        </svg>
+<rect x="40" y="35" width="1120" height="1530" rx="28" fill="none" stroke="#E8443A" stroke-width="3"/>
+<g transform="translate(180,120) scale(2)"><rect x="-22" y="22" width="44" height="40" rx="10" fill="#E8443A"/><ellipse cx="0" cy="0" rx="30" ry="28" fill="#FFE4C4"/><circle cx="-24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="24" cy="-12" r="20" fill="#1A1A2E"/><circle cx="-24" cy="-12" r="9" fill="#E8443A"/><circle cx="24" cy="-12" r="9" fill="#E8443A"/><circle cx="-10" cy="-4" r="3.5" fill="#333"/><circle cx="10" cy="-4" r="3.5" fill="#333"/><path d="M-7 6 Q0 15 7 6" stroke="#E8443A" stroke-width="2.5" fill="none"/></g>
+<path d="M350 90 C350 78 362 76 366 84 C370 76 382 78 382 90 C382 100 366 108 366 108 C366 108 350 100 350 90Z" fill="#E8443A" opacity="0.4" transform="scale(1.4)"/>
+<text x="600" y="1575" text-anchor="middle" font-size="26" fill="#4A2020" font-family="Georgia,serif" opacity="0.6">Pucca</text>
+</svg>

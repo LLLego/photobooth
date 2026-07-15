@@ -1,6 +1,6 @@
 <svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg">
-          <rect x="50" y="40" width="1100" height="1480" rx="30" fill="none" stroke="#E8443A" stroke-width="3"/>
-          <g transform="translate(180,120)"><rect x="-18" y="22" width="36" height="36" rx="8" fill="#1A1A2E"/><ellipse cx="0" cy="0" rx="26" ry="24" fill="#FFE4C4"/><rect x="-24" y="-16" width="48" height="14" rx="4" fill="#1A1A2E"/><circle cx="-8" cy="-4" r="3" fill="#333"/><circle cx="8" cy="-4" r="3" fill="#333"/><rect x="24" y="22" width="6" height="26" rx="3" fill="#999"/><rect x="22" y="46" width="10" height="4" rx="2" fill="#999"/></g>
-          <text x="900" y="100" font-size="24" opacity="0.25">✦</text><text x="300" y="100" font-size="18" opacity="0.25">✦</text>
-          <text x="600" y="1565" text-anchor="middle" font-size="28" fill="#4A2020" font-family="Georgia,serif" opacity="0.7">Garu</text>
-        </svg>
+<rect x="40" y="35" width="1120" height="1530" rx="28" fill="none" stroke="#E8443A" stroke-width="3"/>
+<g transform="translate(180,120) scale(2)"><rect x="-18" y="22" width="36" height="36" rx="8" fill="#1A1A2E"/><ellipse cx="0" cy="0" rx="26" ry="24" fill="#FFE4C4"/><rect x="-24" y="-16" width="48" height="13" rx="4" fill="#1A1A2E"/><circle cx="-8" cy="-3" r="3" fill="#333"/><circle cx="8" cy="-3" r="3" fill="#333"/><rect x="24" y="20" width="5" height="24" rx="2.5" fill="#999"/><rect x="22" y="44" width="9" height="4" rx="2" fill="#999"/></g>
+<text x="900" y="100" font-size="30" opacity="0.2">✦</text><text x="300" y="100" font-size="24" opacity="0.2">✦</text>
+<text x="600" y="1575" text-anchor="middle" font-size="26" fill="#4A2020" font-family="Georgia,serif" opacity="0.6">Garu</text>
+</svg>
