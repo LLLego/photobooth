@@ -1,0 +1,229 @@
+Below is a complete, self-contained HTML file. I went with a **paper-cutout / storybook** treatment — warm kraft-paper cream background, a hand-illustrated double border (dashed honey outer + solid brown inner with a gold pinstripe), a `conic-gradient` honeycomb corner medallion behind each character (the gold → honey → dark-brown rotation gives a real suggestion of honeycomb cells without using any image), and a serif title ("Hundred Acre Gang") set italic and amber, with small brown hearts floating between words instead of the usual em-dash. All four characters sit inside circular vignettes with their own little name-tape labels so the corners read as composed scenes rather than emoji scattered onto a frame.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hundred Acre Gang — Photobooth Frame</title>
+</head>
+<body style="margin:0;min-height:100vh;background:linear-gradient(135deg,#1a0f08,#2a1810);display:flex;align-items:center;justify-content:center;padding:32px 16px;font-family:Georgia,'Times New Roman',serif;">
+
+<div style="
+  width:1200px;
+  height:1600px;
+  position:relative;
+  background:
+    radial-gradient(ellipse at 30% 20%, #FFF6E0 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, #FBE5B6 0%, transparent 70%),
+    linear-gradient(135deg,#FAEBD2 0%,#F2D8A8 100%);
+  border-radius:48px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.55),
+    0 10px 30px rgba(0,0,0,0.35),
+    inset 0 0 100px rgba(232,197,71,0.18);
+  overflow:hidden;
+  flex-shrink:0;
+">
+
+  <!-- Ornate double border -->
+  <div style="
+    position:absolute;inset:24px;
+    border:4px dashed #4A2515;
+    border-radius:36px;
+    pointer-events:none;
+    opacity:0.5;
+  "></div>
+  <div style="
+    position:absolute;inset:40px;
+    border:10px solid #4A2515;
+    border-radius:32px;
+    box-shadow:
+      inset 0 0 0 2px #E8C547,
+      inset 0 0 0 14px transparent,
+      inset 0 0 0 16px #E8C547,
+      inset 0 0 0 18px transparent;
+    pointer-events:none;
+  "></div>
+
+  <!-- Inner photo stage -->
+  <div style="
+    position:absolute;
+    top:80px;left:80px;right:80px;bottom:80px;
+    background:rgba(255,255,255,0.5);
+    border-radius:24px;
+    display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:18px;
+    box-shadow:inset 0 4px 24px rgba(74,37,21,0.18);
+  ">
+    <div style="font-size:120px;line-height:1;filter:drop-shadow(0 8px 18px rgba(74,37,21,0.35));">📷</div>
+    <div style="font-family:'Georgia',serif;font-style:italic;color:#4A2515;font-size:26px;letter-spacing:4px;text-transform:uppercase;font-weight:600;opacity:0.78;">Photo Window</div>
+    <div style="width:160px;height:2px;background:#E8C547;margin-top:4px;border-radius:2px;"></div>
+  </div>
+
+  <!-- TOP-LEFT: Pooh bear -->
+  <div style="
+    position:absolute;
+    top:60px;left:60px;
+    width:200px;height:200px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    background:conic-gradient(from 0deg,#E8C547 0deg 60deg,#FFB400 60deg 120deg,#4A2515 120deg 180deg,#E8C547 180deg 240deg,#FFB400 240deg 300deg,#4A2515 300deg 360deg);
+    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
+    z-index:5;
+  ">
+    <div style="
+      width:168px;height:168px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
+    ">
+      <div style="font-size:130px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🧸</div>
+    </div>
+  </div>
+  <div style="
+    position:absolute;top:252px;left:108px;
+    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
+    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
+  ">— Pooh Bear —</div>
+
+  <!-- TOP-RIGHT: Piglet -->
+  <div style="
+    position:absolute;
+    top:60px;right:60px;
+    width:190px;height:190px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    background:conic-gradient(from 30deg,#FFB400 0deg 60deg,#E8C547 60deg 120deg,#4A2515 120deg 180deg,#FFB400 180deg 240deg,#E8C547 240deg 300deg,#4A2515 300deg 360deg);
+    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
+    z-index:5;
+  ">
+    <div style="
+      width:158px;height:158px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
+    ">
+      <div style="font-size:120px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🐷</div>
+    </div>
+  </div>
+  <div style="
+    position:absolute;top:242px;right:108px;
+    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
+    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
+  ">— Piglet —</div>
+
+  <!-- BOTTOM-LEFT: Tigger -->
+  <div style="
+    position:absolute;
+    bottom:60px;left:60px;
+    width:195px;height:195px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    background:conic-gradient(from 60deg,#E8C547 0deg 60deg,#FFB400 60deg 120deg,#4A2515 120deg 180deg,#E8C547 180deg 240deg,#FFB400 240deg 300deg,#4A2515 300deg 360deg);
+    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
+    z-index:5;
+  ">
+    <div style="
+      width:163px;height:163px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
+    ">
+      <div style="font-size:125px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🐯</div>
+    </div>
+  </div>
+  <div style="
+    position:absolute;bottom:252px;left:108px;
+    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
+    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
+  ">— Tigger —</div>
+
+  <!-- BOTTOM-RIGHT: Eeyore -->
+  <div style="
+    position:absolute;
+    bottom:60px;right:60px;
+    width:195px;height:195px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    background:conic-gradient(from 90deg,#FFB400 0deg 60deg,#E8C547 60deg 120deg,#4A2515 120deg 180deg,#FFB400 180deg 240deg,#E8C547 240deg 300deg,#4A2515 300deg 360deg);
+    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
+    z-index:5;
+  ">
+    <div style="
+      width:163px;height:163px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
+    ">
+      <div style="font-size:125px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🐴</div>
+    </div>
+  </div>
+  <div style="
+    position:absolute;bottom:252px;right:108px;
+    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
+    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
+  ">— Eeyore —</div>
+
+  <!-- TOP-CENTER: honey drip cluster -->
+  <div style="
+    position:absolute;
+    top:38px;left:50%;
+    transform:translateX(-50%);
+    display:flex;align-items:flex-start;gap:0;
+    z-index:6;
+  ">
+    <span style="font-size:56px;filter:drop-shadow(0 4px 4px rgba(74,37,21,0.35));transform:rotate(-22deg) translateY(8px);display:inline-block;">🍯</span>
+    <span style="font-size:74px;filter:drop-shadow(0 6px 6px rgba(74,37,21,0.4));margin:0 -14px;z-index:2;display:inline-block;">🍯</span>
+    <span style="font-size:56px;filter:drop-shadow(0 4px 4px rgba(74,37,21,0.35));transform:rotate(22deg) translateY(8px);display:inline-block;">🍯</span>
+  </div>
+
+  <!-- BOTTOM-CENTER: title -->
+  <div style="
+    position:absolute;
+    bottom:28px;left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    z-index:6;
+    width:600px;
+  ">
+    <div style="
+      font-family:'Playfair Display',Georgia,'Times New Roman',serif;
+      font-size:64px;
+      font-style:italic;
+      font-weight:900;
+      letter-spacing:2px;
+      color:#4A2515;
+      text-shadow:
+        2px 2px 0 #E8C547,
+        4px 4px 0 #FFB400,
+        6px 6px 12px rgba(74,37,21,0.4);
+      line-height:1;
+    ">Hundred Acre Gang</div>
+    <div style="
+      display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;
+    ">
+      <span style="width:50px;height:1px;background:#4A2515;display:inline-block;"></span>
+      <span style="font-size:14px;letter-spacing:10px;color:#4A2515;font-weight:700;text-transform:uppercase;font-family:Georgia,serif;">est. forever</span>
+      <span style="width:50px;height:1px;background:#4A2515;display:inline-block;"></span>
+    </div>
+    <div style="font-size:18px;letter-spacing:14px;color:#FFB400;margin-top:10px;font-family:Georgia,serif;">♥ ♥ ♥</div>
+  </div>
+
+</div>
+
+</body>
+</html>
+
+
+A few decisions worth flagging:
+
+- **Center is a real window, not just blank space.** A semi-translucent cream panel with `inset 0 4px 24px rgba(74,37,21,0.18)` gives the photo area a subtle framed-mat look, so when a real photo is composited in, it won't fight the border. The 📷 is just a placeholder marker.
+- **The corner vignettes use `conic-gradient` as a honeycomb suggestion.** Six segments rotating gold → honey → brown read as蜂窝 cells at a glance, and the inner cream radial-gradient keeps each character lifted off the busy ring. Each character is set at 120–130px so they clearly dominate the corner, not nestle inside it.
+- **The title gets a triple-stacked `text-shadow`** (gold → honey → dark-brown blur) instead of a flat drop-shadow — that's the cheap-but-effective trick to make serif italic feel like it was pressed into warm foil. The little "EST. FOREVER" sub-tag and heart row anchor the bottom so it doesn't feel like a floating word.
+- **Honey pots at top-center are clustered and tilted inward** (`-22deg` / `+22deg`) rather than three-in-a-row — a small composition tell that separates "designed" from "dropped in".

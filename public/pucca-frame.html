@@ -1,0 +1,428 @@
+A photobooth frame felt like the perfect place to lean into the cute cartoon energy — so I kept the dark moody intelligence for the *body* (the booth's exterior aesthetic) and let the inner frame explode with bright red/pink cartoon energy. The two characters are built entirely from CSS shapes: Pucca with her signature black hair buns, blunt bangs, asymmetrical pigtails and red dress; Garu as a ninja with his pointed dark hair, mask, and a subtle hint of his eyes peeking through.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pucca & Garu — Photobooth Frame</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(232, 68, 58, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 80%, rgba(255, 107, 157, 0.15) 0%, transparent 55%),
+      #0d0d1f;
+    font-family: Georgia, 'Times New Roman', serif;
+    padding: 40px 20px;
+  }
+
+  /* ────────── THE FRAME ────────── */
+  .photobooth {
+    width: 1200px;
+    height: 1600px;
+    position: relative;
+    background:
+      radial-gradient(circle at 25% 25%, rgba(255, 182, 193, 0.18) 0%, transparent 45%),
+      radial-gradient(circle at 75% 75%, rgba(232, 68, 58, 0.14) 0%, transparent 45%),
+      repeating-linear-gradient(45deg,
+        rgba(232, 68, 58, 0.035) 0px,
+        rgba(232, 68, 58, 0.035) 16px,
+        transparent 16px,
+        transparent 32px),
+      linear-gradient(135deg, #fff5f5 0%, #ffe8ec 100%);
+    border-radius: 36px;
+    border: 6px solid #E8443A;
+    box-shadow:
+      0 0 0 16px #fff5f5,
+      0 0 0 22px #E8443A,
+      0 0 0 30px #fff5f5,
+      0 0 0 38px #FFB6C1,
+      0 40px 80px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+  }
+
+  /* ────────── PHOTO WINDOW ────────── */
+  .photo-area {
+    position: absolute;
+    top: 340px;
+    left: 80px;
+    width: 1040px;
+    height: 1020px;
+    background: #fff;
+    border: 3px dashed #E8443A;
+    border-radius: 18px;
+    box-shadow:
+      inset 0 0 0 8px #fff,
+      inset 0 0 0 10px #FFB6C1,
+      0 6px 24px rgba(232, 68, 58, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .camera-icon {
+    font-size: 160px;
+    opacity: 0.22;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .photo-label {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    color: #E8443A;
+    letter-spacing: 3px;
+    text-transform: lowercase;
+  }
+
+  /* ════════════════════════════════════════════
+     PUCCA — TOP LEFT
+     ════════════════════════════════════════════ */
+  .pucca {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    width: 220px;
+    height: 280px;
+    z-index: 10;
+    transform: rotate(-7deg);
+  }
+  .pucca .body {
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    width: 180px;
+    height: 115px;
+    background: linear-gradient(180deg, #E8443A 0%, #b8302a 100%);
+    border-radius: 80px 80px 22px 22px;
+    box-shadow:
+      inset 0 -10px 20px rgba(0, 0, 0, 0.18),
+      inset 0 4px 6px rgba(255, 255, 255, 0.2),
+      0 8px 18px rgba(232, 68, 58, 0.3);
+  }
+  .pucca .collar {
+    position: absolute;
+    top: -16px;
+    left: 25px;
+    width: 130px;
+    height: 32px;
+    background: #FFB6C1;
+    border-radius: 60px 60px 0 0;
+    border: 3px solid #1A1A2E;
+    border-bottom: none;
+  }
+  .pucca .belt {
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    width: 180px;
+    height: 14px;
+    background: #1A1A2E;
+    border-radius: 4px;
+  }
+  .pucca .belt::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -8px;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFB6C1;
+    border: 3px solid #1A1A2E;
+  }
+  .pucca .head {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 145px;
+    height: 145px;
+    background: radial-gradient(circle at 38% 35%, #fff1dc 0%, #FFE4C4 60%, #f5d4a8 100%);
+    border-radius: 50%;
+    border: 3px solid #1A1A2E;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  .pucca .face {
+    position: absolute;
+    inset: 0;
+  }
+  .pucca .cheek-l, .pucca .cheek-r {
+    position: absolute;
+    width: 28px;
+    height: 16px;
+    background: #ff7a8a;
+    border-radius: 50%;
+    top: 72px;
+    opacity: 0.85;
+  }
+  .pucca .cheek-l { left: 14px; }
+  .pucca .cheek-r { right: 14px; }
+  .pucca .eye-l, .pucca .eye-r {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: #1A1A2E;
+    border-radius: 50%;
+    top: 58px;
+  }
+  .pucca .eye-l { left: 38px; }
+  .pucca .eye-r { right: 38px; }
+  .pucca .eye-l::after, .pucca .eye-r::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #fff;
+    border-radius: 50%;
+    top: 4px;
+    left: 4px;
+  }
+  .pucca .mouth {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #1A1A2E;
+    border-radius: 50%;
+    top: 95px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .pucca .bangs {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 155px;
+    height: 70px;
+    background: #1A1A2E;
+    border-radius: 78px 78px 8px 8px;
+    box-shadow: inset 0 -4px 6px rgba(255, 255, 255, 0.08);
+  }
+  .pucca .bangs::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 16px;
+    width: 56px;
+    height: 56px;
+    background: #1A1A2E;
+    border-radius: 0 100% 0 50%;
+  }
+  .pucca .bangs::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    background: #1A1A2E;
+    border-radius: 100% 0 50% 0;
+  }
+  .pucca .bun-l, .pucca .bun-r {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at 30% 30%, #2a2a44 0%, #1A1A2E 70%);
+    border-radius: 50%;
+    top: 15px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  }
+  .pucca .bun-l { left: 2px; }
+  .pucca .bun-r { right: 2px; }
+  .pucca .bun-l::before, .pucca .bun-r::before {
+    content: '';
+    position: absolute;
+    inset: 9px;
+    border: 3px solid #FFB6C1;
+    border-radius: 50%;
+    opacity: 0.65;
+  }
+  .pucca .bun-l::after, .pucca .bun-r::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 14px;
+    opacity: 0.4;
+  }
+  .pucca .bun-l::after { left: 14px; }
+  .pucca .bun-r::after { right: 14px; }
+  /* Asymmetric pigtails sticking out */
+  .pucca .pigtail-l, .pucca .pigtail-r {
+    position: absolute;
+    width: 26px;
+    height: 95px;
+    background: linear-gradient(180deg, #1A1A2E 0%, #2a2a44 100%);
+    border-radius: 13px;
+    top: 28px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  }
+  .pucca .pigtail-l {
+    left: -12px;
+    transform: rotate(-22deg);
+  }
+  .pucca .pigtail-r {
+    right: -12px;
+    transform: rotate(22deg);
+  }
+
+  /* ════════════════════════════════════════════
+     GARU — TOP RIGHT
+     ════════════════════════════════════════════ */
+  .garu {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    width: 220px;
+    height: 280px;
+    z-index: 10;
+    transform: rotate(7deg);
+  }
+  .garu .body {
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    width: 180px;
+    height: 115px;
+    background: linear-gradient(180deg, #1A1A2E 0%, #0d0d1f 100%);
+    border-radius: 80px 80px 22px 22px;
+    box-shadow:
+      inset 0 -10px 18px rgba(0, 0, 0, 0.4),
+      0 8px 18px rgba(0, 0, 0, 0.35);
+  }
+  .garu .scarf {
+    position: absolute;
+    bottom: 100px;
+    left: 30px;
+    width: 160px;
+    height: 28px;
+    background: linear-gradient(180deg, #E8443A 0%, #b8302a 100%);
+    border-radius: 14px;
+    box-shadow: 0 3px 6px rgba(232, 68, 58, 0.4);
+    z-index: 2;
+  }
+  .garu .scarf-tail {
+    position: absolute;
+    bottom: 70px;
+    right: 30px;
+    width: 24px;
+    height: 70px;
+    background: linear-gradient(180deg, #E8443A 0%, #b8302a 100%);
+    border-radius: 12px;
+    transform: rotate(18deg);
+    z-index: 1;
+  }
+  .garu .scarf-tail::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 14px solid #b8302a;
+  }
+  .garu .head {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 145px;
+    height: 145px;
+    background: radial-gradient(circle at 38% 35%, #fff1dc 0%, #FFE4C4 60%, #f5d4a8 100%);
+    border-radius: 50%;
+    border: 3px solid #1A1A2E;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  .garu .hair {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 168px;
+    height: 95px;
+    background: linear-gradient(180deg, #2a2a44 0%, #1A1A2E 100%);
+    border-radius: 84px 84px 18px 18px;
+    box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.4);
+  }
+  .garu .hair::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 32px solid transparent;
+    border-right: 32px solid transparent;
+    border-bottom: 48px solid #1A1A2E;
+  }
+  .garu .hair::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 14px;
+    background: #1A1A2E;
+    border-radius: 50% 50% 50% 0;
+    transform: translateX(-50%) rotate(-45deg);
+  }
+  .garu .mask-band {
+    position: absolute;
+    top: 88px;
+    left: 4px;
+    width: 137px;
+    height: 30px;
+    background: linear-gradient(180deg, #1A1A2E 0%, #0d0d1f 100%);
+    border-radius: 15px;
+    border: 2px solid #2a2a44;
+  }
+  .garu .eye-l, .garu .eye-r {
+    position: absolute;
+    width: 18px;
+    height: 14px;
+    background: #1A1A2E;
+    border-radius: 50%;
+    top: 95px;
+  }
+  .garu .eye-l { left: 38px; }
+  .garu .eye-r { right: 38px; }
+  .garu .eye-l::after, .garu .eye-r::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 4px;
+  }
+  .garu .mouth {
+    position: absolute;
+    width: 16px;
+    height: 6px;
+    border-bottom: 3px solid #1A1A2E;
+    border-radius: 0 0 16px 16px;
+    top: 128px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ════════════════════════════════════════════
+     FLOATING HEARTS
+     ════════════════════════════════════════════ */
+  .heart {
+    position

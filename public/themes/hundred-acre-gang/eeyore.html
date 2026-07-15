@@ -1,0 +1,306 @@
+Below is a single-file photobooth frame. A few decisions worth flagging up-front:
+
+- **Palette is anchored on the grey you gave (#A0A0B0)** but I added two cooler siblings — a slate roof `#7C8492` for depth and a pale cloud `#C8CCD2` for the inner mat. Pure flat #A0A0B0 across the whole frame reads like concrete; the two-step value shift lets it feel like flocked paper instead.
+- **The donkey is full CSS** (about 35 stacked `div`s with `border-radius` blobs — head, two ears with pink inner cups, nose patch, nostrils, eyes with drooping eyebrows, sewn-on button eyes, a single falling tear, mane tufts, body, legs, one slightly-splayed hoof, and a tacked-on tail). His head tilts ~8° down-and-right because Eeyore's whole posture is gravitational. The pink bow sits where the tail attaches, the way it does in the originals.
+- **The frame stack**: outer matted card → photo window with an inset box-shadow (so it reads as paper laid on paper, not a flat fill) → dashed inner cut line for the physical "tear here" gesture. Photo area is empty with a centred camera glyph, kept faint so whatever photo replaces it can dominate.
+- **"EEYORE" in small-caps with 8px letter-spacing and "✦" diamonds either side** — the diamonds do the work that an icon font would normally do, without pulling in an external asset. Subtitle below in italic for the signature line.
+- **Motion is restrained to one loop**: the tear drop falls every 6 seconds and the photo flash blinks at the opposite phase. Both gated by `prefers-reduced-motion`. A photobooth frame shouldn't wiggle at the viewer.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eeyore Photobooth Frame · 1200×1600</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #D8DCE2;
+    background-image: radial-gradient(circle at 50% 40%, #E8ECEF, #C8CCD2 70%);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+  }
+</style>
+</head>
+<body>
+
+<div style="
+  width: 1200px;
+  height: 1600px;
+  background: #A0A0B0;
+  background-image: linear-gradient(135deg, #AEB4BE 0%, #90969F 50%, #868C97 100%);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 40px 100px -30px rgba(20,28,42,0.55), 0 15px 35px -15px rgba(20,28,42,0.35);
+  border-radius: 4px;
+">
+
+  <!-- Outer frame texture: hairline lines for a pressed-paper feel -->
+  <div style="
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent 0, transparent 40px, rgba(255,255,255,0.025) 40px, rgba(255,255,255,0.025) 41px),
+      repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(0,0,0,0.02) 40px, rgba(0,0,0,0.02) 41px);
+    pointer-events: none;
+  "></div>
+
+  <!-- Inner double frame: thin dark rule + light mat line -->
+  <div style="
+    position: absolute; inset: 45px;
+    border: 1px solid rgba(35,42,58,0.45);
+    pointer-events: none;
+  "></div>
+  <div style="
+    position: absolute; inset: 56px;
+    border: 1px solid rgba(255,255,255,0.35);
+    pointer-events: none;
+  "></div>
+
+  <!-- TOP STRIP -->
+  <div style="
+    position: absolute; top: 90px; left: 90px; right: 90px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: #F5F6F8;
+    z-index: 3;
+  ">
+    <div style="
+      font-size: 11px; letter-spacing: 7px; font-weight: 400;
+      text-transform: uppercase; opacity: 0.85;
+    ">No. 042 · Gloomy Corner Studio</div>
+    <div style="
+      font-size: 11px; letter-spacing: 7px; font-weight: 400;
+      text-transform: uppercase; opacity: 0.85;
+    ">A Foggy Afternoon</div>
+  </div>
+
+  <!-- Top decorative double-line under the strip -->
+  <div style="
+    position: absolute; top: 125px; left: 90px; right: 90px;
+    height: 1px; background: rgba(35,42,58,0.4);
+    z-index: 3;
+  "></div>
+  <div style="
+    position: absolute; top: 128px; left: 90px; right: 90px;
+    height: 1px; background: rgba(255,255,255,0.3);
+    z-index: 3;
+  "></div>
+
+  <!-- PHOTO WINDOW -->
+  <div style="
+    position: absolute; top: 155px; left: 90px;
+    width: 1020px; height: 1240px;
+    background: #EFF1F4;
+    border: 1px solid #5C6470;
+    box-shadow:
+      inset 0 0 0 8px #C8CCD2,
+      inset 0 0 0 9px rgba(35,42,58,0.35),
+      inset 0 25px 50px -25px rgba(35,42,58,0.35),
+      inset 0 -25px 50px -25px rgba(35,42,58,0.35),
+      0 5px 25px rgba(0,0,0,0.18);
+    overflow: hidden;
+  ">
+    <!-- inner dashed cut line (photobooth "tear here") -->
+    <div style="
+      position: absolute; inset: 12px;
+      border: 1px dashed rgba(35,42,58,0.25);
+      pointer-events: none;
+    "></div>
+
+    <!-- Photo placeholder: 📷 -->
+    <div style="
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #B0B6C2;
+    ">
+      <div style="font-size: 110px; line-height: 1; opacity: 0.42; animation: blink 3s ease-in-out infinite;">
+        📷
+      </div>
+      <div style="
+        margin-top: 28px;
+        font-size: 12px; letter-spacing: 10px; text-transform: uppercase;
+        color: #9CA3B0; font-weight: 400;
+      ">— say something sad —</div>
+    </div>
+  </div>
+
+  <!-- DONKEY: bottom-right corner, ~130px tall -->
+  <div style="
+    position: absolute; bottom: 96px; right: 110px;
+    width: 140px; height: 130px;
+    z-index: 5;
+  ">
+    <!-- ground shadow -->
+    <div style="
+      position: absolute; bottom: -2px; left: -12px; right: -18px;
+      height: 14px;
+      background: radial-gradient(ellipse, rgba(35,42,58,0.45), transparent 70%);
+      filter: blur(2px);
+      z-index: 0;
+    "></div>
+
+    <!-- BODY (behind head) -->
+    <div style="
+      position: absolute; top: 52px; left: 26px;
+      width: 78px; height: 48px;
+      background: #8C93A0;
+      border-radius: 26px 30px 18px 18px;
+      box-shadow:
+        inset -7px -5px 10px rgba(35,42,58,0.32),
+        inset 5px 4px 8px rgba(255,255,255,0.18);
+      z-index: 1;
+    "></div>
+
+    <!-- MANE tufts (behind head) -->
+    <div style="
+      position: absolute; top: 46px; left: 38px;
+      width: 8px; height: 22px;
+      background: #5B6270;
+      border-radius: 5px 5px 4px 4px;
+      transform: rotate(-18deg);
+      z-index: 2;
+    "></div>
+    <div style="
+      position: absolute; top: 52px; left: 50px;
+      width: 7px; height: 18px;
+      background: #5B6270;
+      border-radius: 4px;
+      transform: rotate(-8deg);
+      z-index: 2;
+    "></div>
+    <div style="
+      position: absolute; top: 56px; left: 62px;
+      width: 7px; height: 16px;
+      background: #646B7A;
+      border-radius: 4px;
+      transform: rotate(2deg);
+      z-index: 2;
+    "></div>
+
+    <!-- HEAD group -->
+    <div style="
+      position: absolute; top: 6px; left: 50px;
+      width: 72px; height: 64px;
+      transform: rotate(8deg);
+      z-index: 3;
+    ">
+      <!-- Left ear (back) -->
+      <div style="
+        position: absolute; top: -8px; left: 0px;
+        width: 16px; height: 28px;
+        background: #7A828F;
+        border-radius: 50% 50% 30% 30% / 60% 60% 40% 40%;
+        transform: rotate(-22deg);
+      "></div>
+      <div style="
+        position: absolute; top: -4px; left: 4px;
+        width: 9px; height: 20px;
+        background: #C9A0AE;
+        border-radius: 50% 50% 30% 30% / 60% 60% 40% 40%;
+        transform: rotate(-22deg);
+      "></div>
+
+      <!-- Right ear (front) -->
+      <div style="
+        position: absolute; top: -10px; left: 40px;
+        width: 18px; height: 30px;
+        background: #838B98;
+        border-radius: 50% 50% 30% 30% / 60% 60% 40% 40%;
+        transform: rotate(26deg);
+      "></div>
+      <div style="
+        position: absolute; top: -4px; left: 44px;
+        width: 10px; height: 21px;
+        background: #D0A8B5;
+        border-radius: 50% 50% 30% 30% / 60% 60% 40% 40%;
+        transform: rotate(26deg);
+      "></div>
+
+      <!-- Head main -->
+      <div style="
+        position: absolute; top: 4px; left: 4px;
+        width: 64px; height: 56px;
+        background: linear-gradient(155deg, #9098A5 0%, #7E8593 100%);
+        border-radius: 52% 52% 48% 48% / 48% 50% 50% 52%;
+        box-shadow:
+          inset -4px 3px 6px rgba(255,255,255,0.18),
+          inset 4px -4px 10px rgba(35,42,58,0.22);
+      "></div>
+
+      <!-- Snout / muzzle patch -->
+      <div style="
+        position: absolute; bottom: 4px; left: 16px;
+        width: 40px; height: 26px;
+        background: linear-gradient(165deg, #B7BDC8 0%, #A0A6B2 100%);
+        border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+      "></div>
+
+      <!-- Nostrils -->
+      <div style="
+        position: absolute; bottom: 17px; left: 22px;
+        width: 3px; height: 4px;
+        background: #3F4654;
+        border-radius: 50%;
+      "></div>
+      <div style="
+        position: absolute; bottom: 17px; left: 47px;
+        width: 3px; height: 4px;
+        background: #3F4654;
+        border-radius: 50%;
+      "></div>
+
+      <!-- Mouth: a slight sad curve -->
+      <div style="
+        position: absolute; bottom: 10px; left: 28px;
+        width: 22px; height: 8px;
+        border-bottom: 1.5px solid #4A5160;
+        border-radius: 0 0 50% 50%;
+      "></div>
+
+      <!-- Eyes (sewn buttons) -->
+      <div style="
+        position: absolute; top: 26px; left: 14px;
+        width: 9px; height: 9px;
+        background: #2C333F;
+        border-radius: 50%;
+        box-shadow:
+          inset 1.5px 1.5px 0 rgba(255,255,255,0.4),
+          0 0 0 1.5px #4A5160;
+      "></div>
+      <div style="
+        position: absolute; top: 26px; left: 40px;
+        width: 9px; height: 9px;
+        background: #2C333F;
+        border-radius: 50%;
+        box-shadow:
+          inset 1.5px 1.5px 0 rgba(255,255,255,0.4),
+          0 0 0 1.5px #4A5160;
+      "></div>
+
+      <!-- Eyebrows (drooping, sad outer-down) -->
+      <div style="
+        position: absolute; top: 21px; left: 12px;
+        width: 13px; height: 2px;
+        background: #4A5160;
+        border-radius: 1px;
+        transform: rotate(22deg);
+      "></div>
+      <div style="
+        position: absolute; top: 21px; left: 38px;
+        width: 13px; height: 2px;
+        background: #4A5160;
+        border-radius: 1px;
+        transform: rotate(-22deg);
+      "></div>
+
+      <!-- Single falling tear -->
+      <div style="
+        position: absolute; top: 35px; left: 44px;
+        width: 3px; height: 5px;
+        background: #B8CCDD;
+        border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+        animation: tear

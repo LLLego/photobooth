@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hello Kitty Photobooth</title>
+</head>
+<body style="margin:0; min-height:100vh; background:linear-gradient(135deg,#FFEDF1,#FFD7DF); font-family:Georgia,'Times New Roman',serif; display:flex; align-items:center; justify-content:center; padding:20px;">
+
+<div style="
+  position:relative;
+  width:1200px;
+  height:1600px;
+  background:#FFF5F7;
+  border:10px solid #E891A0;
+  border-radius:60px;
+  box-sizing:border-box;
+  box-shadow:0 30px 80px rgba(232,68,58,0.35), inset 0 0 0 4px #FFF, inset 0 0 0 12px #E891A0, inset 0 0 0 16px #FFF;
+  overflow:hidden;
+">
+
+  <!-- ============ HELLO KITTY FACE (TOP-LEFT) ============ -->
+  <div style="position:absolute; top:60px; left:60px; width:240px; height:210px; z-index:10;">
+    <!-- Left ear -->
+    <div style="position:absolute; top:0; left:30px; width:90px; height:80px; background:#FFFFFF; border:4px solid #000; border-radius:50%; transform:rotate(-22deg); z-index:1;"></div>
+    <!-- Right ear -->
+    <div style="position:absolute; top:0; right:30px; width:90px; height:80px; background:#FFFFFF; border:4px solid #000; border-radius:50%; transform:rotate(22deg); z-index:1;"></div>
+    <!-- Head -->
+    <div style="position:absolute; top:18px; left:0; width:240px; height:185px; background:#FFFFFF; border:4px solid #000; border-radius:50%; z-index:2;"></div>
+    <!-- Left whiskers -->
+    <div style="position:absolute; top:108px; left:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
+    <div style="position:absolute; top:128px; left:0; width:48px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
+    <div style="position:absolute; top:148px; left:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
+    <!-- Right whiskers -->
+    <div style="position:absolute; top:108px; right:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
+    <div style="position:absolute; top:128px; right:0; width:48px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
+    <div style="position:absolute; top:148px; right:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
+    <!-- Left eye -->
+    <div style="position:absolute; top:88px; left:70px; width:20px; height:26px; background:#000; border-radius:50%; z-index:3;"></div>
+    <!-- Right eye -->
+    <div style="position:absolute; top:88px; right:70px; width:20px; height:26px; background:#000; border-radius:50%; z-index:3;"></div>
+    <!-- Nose -->
+    <div style="position:absolute; top:118px; left:50%; transform:translateX(-50%); width:30px; height:22px; background:#FFD700; border:3px solid #000; border-radius:50%; z-index:3;"></div>
+    <!-- BOW -->
+    <div style="position:absolute; top:0; right:-30px; z-index:6;">
+      <!-- Left bow loop -->
+      <div style="position:absolute; left:0; top:4px; width:55px; height:60px; background:#E8443A; border:3px solid #000; border-radius:50% 8px 50% 8px; transform:rotate(-12deg);"></div>
+      <!-- Right bow loop -->
+      <div style="position:absolute; left:55px; top:4px; width:55px; height:60px; background:#E8443A; border:3px solid #000; border-radius:8px 50% 8px 50%; transform:rotate(12deg);"></div>
+      <!-- Bow center knot -->
+      <div style="position:absolute; left:36px; top:14px; width:38px; height:42px; background:#E8443A; border:3px solid #000; border-radius:8px; z-index:2;"></div>
+      <!-- Bow highlight -->
+      <div style="position:absolute; left:8px; top:14px; width:14px; height:18px; background:rgba(255,255,255,0.5); border-radius:50%; transform:rotate(-12deg);"></div>
+      <div style="position:absolute; left:88px; top:14px; width:14px; height:18px; background:rgba(255,255,255,0.5); border-radius:50%; transform:rotate(12deg);"></div>
+    </div>
+  </div>
+
+  <!-- ============ LARGE PINK BOW (TOP-RIGHT) ============ -->
+  <div style="position:absolute; top:80px; right:60px; width:260px; height:180px; z-index:10;">
+    <!-- Left bow loop -->
+    <div style="position:absolute; left:0; top:30px; width:120px; height:130px; background:#E891A0; border:4px solid #C5616F; border-radius:50% 8px 50% 8px; transform:rotate(-10deg); box-shadow:inset -8px 8px 0 rgba(255,255,255,0.25);"></div>
+    <!-- Right bow loop -->
+    <div style="position:absolute; left:140px; top:30px; width:120px; height:130px; background:#E891A0; border:4px solid #C5616F; border-radius:8px 50% 8px 50%; transform:rotate(10deg); box-shadow:inset 8px 8px 0 rgba(255,255,255,0.25);"></div>
+    <!-- Center knot -->
+    <div style="position:absolute; left:95px; top:48px; width:70px; height:90px; background:#E8443A; border:4px solid #B8281F; border-radius:14px; z-index:2; box-shadow:inset -4px 0 0 rgba(0,0,0,0.12);"></div>
+    <!-- Center knot shine -->
+    <div style="position:absolute; left:106px; top:58px; width:14px; height:30px; background:rgba(255,255,255,0.45); border-radius:50%; z-index:3;"></div>
+    <!-- Ribbon tails -->
+    <div style="position:absolute; left:30px; top:140px; width:36px; height:90px; background:#E891A0; border:4px solid #C5616F; border-radius:8px 8px 50% 8px; transform:rotate(18deg);"></div>
+    <div style="position:absolute; right:30px; top:140px; width:36px; height:90px; background:#E891A0; border:4px solid #C5616F; border-radius:8px 8px 8px 50%; transform:rotate(-18deg);"></div>
+    <!-- Sparkle highlights on bow -->
+    <div style="position:absolute; left:22px; top:50px; width:18px; height:18px; background:rgba(255,255,255,0.7); border-radius:50%; transform:rotate(-10deg);"></div>
+    <div style="position:absolute; right:22px; top:50px; width:18px; height:18px; background:rgba(255,255,255,0.7); border-radius:50%; transform:rotate(10deg);"></div>
+  </div>
+
+  <!-- ============ FLOATING SPARKLE STARS ============ -->
+  <!-- Yellow 4-point star -->
+  <div style="position:absolute; top:90px; left:380px; width:34px; height:34px; z-index:6;">
+    <div style="position:absolute; top:0; left:14px; width:6px; height:34px; background:#FFD700; border-radius:3px;"></div>
+    <div style="position:absolute; top:14px; left:0; width:34px; height:6px; background:#FFD700; border-radius:3px;"></div>
+    <div style="position:absolute; top:7px; left:7px; width:20px; height:20px; background:#FFE066; border-radius:50%;"></div>
+  </div>
+  <!-- Pink 4-point star -->
+  <div style="position:absolute; top:180px; left:540px; width:44px; height:44px; z-index:6;">
+    <div style="position:absolute; top:0; left:19px; width:6px; height:44px; background:#E8443A; border-radius:3px;"></div>
+    <div style="position:absolute; top:19px; left:0; width:44px; height:6px; background:#E8443A; border-radius:3px;"></div>
+    <div style="position:absolute; top:11px; left:11px; width:22px; height:22px; background:#E891A0; border-radius:50%;"></div>
+  </div>
+  <!-- Tiny pink star -->
+  <div style="position:absolute; top:60px; left:680px; width:22px; height:22px; z-index:6;">
+    <div style="position:absolute; top:0; left:9px; width:4px; height:22px; background:#E891A0; border-radius:2px;"></div>
+    <div style="position:absolute; top:9px; left:0; width:22px; height:4px; background:#E891A0; border-radius:2px;"></div>
+  </div>
+  <!-- Yellow star -->
+  <div style="position:absolute; top:230px; left:760px; width:26px; height:26px; z-index:6;">
+    <div style="position:absolute; top:0; left:11px; width:4px; height:26px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:11px; left:0; width:26px; height:4px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:7px; left:7px; width:12px; height:12px; background:#FFE066; border-radius:50%;"></div>
+  </div>
+  <!-- Left mid sparkles -->
+  <div style="position:absolute; top:340px; left:40px; width:24px; height:24px; z-index:6;">
+    <div style="position:absolute; top:0; left:10px; width:4px; height:24px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:10px; left:0; width:24px; height:4px; background:#FFD700; border-radius:2px;"></div>
+  </div>
+  <div style="position:absolute; top:420px; left:90px; width:18px; height:18px; z-index:6;">
+    <div style="position:absolute; top:0; left:8px; width:3px; height:18px; background:#E8443A; border-radius:2px;"></div>
+    <div style="position:absolute; top:8px; left:0; width:18px; height:3px; background:#E8443A; border-radius:2px;"></div>
+  </div>
+  <!-- Right mid sparkles -->
+  <div style="position:absolute; top:340px; right:40px; width:24px; height:24px; z-index:6;">
+    <div style="position:absolute; top:0; left:10px; width:4px; height:24px; background:#E8443A; border-radius:2px;"></div>
+    <div style="position:absolute; top:10px; left:0; width:24px; height:4px; background:#E8443A; border-radius:2px;"></div>
+  </div>
+  <div style="position:absolute; top:440px; right:80px; width:20px; height:20px; z-index:6;">
+    <div style="position:absolute; top:0; left:8px; width:4px; height:20px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:8px; left:0; width:20px; height:4px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:6px; left:6px; width:8px; height:8px; background:#FFE066; border-radius:50%;"></div>
+  </div>
+  <!-- Lower sparkles -->
+  <div style="position:absolute; bottom:280px; left:50px; width:22px; height:22px; z-index:6;">
+    <div style="position:absolute; top:0; left:9px; width:4px; height:22px; background:#E891A0; border-radius:2px;"></div>
+    <div style="position:absolute; top:9px; left:0; width:22px; height:4px; background:#E891A0; border-radius:2px;"></div>
+  </div>
+  <div style="position:absolute; bottom:280px; right:50px; width:22px; height:22px; z-index:6;">
+    <div style="position:absolute; top:0; left:9px; width:4px; height:22px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:9px; left:0; width:22px; height:4px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:6px; left:6px; width:10px; height:10px; background:#FFE066; border-radius:50%;"></div>
+  </div>
+  <div style="position:absolute; bottom:200px; left:120px; width:16px; height:16px; z-index:6;">
+    <div style="position:absolute; top:0; left:7px; width:3px; height:16px; background:#E8443A; border-radius:2px;"></div>
+    <div style="position:absolute; top:7px; left:0; width:16px; height:3px; background:#E8443A; border-radius:2px;"></div>
+  </div>
+  <div style="position:absolute; bottom:200px; right:120px; width:16px; height:16px; z-index:6;">
+    <div style="position:absolute; top:0; left:7px; width:3px; height:16px; background:#E891A0; border-radius:2px;"></div>
+    <div style="position:absolute; top:7px; left:0; width:16px; height:3px; background:#E891A0; border-radius:2px;"></div>
+  </div>
+  <!-- Bottom corners sparkles -->
+  <div style="position:absolute; bottom:120px; left:380px; width:24px; height:24px; z-index:6;">
+    <div style="position:absolute; top:0; left:10px; width:4px; height:24px; background:#FFD700; border-radius:2px;"></div>
+    <div style="position:absolute; top:10px; left:0; width:24px; height:4px; background:#FFD700; border-radius:2px;"></div>
+  </div>
+  <div style="position:absolute; bottom:100px; right:360px; width:26px; height:26px; z-index:6;">
+    <div style="position:absolute; top:0; left:11px; width:4px; height:26px; background:#E8443A; border-radius:2px;"></div>
+    <div style="position:absolute; top:11px; left:0; width:26px; height:4px; background:#E8443A; border-radius:2px;"></div>
+    <div style="position:absolute; top:8px; left:8px; width:10px; height:10px; background:#E891A0; border-radius:50%;"></div>
+  </div>
+
+  <!-- ============ CENTER PHOTO AREA ============ -->
+  <div style="
+    position:absolute;
+    top:340px; left:140px;
+    width:920

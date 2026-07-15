@@ -1,0 +1,392 @@
+A piglet photobooth, but make it bloom — that's where my head went. Soft warm light, hand-illustrated pig built entirely from CSS (no PNGs, no SVG sprites — every curl of the tail is a border-radius), and a `#FFB6C1 / #FF69B4` palette held in check by quiet cream tones so the pink reads warm, not synthetic. The camera glyph sits as a placeholder in the empty centre, waiting for a real shot.
+
+Type does most of the quiet work: Cormorant Garamond italic for the brand mark and date, Inter for the small UPPERCASE labels with wide tracking, and the big `PIGLET` lockup mixes the two so the word feels handwritten, not stamped. Dotted inner hairline + a soft shadow inside the photo well gives the frame that paper-photo weight. Motion is restrained — the pig bobs gently, its tail unfurls once, the camera keeps a slow breath — nothing pulses, nothing flashes.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piglet · Photobooth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f4ede4 radial-gradient(ellipse at center, #faf5ec 0%, #ede3d3 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    color: #6b5849;
+    padding: 2rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== PHOTOBOOTH FRAME ============================ */
+  .frame {
+    width: 1200px;
+    height: 1600px;
+    background: #fff;
+    box-shadow:
+      0 40px 80px -20px rgba(180, 90, 110, 0.30),
+      0 0 0 1px rgba(255, 105, 180, 0.10);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Double pink border — outer thick + inner dotted hairline */
+  .frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 16px solid #FF69B4;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .frame::after {
+    content: '';
+    position: absolute;
+    top: 28px; right: 28px; bottom: 28px; left: 28px;
+    border: 2px dashed #FFB6C1;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* ===== HEAD STRIP ================================== */
+  .head {
+    position: absolute;
+    top: 56px;
+    left: 64px;
+    right: 64px;
+    height: 50px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.45rem;
+    font-weight: 500;
+    font-style: italic;
+    color: #FF69B4;
+    letter-spacing: 0.04em;
+  }
+  .brand::before {
+    content: '✿';
+    margin-right: 0.55rem;
+    font-style: normal;
+    font-size: 0.95rem;
+    color: #FFB6C1;
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: #d48bb0;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .dot {
+    width: 4px;
+    height: 4px;
+    background: #FF69B4;
+    border-radius: 50%;
+  }
+
+  /* ===== CENTER PHOTO WELL =========================== */
+  .photo-well {
+    position: absolute;
+    top: 144px;
+    bottom: 232px;
+    left: 112px;
+    right: 112px;
+    background:
+      linear-gradient(135deg, #fff6f9 0%, #ffeef3 60%, #ffe1ea 100%);
+    border: 2px solid #FFB6C1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ff8fb8;
+    box-shadow:
+      inset 0 0 80px rgba(255, 182, 193, 0.35),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    z-index: 2;
+    overflow: hidden;
+  }
+  /* faint corner ticks */
+  .photo-well::before,
+  .photo-well::after {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    border: 1.5px solid #FF69B4;
+    opacity: 0.55;
+  }
+  .photo-well::before {
+    top: 18px; left: 18px;
+    border-right: none; border-bottom: none;
+  }
+  .photo-well::after {
+    bottom: 18px; right: 18px;
+    border-left: none; border-top: none;
+  }
+  .camera {
+    font-size: 4rem;
+    line-height: 1;
+    margin-bottom: 1.4rem;
+    filter: drop-shadow(0 6px 14px rgba(255, 105, 180, 0.30));
+    animation: breath 3.6s ease-in-out infinite;
+  }
+  @keyframes breath {
+    0%, 100% { transform: translateY(0); opacity: 0.95; }
+    50%      { transform: translateY(-6px); opacity: 1; }
+  }
+  .photo-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: #FF69B4;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+  .photo-sublabel {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: #d48bb0;
+    margin-top: 0.65rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===== PIGLET — CSS ART, TOP-RIGHT ================= */
+  .piglet {
+    position: absolute;
+    top: 86px;
+    right: 64px;
+    width: 130px;
+    height: 130px;
+    z-index: 6;
+    animation: bob 4.5s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-5px) rotate(2deg); }
+  }
+
+  .piglet .ears { position: absolute; inset: 0; }
+  .ear {
+    position: absolute;
+    width: 30px;
+    height: 38px;
+    background: #FFB6C1;
+    border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+    box-shadow: inset -2px -3px 5px rgba(255,105,180,0.25);
+  }
+  .ear.left  { top: 18px; left: 14px; transform: rotate(-32deg); }
+  .ear.right { top: 18px; right: 14px; transform: rotate(32deg); }
+  .ear::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 20px;
+    background: #FF69B4;
+    border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+    top: 9px; left: 8px;
+    opacity: 0.65;
+  }
+
+  .head-pig {
+    position: absolute;
+    top: 24px;
+    left: 22px;
+    width: 86px;
+    height: 80px;
+    background: radial-gradient(circle at 35% 30%, #ffd9e3 0%, #FFB6C1 55%, #ffa6c0 100%);
+    border-radius: 50%;
+    box-shadow:
+      inset -5px -7px 12px rgba(255, 105, 180, 0.22),
+      inset 3px 4px 10px rgba(255, 255, 255, 0.6),
+      0 4px 8px rgba(180, 90, 110, 0.18);
+  }
+
+  .eyes { position: absolute; inset: 0; }
+  .eye {
+    position: absolute;
+    width: 6px;
+    height: 8px;
+    background: #5a3a2e;
+    border-radius: 50%;
+    top: 52px;
+  }
+  .eye.left  { left: 46px; }
+  .eye.right { right: 46px; }
+  .eye::after {
+    content: '';
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    top: 1.5px; left: 1.5px;
+  }
+  .eye::before {
+    content: '';
+    position: absolute;
+    width: 16px; height: 7px;
+    border-top: 1.5px solid #5a3a2e;
+    border-radius: 50%;
+    top: -7px;
+    left: -5px;
+  }
+  .eye.left::before  { transform: rotate(-14deg); }
+  .eye.right::before { transform: rotate(14deg); }
+
+  .snout {
+    position: absolute;
+    top: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 22px;
+    background: radial-gradient(ellipse at center, #ff9bba 0%, #FF69B4 80%);
+    border-radius: 50%;
+    box-shadow:
+      inset -2px -2px 4px rgba(180, 60, 110, 0.4),
+      inset 1px 1px 3px rgba(255, 255, 255, 0.4);
+  }
+  .nostril {
+    position: absolute;
+    width: 5px; height: 7px;
+    background: #8b3a5a;
+    border-radius: 50%;
+    top: 7px;
+  }
+  .nostril.l { left: 7px; }
+  .nostril.r { right: 7px; }
+
+  .cheek {
+    position: absolute;
+    width: 10px; height: 6px;
+    background: #ff7aa8;
+    border-radius: 50%;
+    opacity: 0.55;
+    top: 70px;
+  }
+  .cheek.l { left: 30px; }
+  .cheek.r { right: 30px; }
+
+  /* little hooves at the bottom of the head */
+  .hoof {
+    position: absolute;
+    width: 14px; height: 9px;
+    background: #FF69B4;
+    border-radius: 50% 50% 40% 40%;
+    bottom: 12px;
+    box-shadow: inset 0 -2px 3px rgba(180, 60, 110, 0.4);
+  }
+  .hoof.l { left: 32px; }
+  .hoof.r { right: 32px; }
+
+  /* the tail — a small curling flourish, lives behind the head */
+  .tail {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 3px solid #FF69B4;
+    border-radius: 50%;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    top: 60px;
+    right: -2px;
+    transform: rotate(-25deg);
+    animation: tail-wag 5s ease-in-out infinite;
+  }
+  @keyframes tail-wag {
+    0%, 100% { transform: rotate(-25deg); }
+    50%      { transform: rotate(15deg); }
+  }
+
+  /* ===== FOOTER — 'PIGLET' LOCKUP ==================== */
+  .footer {
+    position: absolute;
+    bottom: 64px;
+    left: 64px;
+    right: 64px;
+    height: 132px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    text-align: center;
+  }
+  .ornament {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #FFB6C1;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .ornament-line {
+    width: 70px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #FFB6C1, transparent);
+  }
+  .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4.6rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: #FF69B4;
+    line-height: 1;
+    text-indent: 0.22em; /* visually balance the trailing letter-spacing */
+    margin: 0;
+  }
+  .title em {
+    font-style: italic;
+    font-weight: 400;
+    color: #d48bb0;
+    letter-spacing: 0.05em;
+  }
+  .sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: #d48bb0;
+    margin-top: 0.4rem;
+    padding-left: 0.5em;
+    font-weight: 400;
+  }
+
+  /* honour reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .piglet, .camera, .tail { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame" role="img" aria-label="Piglet photobooth frame, 1200 by 1600">
+
+  <div class="head">
+    <div class="brand">Maison Piglet</div>
+    <div class="meta">
+      <span>No. 04</span>
+      <span class

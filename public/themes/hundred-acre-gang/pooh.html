@@ -1,0 +1,206 @@
+The brief is naturally maximalist-cute, so the trick is keeping it disciplined: a tight three-stop gold palette, two double-border stacks that visually echo each other, and a small sealed-wax roundel at bottom-left so the bear doesn't carry the whole show alone. The Pooh is built from layered radial-gradients — head, snout, ears, nose, eyes — with a single honey dipper in his left paw (drawn from one rotated bar plus six gradient bands) because pure portraits read flat in CSS. Copy lives in a 860×400 plate so swapping names / messages is a one-line change.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Winnie the Pooh · Photobooth Frame</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(circle at 50% 0%, #2e2410 0%, #1a1306 60%, #0a0703 100%);
+    font-family:Georgia,'Times New Roman',serif;padding:28px;
+  }
+</style>
+</head>
+<body>
+
+<div style="
+  width:1200px;height:1600px;position:relative;overflow:hidden;flex-shrink:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 18% 0%, rgba(255,180,0,0.45) 0%, rgba(232,197,71,0.10) 42%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 82% 100%, rgba(255,180,0,0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 100% at 50% 50%, #f6efdb 0%, #efe3c8 55%, #ddc89b 100%);
+">
+
+  <!-- ============ GOLDEN DOUBLE BORDER ============ -->
+  <div style="position:absolute;inset:0;pointer-events:none;
+              box-shadow:
+                inset 0 0 0 4px  #E8C547,
+                inset 0 0 0 14px #fff5db,
+                inset 0 0 0 18px #FFB400,
+                inset 0 0 0 22px #E8C547,
+                inset 0 0 0 28px #7a4f12;"></div>
+
+  <!-- ============ INNER CORNER ORNAMENTS ============ -->
+  <div style="position:absolute;top:46px;left:46px;width:74px;height:74px;
+              border-top:4px solid #B8860B;border-left:4px solid #B8860B;
+              border-top-left-radius:6px;z-index:2;"></div>
+  <div style="position:absolute;top:46px;right:46px;width:74px;height:74px;
+              border-top:4px solid #B8860B;border-right:4px solid #B8860B;
+              border-top-right-radius:6px;z-index:2;"></div>
+  <div style="position:absolute;bottom:46px;left:46px;width:74px;height:74px;
+              border-bottom:4px solid #B8860B;border-left:4px solid #B8860B;
+              border-bottom-left-radius:6px;z-index:2;"></div>
+  <div style="position:absolute;bottom:46px;right:46px;width:74px;height:74px;
+              border-bottom:4px solid #B8860B;border-right:4px solid #B8860B;
+              border-bottom-right-radius:6px;z-index:2;"></div>
+
+  <!-- ============ TOP RIGHT · DATE & EVENT ============ -->
+  <div style="position:absolute;top:78px;right:130px;z-index:2;text-align:right;">
+    <div style="color:#7a4f12;font-family:Georgia,serif;font-size:13px;letter-spacing:5px;font-weight:600;">ONE HUNDRED ACRE WOOD</div>
+    <div style="margin-top:8px;color:#B8860B;font-family:Georgia,serif;font-size:24px;font-weight:700;letter-spacing:3px;font-style:italic;">Est. MCMXXI</div>
+    <div style="margin-top:10px;display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+      <span style="display:inline-block;width:34px;height:1px;background:#B8860B;"></span>
+      <span style="color:#B8860B;font-size:15px;">✦</span>
+      <span style="display:inline-block;width:34px;height:1px;background:#B8860B;"></span>
+    </div>
+    <div style="margin-top:8px;color:#8a6914;font-family:Georgia,serif;font-size:14px;letter-spacing:3px;font-style:italic;">a friend of piglet</div>
+  </div>
+
+  <!-- ============ PHOTO DROP ZONE ============ -->
+  <div style="
+    position:absolute;top:230px;left:110px;width:980px;height:1090px;
+    background:
+      repeating-linear-gradient(45deg, rgba(184,134,11,0.045) 0 4px, transparent 4px 14px),
+      linear-gradient(180deg,#fffaef 0%, #f6efdb 100%);
+    border:3px dashed #C99A2E;border-radius:4px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.6),
+      0 18px 50px -18px rgba(122,79,18,0.30),
+      0 6px 14px -8px rgba(122,79,18,0.18);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  ">
+    <div style="font-size:180px;line-height:1;
+                filter:drop-shadow(0 10px 18px rgba(122,79,18,0.30));">📷</div>
+    <div style="margin-top:36px;font-size:13px;letter-spacing:7px;
+                color:#B8860B;font-weight:700;">— PLACE PHOTO HERE —</div>
+    <div style="margin-top:14px;font-size:12px;letter-spacing:3px;
+                color:#a68a4e;font-style:italic;font-family:Georgia,serif;">a perfect moment, captured</div>
+    <div style="margin-top:60px;display:flex;align-items:center;gap:18px;">
+      <span style="display:inline-block;width:90px;height:1px;background:rgba(184,134,11,0.45);"></span>
+      <span style="color:#B8860B;font-size:18px;">❀</span>
+      <span style="display:inline-block;width:90px;height:1px;background:rgba(184,134,11,0.45);"></span>
+    </div>
+  </div>
+
+  <!-- ============ WINNIE THE POOH · PURE CSS BEAR (TOP-LEFT, 140px) ============ -->
+  <div style="position:absolute;top:64px;left:64px;width:170px;height:170px;z-index:3;">
+
+    <!-- LEFT EAR (drawn first, head overlaps the joint) -->
+    <div style="position:absolute;top:6px;left:14px;width:62px;height:62px;
+                background:#C9941A;border-radius:50%;"></div>
+    <div style="position:absolute;top:22px;left:30px;width:32px;height:32px;
+                background:#F2BC5C;border-radius:50%;"></div>
+
+    <!-- RIGHT EAR -->
+    <div style="position:absolute;top:6px;left:94px;width:62px;height:62px;
+                background:#C9941A;border-radius:50%;"></div>
+    <div style="position:absolute;top:22px;left:94px;width:32px;height:32px;
+                background:#F2BC5C;border-radius:50%;"></div>
+
+    <!-- HEAD -->
+    <div style="position:absolute;top:30px;left:8px;width:154px;height:130px;
+                background:radial-gradient(circle at 35% 30%, #F4C651 0%, #E8A90E 60%, #B87512 100%);
+                border-radius:50%;"></div>
+
+    <!-- FACE / SNOUT -->
+    <div style="position:absolute;top:78px;left:42px;width:86px;height:58px;
+                background:radial-gradient(ellipse at 50% 40%, #FBE5B4 0%, #F0CF85 70%, #DDA951 100%);
+                border-radius:50%;
+                box-shadow:inset 0 -4px 6px rgba(184,134,11,0.28);"></div>
+
+    <!-- LEFT EYEBROW (subtle) -->
+    <div style="position:absolute;top:74px;left:46px;width:20px;height:3px;
+                background:#5a3c0a;border-radius:2px;
+                transform:rotate(-12deg);"></div>
+    <!-- RIGHT EYEBROW -->
+    <div style="position:absolute;top:74px;right:46px;width:20px;height:3px;
+                background:#5a3c0a;border-radius:2px;
+                transform:rotate(12deg);"></div>
+
+    <!-- LEFT EYE -->
+    <div style="position:absolute;top:80px;left:54px;width:10px;height:13px;
+                background:#2a1c08;border-radius:50%;"></div>
+    <div style="position:absolute;top:82px;left:56px;width:3px;height:3px;
+                background:#fff;border-radius:50%;"></div>
+
+    <!-- RIGHT EYE -->
+    <div style="position:absolute;top:80px;right:54px;width:10px;height:13px;
+                background:#2a1c08;border-radius:50%;"></div>
+    <div style="position:absolute;top:82px;right:56px;width:3px;height:3px;
+                background:#fff;border-radius:50%;"></div>
+
+    <!-- NOSE -->
+    <div style="position:absolute;top:94px;left:75px;width:20px;height:14px;
+                background:radial-gradient(circle at 35% 30%, #5a3c0a 0%, #1a0e02 100%);
+                border-radius:50% 50% 50% 50% / 50% 50% 60% 60%;"></div>
+    <div style="position:absolute;top:96px;left:78px;width:5px;height:3px;
+                background:rgba(255,255,255,0.55);border-radius:50%;"></div>
+
+    <!-- MOUTH (smile) -->
+    <div style="position:absolute;top:112px;left:72px;width:26px;height:14px;
+                border-bottom:2.5px solid #4a3210;border-radius:0 0 50% 50%;
+                transform:rotate(0deg);"></div>
+
+    <!-- CHEEK BLUSH (both sides) -->
+    <div style="position:absolute;top:106px;left:34px;width:16px;height:9px;
+                background:rgba(255,140,90,0.4);border-radius:50%;"></div>
+    <div style="position:absolute;top:106px;right:34px;width:16px;height:9px;
+                background:rgba(255,140,90,0.4);border-radius:50%;"></div>
+
+    <!-- HONEY DIPPER (in paw, lower-right of bear) -->
+    <div style="position:absolute;top:138px;left:104px;width:60px;height:9px;
+                background:linear-gradient(90deg,#D4901A 0%,#E8A90E 40%,#F0CF85 100%);
+                border-radius:5px;transform:rotate(-32deg);
+                box-shadow:0 2px 4px rgba(122,79,18,0.35);"></div>
+    <!-- dipper grooves -->
+    <div style="position:absolute;top:142px;left:113px;width:3px;height:8px;background:#a87318;transform:rotate(-32deg);"></div>
+    <div style="position:absolute;top:144px;left:123px;width:3px;height:8px;background:#a87318;transform:rotate(-32deg);"></div>
+    <div style="position:absolute;top:146px;left:133px;width:3px;height:8px;background:#a87318;transform:rotate(-32deg);"></div>
+
+    <!-- HONEY DRIP -->
+    <div style="position:absolute;top:148px;left:96px;width:9px;height:15px;
+                background:linear-gradient(180deg,#FFB400,#D4901A);border-radius:50% 50% 50% 50% / 30% 30% 70% 70%;
+                box-shadow:0 2px 4px rgba(122,79,18,0.3);"></div>
+  </div>
+
+  <!-- ============ BOTTOM · TITLE PLATE ============ -->
+  <div style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
+              width:880px;text-align:center;z-index:2;">
+
+    <!-- TOP FLOURISH -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px;">
+      <span style="display:inline-block;width:160px;height:1.5px;
+                   background:linear-gradient(90deg,transparent,#B8860B);"></span>
+      <span style="color:#B8860B;font-size:22px;">✦</span>
+      <span style="color:#B8860B;font-size:13px;letter-spacing:6px;font-weight:700;
+                   font-family:Georgia,serif;">A LITTLE SOMETHING SWEET</span>
+      <span style="color:#B8860B;font-size:22px;">✦</span>
+      <span style="display:inline-block;width:160px;height:1.5px;
+                   background:linear-gradient(90deg,#B8860B,transparent);"></span>
+    </div>
+
+    <!-- MAIN TITLE -->
+    <div style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;
+                font-size:62px;font-weight:900;line-height:0.95;
+                background:linear-gradient(180deg,#FFB400 0%,#E8A90E 45%,#B8860B 100%);
+                -webkit-background-clip:text;background-clip:text;color:transparent;
+                letter-spacing:4px;text-transform:uppercase;
+                filter:drop-shadow(0 3px 0 rgba(122,79,18,0.28));">
+      Winnie the Pooh
+    </div>
+
+    <!-- SUBTITLE -->
+    <div style="margin-top:14px;font-family:Georgia,serif;font-size:18px;
+                font-style:italic;color:#8a6914;letter-spacing:2.5px;">
+      “a bear of very little brain, and very big appetite”
+    </div>
+
+    <!-- BOTTOM FLOURISH -->
+    <div style="margin-top:18px;display:flex;align-items:center;justify-content:center;gap:16px;">
+      <span style="display:inline-block;width:200px;height:1px;
+                   background:linear-gradient(90deg,transparent,#B886
