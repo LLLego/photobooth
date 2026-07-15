@@ -2,911 +2,1043 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Hello Kitty Photobooth</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello Kitty · Sweet Moments Photobooth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Quicksand:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  :root{
-    --pink: #E891A0;
-    --pink-soft: #F5C3CD;
-    --pink-blush: #FCE0E5;
-    --pink-deep: #D66E80;
-    --red: #E8443A;
-    --red-deep: #C8302A;
+  :root {
+    --pink-soft: #E891A0;
+    --pink-pale: #FFE3E9;
+    --pink-blush: #FFD0DC;
+    --pink-deep: #C97D8E;
+    --pink-shadow: #9C5466;
+    --cream: #FFF8F3;
+    --white: #FFFFFF;
+    --cherry: #E8443A;
+    --cherry-deep: #B8281F;
+    --cherry-shadow: #8B1810;
     --gold: #FFD700;
-    --gold-soft: #FFE980;
-    --cream: #FFFAF1;
-    --paper: #FFF6EE;
-    --ink: #5A3530;
+    --gold-deep: #D4A800;
+    --ink: #4A1F2A;
+    --ink-soft: #7A4855;
+    --frame-bg: #FFEEF1;
   }
 
-  html, body {
+  html, body { height: 100%; }
+
+  body {
     min-height: 100vh;
-    font-family: 'Fraunces', serif;
-    background:
-      repeating-linear-gradient(0deg, rgba(232,145,160,0.025) 0px, rgba(232,145,160,0.025) 1px, transparent 1px, transparent 3px),
-      repeating-linear-gradient(90deg, rgba(232,145,160,0.018) 0px, rgba(232,145,160,0.018) 1px, transparent 1px, transparent 3px),
-      linear-gradient(135deg, #FBE7EB 0%, #FAE0D8 50%, #F5D5D8 100%);
-    display: flex; align-items: center; justify-content: center;
+    background: #F5D8DF;
+    background-image:
+      radial-gradient(ellipse 600px 400px at 15% 20%, #FFEFF3 0%, transparent 60%),
+      radial-gradient(ellipse 700px 500px at 85% 80%, #F7CBD4 0%, transparent 60%),
+      radial-gradient(ellipse 400px 300px at 50% 50%, #FFE5EB 0%, transparent 60%);
+    font-family: 'Quicksand', sans-serif;
+    color: var(--ink);
     padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow-x: hidden;
   }
 
-  body::before{
-    content:""; position:fixed; inset:0;
+  /* Paper-grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
     background-image:
-      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.6) 0%, transparent 1.5%),
-      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.5) 0%, transparent 1%),
-      radial-gradient(circle at 30% 80%, rgba(255,215,0,0.3) 0%, transparent 1.2%),
-      radial-gradient(circle at 70% 30%, rgba(255,215,0,0.25) 0%, transparent 1%);
-    background-size: 250px 250px, 320px 320px, 280px 280px, 350px 350px;
-    pointer-events:none; z-index:0;
-    opacity:0.7;
+      repeating-linear-gradient(45deg, transparent 0 2px, rgba(255,255,255,0.02) 2px 4px),
+      repeating-linear-gradient(-45deg, transparent 0 3px, rgba(154,80,100,0.015) 3px 6px);
+    z-index: 0;
   }
 
-  .booth{
+  /* ============ STAGE ============ */
+  .stage {
     position: relative;
-    width: 820px;
-    height: 1080px;
-    background: var(--cream);
-    border: 2px solid var(--pink);
-    box-shadow:
-      0 0 0 1px var(--paper),
-      0 0 0 6px var(--pink-blush),
-      0 0 0 7px var(--pink),
-      0 30px 60px -20px rgba(214,110,128,0.45),
-      inset 0 0 100px rgba(252,224,229,0.5);
+    width: 100%;
+    max-width: 1180px;
+    aspect-ratio: 1 / 1.05;
     z-index: 1;
   }
 
-  /* dashed inner stitch line */
-  .booth::before{
-    content:""; position:absolute; inset: 22px;
-    border: 2px dashed var(--pink);
-    pointer-events:none;
-    opacity:0.7;
-  }
-
-  /* ================== TITLE (top center) ================== */
-  .title-wrap{
-    position:absolute;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-2deg);
-    text-align:center;
-    z-index: 20;
-    white-space: nowrap;
-  }
-  .title{
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-style: italic;
-    font-size: 58px;
-    letter-spacing: 0.02em;
-    color: var(--red);
-    text-shadow:
-      2px 2px 0 var(--pink-blush),
-      3px 3px 0 var(--gold-soft),
-      4px 4px 0 rgba(232,145,160,0.4);
-    line-height: 1;
-  }
-  .title-sub{
-    font-family: 'Caveat', cursive;
-    font-size: 22px;
-    color: var(--pink-deep);
-    margin-top: 4px;
-    letter-spacing: 0.15em;
-    transform: rotate(1deg);
-    display:inline-block;
-  }
-  .title-sub::before, .title-sub::after{
-    content: "✦";
-    color: var(--gold);
-    margin: 0 10px;
-    font-size: 14px;
-    vertical-align: middle;
-  }
-
-  /* ================== KITTY HEAD ================== */
-  .kitty{
-    position:absolute;
-    width: 130px;
-    height: 120px;
-    z-index: 15;
-  }
-  .kitty-top-left{ top: 150px; left: 50px; transform: rotate(-12deg); }
-  .kitty-top-right{ top: 150px; right: 50px; transform: rotate(13deg); }
-
-  /* Kitty face */
-  .kitty .head{
-    position:absolute;
-    top: 18px; left: 12px;
-    width: 106px; height: 92px;
-    background:
-      radial-gradient(ellipse at 35% 35%, #FFFFFF 0%, #FFFFFF 90%, #FBE4E9 100%);
-    border-radius: 48% 52% 50% 50% / 55% 55% 45% 45%;
-    border: 2.5px solid var(--ink);
+  /* ============ OUTER FRAME ============ */
+  .frame {
+    position: absolute;
+    inset: 0;
+    background: var(--frame-bg);
+    border-radius: 36px;
     box-shadow:
-      inset -4px -4px 0 rgba(232,145,160,0.08),
-      inset 3px 3px 0 rgba(255,255,255,0.9);
-  }
-  /* Ears */
-  .kitty .ear{
-    position:absolute;
-    width: 34px; height: 36px;
-    background: #FFFFFF;
-    border: 2.5px solid var(--ink);
-    top: -4px;
-  }
-  .kitty .ear.l{
-    left: 14px;
-    border-radius: 60% 30% 50% 50%;
-    transform: rotate(-18deg);
-    box-shadow: inset -2px -2px 0 rgba(232,145,160,0.1);
-  }
-  .kitty .ear.r{
-    right: 14px;
-    border-radius: 30% 60% 50% 50%;
-    transform: rotate(18deg);
-    box-shadow: inset -2px -2px 0 rgba(232,145,160,0.1);
+      inset 0 0 0 3px var(--white),
+      inset 0 0 0 4px var(--pink-soft),
+      inset 0 0 0 14px var(--white),
+      inset 0 0 0 16px var(--pink-soft),
+      inset 0 0 0 20px var(--pink-pale),
+      0 30px 80px -20px rgba(154, 80, 100, 0.4),
+      0 0 0 8px var(--white),
+      0 0 0 10px var(--pink-soft);
+    overflow: hidden;
   }
 
-  /* Eyes */
-  .kitty .eye{
-    position:absolute;
-    width: 11px; height: 16px;
+  /* Dotted pattern inside frame */
+  .frame::before {
+    content: '';
+    position: absolute;
+    inset: 30px;
+    background-image:
+      radial-gradient(circle at center, var(--pink-soft) 1.2px, transparent 1.8px),
+      radial-gradient(circle at center, var(--gold) 0.8px, transparent 1.2px);
+    background-size: 32px 32px, 64px 64px;
+    background-position: 0 0, 16px 16px;
+    opacity: 0.35;
+    border-radius: 16px;
+    z-index: 1;
+  }
+
+  /* Corner scallops */
+  .frame::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at top left, transparent 18px, var(--pink-soft) 19px, var(--pink-soft) 20px, transparent 21px) top left / 40px 40px no-repeat,
+      radial-gradient(circle at top right, transparent 18px, var(--pink-soft) 19px, var(--pink-soft) 20px, transparent 21px) top right / 40px 40px no-repeat,
+      radial-gradient(circle at bottom left, transparent 18px, var(--pink-soft) 19px, var(--pink-soft) 20px, transparent 21px) bottom left / 40px 40px no-repeat,
+      radial-gradient(circle at bottom right, transparent 18px, var(--pink-soft) 19px, var(--pink-soft) 20px, transparent 21px) bottom right / 40px 40px no-repeat;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ============ PHOTO WINDOW ============ */
+  .photo-window {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64%;
+    height: 76%;
+    background: linear-gradient(135deg, #FFF6F9 0%, #FFEAF0 100%);
+    border-radius: 20px;
+    box-shadow:
+      inset 0 0 0 2px var(--pink-soft),
+      inset 0 0 0 4px var(--white),
+      inset 0 0 0 6px var(--pink-soft),
+      inset 0 0 0 14px var(--white),
+      0 0 0 1px var(--pink-shadow),
+      0 25px 60px -15px rgba(154, 80, 100, 0.3);
+    z-index: 5;
+    overflow: hidden;
+  }
+
+  /* Inner soft glow */
+  .photo-window::before {
+    content: '';
+    position: absolute;
+    inset: 16px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 18px, rgba(232, 145, 160, 0.04) 18px 19px),
+      repeating-linear-gradient(90deg, transparent 0 18px, rgba(232, 145, 160, 0.04) 18px 19px);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  /* Subtle heart watermark */
+  .photo-window::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 55px;
+    transform: translate(-50%, -50%);
+    background:
+      radial-gradient(circle at 30% 35%, var(--pink-blush) 8px, transparent 9px),
+      radial-gradient(circle at 70% 35%, var(--pink-blush) 8px, transparent 9px);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* Tape pieces */
+  .tape {
+    position: absolute;
+    width: 80px;
+    height: 22px;
+    background:
+      repeating-linear-gradient(45deg,
+        rgba(255, 215, 220, 0.85) 0 6px,
+        rgba(255, 200, 210, 0.6) 6px 12px);
+    box-shadow:
+      0 2px 4px rgba(154, 80, 100, 0.2),
+      inset 0 0 0 1px rgba(255,255,255,0.4);
+    z-index: 30;
+  }
+  .tape.tl { top: 6%; left: 8%; transform: rotate(-15deg); }
+  .tape.tr { top: 6%; right: 8%; transform: rotate(12deg); }
+  .tape.bl { bottom: 6%; left: 10%; transform: rotate(8deg); background: repeating-linear-gradient(45deg, rgba(255,230,180,0.85) 0 6px, rgba(255,210,140,0.6) 6px 12px); }
+  .tape.br { bottom: 6%; right: 10%; transform: rotate(-18deg); background: repeating-linear-gradient(45deg, rgba(255,230,180,0.85) 0 6px, rgba(255,210,140,0.6) 6px 12px); }
+
+  /* ============ HELLO KITTY (TOP-LEFT) ============ */
+  .kitty {
+    position: absolute;
+    top: 28px;
+    left: 28px;
+    width: 140px;
+    height: 140px;
+    z-index: 20;
+  }
+
+  /* Left ear */
+  .ear {
+    position: absolute;
+    top: 8px;
+    width: 36px;
+    height: 42px;
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 50% 50% 20% 20% / 100% 100% 20% 20%;
+    transform: rotate(-12deg);
+    z-index: 1;
+    box-shadow:
+      inset -3px -3px 0 rgba(232, 145, 160, 0.15);
+  }
+  .ear.left { left: 18px; transform: rotate(-18deg); }
+  .ear.right { right: 18px; transform: rotate(18deg); }
+
+  /* Face */
+  .kitty .face {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 124px;
+    height: 108px;
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow:
+      inset -5px -6px 0 -2px rgba(232, 145, 160, 0.08),
+      inset 4px 4px 0 -2px rgba(255, 255, 255, 0.6);
+  }
+
+  /* Right eye */
+  .eye {
+    position: absolute;
+    top: 62px;
+    width: 9px;
+    height: 14px;
     background: var(--ink);
     border-radius: 50%;
-    top: 52px;
+    z-index: 3;
   }
-  .kitty .eye.l{ left: 42px; transform: rotate(-3deg); }
-  .kitty .eye.r{ right: 42px; transform: rotate(3deg); }
+  .eye.left { left: 38px; }
+  .eye.right { right: 38px; }
+  .eye::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 3px;
+    height: 4px;
+    background: var(--white);
+    border-radius: 50%;
+  }
 
-  /* Nose */
-  .kitty .nose{
-    position:absolute;
-    width: 14px; height: 9px;
+  /* Nose (oval yellow) */
+  .kitty .nose {
+    position: absolute;
+    top: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 9px;
     background: var(--gold);
     border: 2px solid var(--ink);
     border-radius: 50%;
-    top: 73px; left: 50%;
-    transform: translateX(-50%);
+    z-index: 3;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6);
   }
 
-  /* Whiskers */
-  .kitty .whisk{
-    position:absolute;
+  /* Whiskers - 3 each side using a whisker group */
+  .whiskers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .whisker {
+    position: absolute;
     height: 2px;
     background: var(--ink);
     border-radius: 2px;
-    transform-origin: left center;
   }
-  .kitty .whisk.w1{ width: 26px; top: 68px; left: 4px; transform: rotate(-8deg); }
-  .kitty .whisk.w2{ width: 28px; top: 76px; left: 2px; transform: rotate(4deg); }
-  .kitty .whisk.w3{ width: 26px; top: 84px; left: 4px; transform: rotate(14deg); }
+  /* Left whiskers */
+  .whisker.l1 { top: 78px; left: 8px; width: 26px; transform: rotate(-8deg); }
+  .whisker.l2 { top: 86px; left: 6px; width: 28px; transform: rotate(2deg); }
+  .whisker.l3 { top: 94px; left: 8px; width: 26px; transform: rotate(12deg); }
+  /* Right whiskers */
+  .whisker.r1 { top: 78px; right: 8px; width: 26px; transform: rotate(8deg); }
+  .whisker.r2 { top: 86px; right: 6px; width: 28px; transform: rotate(-2deg); }
+  .whisker.r3 { top: 94px; right: 8px; width: 26px; transform: rotate(-12deg); }
 
-  .kitty .whisk.w4{ width: 26px; top: 68px; right: 4px; transform: rotate(8deg) scaleX(-1); }
-  .kitty .whisk.w5{ width: 28px; top: 76px; right: 2px; transform: rotate(-4deg) scaleX(-1); }
-  .kitty .whisk.w6{ width: 26px; top: 84px; right: 4px; transform: rotate(-14deg) scaleX(-1); }
-
-  /* Bow on Kitty head */
-  .kitty .bow{
-    position:absolute;
-    top: -2px; right: 2px;
-    width: 50px; height: 32px;
-    z-index: 5;
-  }
-  .kitty .bow-l, .kitty .bow-r{
-    position:absolute;
-    top: 0;
-    width: 24px; height: 28px;
-    background: var(--red);
-    border: 2.5px solid var(--ink);
-  }
-  .kitty .bow-l{
-    left: 0;
-    border-radius: 70% 30% 50% 50% / 60% 40% 60% 40%;
-    transform: rotate(-8deg);
-    box-shadow: inset 3px 3px 0 rgba(255,255,255,0.25);
-  }
-  .kitty .bow-r{
-    right: 0;
-    border-radius: 30% 70% 50% 50% / 40% 60% 40% 60%;
-    transform: rotate(8deg);
-    box-shadow: inset -3px 3px 0 rgba(255,255,255,0.25);
-  }
-  .kitty .bow-c{
-    position:absolute;
-    top: 7px; left: 50%;
-    transform: translateX(-50%);
-    width: 12px; height: 16px;
-    background: var(--red);
-    border: 2.5px solid var(--ink);
-    border-radius: 4px;
-    z-index: 2;
-  }
-
-  /* ================== BOWS scattered ================== */
-  .bow{
-    position:absolute;
-    z-index: 8;
-  }
-  .bow-i{
-    position:relative;
-    width: 60px; height: 40px;
-  }
-  .bow-i .bl, .bow-i .br{
-    position:absolute; top: 0;
-    width: 28px; height: 36px;
-    background: var(--pink);
-    border: 2.5px solid var(--ink);
-  }
-  .bow-i .bl{
-    left: 0;
-    border-radius: 80% 30% 60% 50% / 65% 35% 65% 35%;
-    transform: rotate(-6deg);
-    box-shadow: inset 4px 4px 0 rgba(255,255,255,0.3);
-  }
-  .bow-i .br{
-    right: 0;
-    border-radius: 30% 80% 50% 60% / 35% 65% 35% 65%;
-    transform: rotate(6deg);
-    box-shadow: inset -4px 4px 0 rgba(255,255,255,0.3);
-  }
-  .bow-i .bc{
-    position:absolute;
-    top: 8px; left: 50%;
-    transform: translateX(-50%);
-    width: 14px; height: 22px;
-    background: var(--pink-deep);
-    border: 2.5px solid var(--ink);
-    border-radius: 5px;
-    z-index: 2;
-  }
-
-  .bow.gold .bl, .bow.gold .br{ background: var(--gold); }
-  .bow.gold .bc{ background: #E6B800; }
-  .bow.red .bl, .bow.red .br{ background: var(--red); }
-  .bow.red .bc{ background: var(--red-deep); }
-
-  /* ================== STARS / SPARKLES ================== */
-  .star{
-    position:absolute;
-    z-index: 6;
-  }
-  .star-4{
-    position:relative;
-    width: 30px; height: 30px;
-  }
-  .star-4::before, .star-4::after{
-    content:""; position:absolute;
-    top: 50%; left: 50%;
-    width: 28px; height: 8px;
-    background: var(--gold);
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    transform: translate(-50%,-50%);
-  }
-  .star-4::after{ transform: translate(-50%,-50%) rotate(90deg); }
-  .star-4 .dot{
-    position:absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-    width: 8px; height: 8px;
-    background: #FFFCE0;
-    border-radius: 50%;
-    z-index: 2;
-  }
-
-  .star-burst{
-    position:relative;
-    width: 40px; height: 40px;
-  }
-  .star-burst i{
-    position:absolute;
-    top:50%; left:50%;
-    width: 4px; height: 36px;
-    background: var(--gold);
-    border-radius: 4px;
-    transform-origin: center;
-  }
-  .star-burst i:nth-child(1){ transform: translate(-50%,-50%) rotate(0deg); }
-  .star-burst i:nth-child(2){ transform: translate(-50%,-50%) rotate(45deg); }
-  .star-burst i:nth-child(3){ transform: translate(-50%,-50%) rotate(90deg); }
-  .star-burst i:nth-child(4){ transform: translate(-50%,-50%) rotate(135deg); }
-  .star-burst .core{
-    position:absolute;
-    top:50%; left:50%;
-    transform: translate(-50%,-50%);
-    width: 14px; height: 14px;
-    background: var(--gold);
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    z-index: 2;
-  }
-
-  .sparkle{
-    position:absolute;
-    width: 18px; height: 18px;
-    z-index: 5;
-  }
-  .sparkle::before, .sparkle::after{
-    content:""; position:absolute;
-    top:50%; left:50%;
-    background: #FFF;
-    border: 1.5px solid var(--gold);
-    border-radius: 50%;
-  }
-  .sparkle::before{
-    width: 18px; height: 4px;
-    transform: translate(-50%,-50%);
-    clip-path: polygon(0% 50%, 35% 50%, 40% 0%, 50% 50%, 60% 0%, 65% 50%, 100% 50%, 65% 50%, 60% 100%, 50% 50%, 40% 100%, 35% 50%);
-  }
-  .sparkle::after{ display:none; }
-
-  /* tiny sparkle dots */
-  .dot-gold, .dot-pink, .dot-white{
-    position:absolute;
-    border-radius: 50%;
+  /* Bow on Kitty's ear */
+  .kitty-bow {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 46px;
+    height: 36px;
     z-index: 4;
   }
-  .dot-gold{ background: var(--gold); box-shadow: 0 0 0 1.5px #E6B800; }
-  .dot-pink{ background: var(--pink); box-shadow: 0 0 0 1.5px var(--pink-deep); }
-  .dot-white{ background: #FFF; box-shadow: 0 0 0 1.5px var(--pink); }
-
-  /* ================== FLOWERS ================== */
-  .flower{
-    position:absolute;
-    width: 50px; height: 50px;
-    z-index: 7;
+  .kitty-bow .loop {
+    position: absolute;
+    width: 22px;
+    height: 26px;
+    background: var(--cherry);
+    border: 2.5px solid var(--ink);
+    border-radius: 50% 30% 50% 30%;
+    top: 4px;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.35);
   }
-  .flower .petal{
-    position:absolute;
-    width: 20px; height: 24px;
+  .kitty-bow .loop.l { left: 0; transform: rotate(-15deg); border-radius: 30% 50% 30% 50%; }
+  .kitty-bow .loop.r { right: 0; transform: rotate(15deg); }
+  .kitty-bow .knot {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 14px;
+    background: var(--cherry-deep);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    z-index: 2;
+  }
+
+  /* ============ BIG RIBBON BOW (TOP-RIGHT) ============ */
+  .ribbon {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 145px;
+    height: 145px;
+    z-index: 20;
+  }
+
+  /* Tails (behind loops) */
+  .ribbon .tail {
+    position: absolute;
+    width: 26px;
+    background: var(--pink-soft);
+    border: 3px solid var(--ink);
+    z-index: 1;
+  }
+  .ribbon .tail.l {
+    top: 60px;
+    left: 8px;
+    height: 70px;
+    border-radius: 8px 4px 50% 50% / 8px 4px 80% 80%;
+    transform: rotate(-22deg);
+    box-shadow: inset 3px 3px 0 rgba(255,255,255,0.35);
+  }
+  .ribbon .tail.r {
+    top: 60px;
+    right: 8px;
+    height: 75px;
+    border-radius: 4px 8px 50% 50% / 4px 8px 80% 80%;
+    transform: rotate(22deg);
+    box-shadow: inset -3px 3px 0 rgba(255,255,255,0.35);
+  }
+  /* Tail inner notch - V cut using small white triangle */
+  .ribbon .tail::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 12px solid var(--frame-bg);
+  }
+
+  /* Loops */
+  .ribbon .loop {
+    position: absolute;
+    width: 56px;
+    height: 70px;
+    background: var(--pink-soft);
+    border: 3px solid var(--ink);
+    top: 16px;
+    z-index: 2;
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,0.35);
+  }
+  .ribbon .loop.l {
+    left: 6px;
+    border-radius: 60% 40% 50% 50% / 70% 40% 50% 50%;
+    transform: rotate(-8deg);
+  }
+  .ribbon .loop.r {
+    right: 6px;
+    border-radius: 40% 60% 50% 50% / 40% 70% 50% 50%;
+    transform: rotate(8deg);
+  }
+
+  /* Inner shading lines on loops */
+  .ribbon .loop::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    width: 3px;
+    height: 30px;
+    background: var(--pink-deep);
+    border-radius: 3px;
+    opacity: 0.6;
+  }
+  .ribbon .loop.l::before { right: 10px; }
+  .ribbon .loop.r::before { left: 10px; }
+
+  /* Knot in the middle */
+  .ribbon .knot {
+    position: absolute;
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 28px;
+    background: var(--pink-deep);
+    border: 3px solid var(--ink);
+    border-radius: 6px 6px 8px 8px;
+    z-index: 3;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.3);
+  }
+  .ribbon .knot::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 6px;
+    background: var(--pink-deep);
+    border: 3px solid var(--ink);
+    border-radius: 4px 4px 0 0;
+  }
+
+  /* ============ SPARKLES ============ */
+  .sparkle {
+    position: absolute;
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  /* 4-point sparkle ✦ */
+  .sparkle.cross {
+    width: 24px;
+    height: 24px;
+  }
+  .sparkle.cross::before,
+  .sparkle.cross::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--gold);
+    box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1px rgba(255,255,255,0.5);
+  }
+  .sparkle.cross::before {
+    width: 6px;
+    height: 24px;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
+  }
+  .sparkle.cross::after {
+    width: 24px;
+    height: 6px;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
+  }
+
+  /* Star ⭑ using clip-path on a div with border */
+  .sparkle.star5 {
+    width: 22px;
+    height: 22px;
+    background: var(--gold);
+    filter: drop-shadow(2px 2px 0 var(--ink));
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  /* Filled star ★ */
+  .sparkle.solid {
+    width: 18px;
+    height: 18px;
+    background: var(--cherry);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    filter: drop-shadow(1.5px 1.5px 0 var(--ink));
+  }
+
+  /* Tiny sparkle (small dot burst) */
+  .sparkle.tiny {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px var(--ink);
+  }
+
+  /* ============ FLOWERS ============ */
+  .flower {
+    position: absolute;
+    z-index: 14;
+    pointer-events: none;
+  }
+
+  .flower .petal {
+    position: absolute;
+    width: 14px;
+    height: 14px;
     background: var(--pink-soft);
     border: 2px solid var(--ink);
     border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
-    top: 50%; left: 50%;
-    transform-origin: center 24px;
+    top: 50%;
+    left: 50%;
+    transform-origin: 50% 100%;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.4);
   }
-  .flower .petal:nth-child(1){ transform: translate(-50%,-100%) rotate(0deg); }
-  .flower .petal:nth-child(2){ transform: translate(-50%,-100%) rotate(72deg); }
-  .flower .petal:nth-child(3){ transform: translate(-50%,-100%) rotate(144deg); }
-  .flower .petal:nth-child(4){ transform: translate(-50%,-100%) rotate(216deg); }
-  .flower .petal:nth-child(5){ transform: translate(-50%,-100%) rotate(288deg); }
-  .flower .center{
-    position:absolute;
-    top:50%; left:50%;
-    transform: translate(-50%,-50%);
-    width: 14px; height: 14px;
+  .flower .petal:nth-child(1) { transform: translate(-50%, -100%) rotate(0deg); }
+  .flower .petal:nth-child(2) { transform: translate(-50%, -100%) rotate(72deg); }
+  .flower .petal:nth-child(3) { transform: translate(-50%, -100%) rotate(144deg); }
+  .flower .petal:nth-child(4) { transform: translate(-50%, -100%) rotate(216deg); }
+  .flower .petal:nth-child(5) { transform: translate(-50%, -100%) rotate(288deg); }
+
+  .flower .center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 9px;
+    height: 9px;
     background: var(--gold);
     border: 2px solid var(--ink);
     border-radius: 50%;
-    z-index: 5;
-  }
-
-  .flower.white .petal{ background: #FFF; }
-  .flower.red .petal{ background: var(--red); }
-
-  /* Strawberry */
-  .strawberry{
-    position:absolute;
-    width: 38px; height: 42px;
-    z-index: 6;
-  }
-  .strawberry .body{
-    position:absolute;
-    bottom: 0; left: 0;
-    width: 38px; height: 34px;
-    background: var(--red);
-    border: 2.5px solid var(--ink);
-    border-radius: 50% 50% 50% 50% / 40% 40% 75% 75%;
-    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.1);
-  }
-  .strawberry .leaf{
-    position:absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%) rotate(-10deg);
-    width: 30px; height: 14px;
-    background: #7CB342;
-    border: 2.5px solid var(--ink);
-    border-radius: 50% 50% 50% 50% / 100% 100% 0 0;
-    clip-path: polygon(0 100%, 15% 30%, 30% 80%, 50% 0%, 70% 80%, 85% 30%, 100% 100%);
-  }
-  .strawberry .seed{
-    position:absolute;
-    width: 3px; height: 4px;
-    background: var(--gold);
-    border-radius: 50%;
-  }
-  .strawberry .seed:nth-child(3){ top: 18px; left: 12px; }
-  .strawberry .seed:nth-child(4){ top: 14px; left: 22px; }
-  .strawberry .seed:nth-child(5){ top: 22px; left: 8px; }
-  .strawberry .seed:nth-child(6){ top: 26px; left: 20px; }
-  .strawberry .seed:nth-child(7){ top: 18px; left: 28px; }
-
-  /* Heart */
-  .heart{
-    position:absolute;
-    width: 28px; height: 26px;
-    z-index: 6;
-  }
-  .heart::before, .heart::after{
-    content:""; position:absolute;
-    width: 16px; height: 22px;
-    background: var(--red);
-    border: 2px solid var(--ink);
-    border-radius: 50% 50% 0 0;
-    top: 0;
-  }
-  .heart::before{
-    left: 0;
-    transform: rotate(-45deg);
-    transform-origin: bottom right;
-  }
-  .heart::after{
-    right: 0;
-    transform: rotate(45deg);
-    transform-origin: bottom left;
-  }
-
-  /* ================== PHOTO WINDOW ================== */
-  .photo-window{
-    position:absolute;
-    top: 220px;
-    left: 80px;
-    right: 80px;
-    bottom: 240px;
-    background:
-      repeating-linear-gradient(45deg, rgba(232,145,160,0.04) 0, rgba(232,145,160,0.04) 1px, transparent 1px, transparent 8px),
-      linear-gradient(135deg, rgba(255,250,241,0.6), rgba(252,224,229,0.6));
-    border: 2px solid var(--pink);
-    box-shadow:
-      0 0 0 4px var(--cream),
-      0 0 0 5px var(--pink-blush),
-      inset 0 0 30px rgba(232,145,160,0.1);
-    overflow:hidden;
     z-index: 2;
   }
-  .photo-window::before{
-    content:""; position:absolute; inset: 0;
-    border: 1.5px dashed var(--pink-soft);
-    pointer-events:none;
-  }
-  .photo-window::after{
-    content: "✿ snap a memory ✿";
-    position:absolute;
-    bottom: 16px; left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Caveat', cursive;
-    font-size: 18px;
-    color: var(--pink-deep);
-    opacity: 0.5;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
+
+  /* Small flower variant */
+  .flower.small .petal {
+    width: 10px;
+    height: 10px;
   }
 
-  /* tape pieces on corners of photo */
-  .tape{
-    position:absolute;
-    width: 70px; height: 22px;
-    background: rgba(232,145,160,0.35);
-    border: 1px solid rgba(214,110,128,0.4);
-    z-index: 25;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-  .tape::before{
-    content:""; position:absolute; inset:0;
-    background:
-      repeating-linear-gradient(45deg, transparent 0, transparent 3px, rgba(255,255,255,0.2) 3px, rgba(255,255,255,0.2) 4px);
-  }
-  .tape.tl{ top: 210px; left: 70px; transform: rotate(-32deg); }
-  .tape.tr{ top: 210px; right: 70px; transform: rotate(32deg); }
-  .tape.bl{ bottom: 230px; left: 70px; transform: rotate(32deg); }
-  .tape.br{ bottom: 230px; right: 70px; transform: rotate(-32deg); }
-
-  /* ================== BOTTOM DECORATION ================== */
-  .footer{
-    position:absolute;
-    bottom: 30px;
-    left: 30px; right: 30px;
-    height: 200px;
-    z-index: 10;
-  }
-
-  .date-strip{
-    position:absolute;
-    bottom: 70px;
+  /* ============ TITLE ============ */
+  .title-block {
+    position: absolute;
+    top: 60px;
     left: 50%;
-    transform: translateX(-50%) rotate(-1deg);
-    font-family: 'Caveat', cursive;
-    font-size: 24px;
-    color: var(--pink-deep);
-    background: var(--cream);
-    padding: 6px 22px;
-    border: 1.5px dashed var(--pink);
-    border-radius: 2px;
-    letter-spacing: 0.05em;
-    box-shadow: 0 2px 0 var(--pink-blush);
+    transform: translateX(-50%);
+    text-align: center;
     z-index: 12;
   }
-  .date-strip span{ color: var(--red); }
+  .title {
+    font-family: 'Pacifico', cursive;
+    font-size: 52px;
+    color: var(--cherry);
+    line-height: 0.9;
+    letter-spacing: 1px;
+    text-shadow:
+      2px 2px 0 var(--white),
+      4px 4px 0 var(--pink-soft),
+      5px 5px 0 var(--ink);
+    transform: rotate(-3deg);
+    position: relative;
+  }
+  .title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    height: 6px;
+    background:
+      radial-gradient(circle at 10% 50%, var(--gold) 2px, transparent 3px),
+      radial-gradient(circle at 30% 50%, var(--gold) 2px, transparent 3px),
+      radial-gradient(circle at 50% 50%, var(--gold) 2px, transparent 3px),
+      radial-gradient(circle at 70% 50%, var(--gold) 2px, transparent 3px),
+      radial-gradient(circle at 90% 50%, var(--gold) 2px, transparent 3px);
+  }
+  .subtitle {
+    font-family: 'Caveat', cursive;
+    font-size: 28px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .subtitle::before,
+  .subtitle::after {
+    content: '~';
+    color: var(--pink-soft);
+    margin: 0 8px;
+    font-weight: 700;
+  }
 
-  .signature{
-    position:absolute;
-    bottom: 22px;
+  /* ============ BOTTOM LABEL ============ */
+  .photo-label {
+    position: absolute;
+    bottom: 38px;
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'Fraunces', serif;
-    font-style: italic;
+    text-align: center;
+    z-index: 12;
+  }
+  .photo-label .tiny-heart {
+    display: inline-block;
+    width: 14px;
+    height: 13px;
+    position: relative;
+    vertical-align: middle;
+    margin: 0 6px;
+  }
+  .photo-label .tiny-heart::before,
+  .photo-label .tiny-heart::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    background: var(--cherry);
+    border-radius: 8px 8px 0 0;
+    top: 0;
+    box-shadow: inset -1px 1px 0 rgba(255,255,255,0.3);
+  }
+  .photo-label .tiny-heart::before {
+    left: 0;
+    transform: rotate(-45deg);
+    transform-origin: 50% 100%;
+  }
+  .photo-label .tiny-heart::after {
+    right: 0;
+    transform: rotate(45deg);
+    transform-origin: 50% 100%;
+  }
+  .photo-label .label-text {
+    font-family: 'Quicksand', sans-serif;
     font-size: 13px;
-    color: var(--pink-deep);
-    letter-spacing: 0.3em;
+    letter-spacing: 5px;
+    color: var(--pink-shadow);
+    font-weight: 700;
     text-transform: uppercase;
-    opacity: 0.7;
   }
-  .signature::before, .signature::after{
-    content: "❀";
-    color: var(--gold);
-    margin: 0 12px;
-  }
-
-  /* Number badge */
-  .num-badge{
-    position:absolute;
-    top: 200px;
-    left: 60px;
-    width: 56px; height: 56px;
-    background: var(--red);
-    border: 2.5px solid var(--ink);
-    border-radius: 50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-style: italic;
-    font-size: 26px;
-    color: #FFF;
-    z-index: 18;
-    transform: rotate(-15deg);
-    box-shadow: 3px 3px 0 var(--pink-blush), 4px 4px 0 var(--ink);
-  }
-  .num-badge::before{
-    content:"✦"; position:absolute;
-    top: -8px; right: -8px;
-    font-size: 18px;
-    color: var(--gold);
-    text-shadow: 1px 1px 0 var(--ink);
-  }
-
-  .num-badge-2{
-    position:absolute;
-    top: 200px;
-    right: 60px;
-    width: 50px; height: 50px;
-    background: var(--gold);
-    border: 2.5px solid var(--ink);
-    border-radius: 50%;
-    display:flex; align-items:center; justify-content:center;
+  .photo-label .label-script {
+    display: block;
     font-family: 'Caveat', cursive;
-    font-weight: 600;
-    font-size: 18px;
-    color: var(--ink);
+    font-size: 22px;
+    color: var(--cherry);
+    margin-top: 6px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  /* Date strip */
+  .date-strip {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 3px;
+    z-index: 12;
+    background: var(--white);
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1.5px dashed var(--pink-soft);
+  }
+
+  /* ============ DECORATIVE STRIP (top & bottom inner borders) ============ */
+  .deco-strip {
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    height: 18px;
+    z-index: 8;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .deco-strip.top { top: 200px; }
+  .deco-strip.bottom { bottom: 130px; }
+
+  .deco-strip .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--pink-soft);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px var(--white);
+  }
+  .deco-strip .dot.red {
+    background: var(--cherry);
+    box-shadow: 0 0 0 1.5px var(--white);
+  }
+  .deco-strip .dot.gold {
+    background: var(--gold);
+    box-shadow: 0 0 0 1.5px var(--white);
+  }
+
+  /* ============ POSITIONING SPARKLES & FLOWERS ============ */
+  .s1 { top: 24%; left: 6%; }
+  .s2 { top: 18%; right: 28%; transform: scale(0.8); }
+  .s3 { top: 60%; left: 4%; transform: scale(1.1); }
+  .s4 { top: 70%; right: 5%; transform: scale(0.9); }
+  .s5 { top: 88%; left: 22%; }
+  .s6 { top: 85%; right: 22%; transform: scale(0.85); }
+  .s7 { top: 40%; left: 13%; transform: scale(0.7); }
+  .s8 { top: 50%; right: 12%; transform: scale(0.75); }
+  .s9 { top: 33%; left: 30%; transform: scale(0.6); }
+  .s10 { top: 95%; right: 35%; transform: scale(0.8); }
+
+  .st1 { top: 22%; right: 6%; }
+  .st2 { top: 75%; left: 8%; transform: scale(1.2); }
+  .st3 { top: 35%; right: 4%; transform: scale(0.9); }
+
+  .t1 { top: 25%; left: 18%; }
+  .t2 { top: 80%; right: 18%; }
+  .t3 { top: 50%; left: 6%; }
+  .t4 { top: 45%; right: 6%; }
+  .t5 { top: 90%; left: 50%; }
+
+  .f1 { top: 14%; left: 24%; }
+  .f2 { top: 20%; right: 22%; transform: scale(0.85); }
+  .f3 { top: 78%; left: 16%; transform: scale(0.9); }
+  .f4 { top: 82%; right: 14%; transform: scale(1.1); }
+  .f5 { top: 55%; left: 10%; transform: scale(0.7); }
+  .f6 { top: 60%; right: 9%; transform: scale(0.8); }
+
+  /* ============ ANIMATIONS ============ */
+  @keyframes twinkle {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.6; transform: scale(0.8) rotate(45deg); }
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  @keyframes flutter {
+    0%, 100% { transform: rotate(-8deg) scale(1); }
+    50% { transform: rotate(8deg) scale(1.02); }
+  }
+
+  .sparkle.cross { animation: twinkle 2.5s ease-in-out infinite; }
+  .sparkle.star5 { animation: twinkle 3s ease-in-out infinite; animation-delay: 0.4s; }
+  .sparkle.solid { animation: twinkle 2.2s ease-in-out infinite; animation-delay: 0.8s; }
+
+  .kitty { animation: bob 4s ease-in-out infinite; }
+  .ribbon .loop.l { animation: sway 3s ease-in-out infinite; transform-origin: right center; }
+  .ribbon .loop.r { animation: sway 3s ease-in-out infinite reverse; transform-origin: left center; }
+
+  /* ============ STAMP / DATE STICKER ============ */
+  .stamp {
+    position: absolute;
+    bottom: 100px;
+    right: 40px;
+    width: 70px;
+    height: 70px;
+    border: 2.5px dashed var(--cherry);
+    border-radius: 50%;
+    transform: rotate(-15deg);
     z-index: 18;
-    transform: rotate(12deg);
-    box-shadow: -3px 3px 0 var(--pink-blush), -4px 4px 0 var(--ink);
-    text-align:center;
-    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.6);
+    text-align: center;
     padding: 4px;
   }
-
-  /* Side labels (vertical text) */
-  .side-label{
-    position:absolute;
-    font-family: 'Caveat', cursive;
+  .stamp::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid var(--cherry);
+    border-radius: 50%;
+  }
+  .stamp .stamp-text {
+    font-family: 'Pacifico', cursive;
+    font-size: 10px;
+    color: var(--cherry);
+    line-height: 1;
+  }
+  .stamp .stamp-year {
+    font-family: 'Quicksand', sans-serif;
     font-size: 14px;
-    color: var(--pink-deep);
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    opacity: 0.55;
-    z-index: 5;
-  }
-  .side-label.left{
-    left: 40px;
-    top: 50%;
-    transform: rotate(-90deg) translateX(50%);
-    transform-origin: left top;
-  }
-  .side-label.right{
-    right: 40px;
-    top: 50%;
-    transform: rotate(90deg) translateX(-50%);
-    transform-origin: right top;
+    color: var(--cherry);
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 2px;
   }
 
-  /* corner floral flourishes */
-  .corner-flourish{
-    position:absolute;
-    width: 100px; height: 100px;
-    z-index: 3;
+  /* Corner hearts decoration */
+  .corner-deco {
+    position: absolute;
+    z-index: 16;
   }
-  .corner-flourish.tl{ top: 25px; left: 25px; }
-  .corner-flourish.tr{ top: 25px; right: 25px; transform: scaleX(-1); }
-  .corner-flourish.bl{ bottom: 25px; left: 25px; transform: scaleY(-1); }
-  .corner-flourish.br{ bottom: 25px; right: 25px; transform: scale(-1,-1); }
+  .corner-deco.tl-heart { top: 175px; left: 175px; }
+  .corner-deco.br-heart { bottom: 165px; right: 175px; }
 
-  .corner-flourish::before{
-    content:""; position:absolute;
-    top: 0; left: 0;
-    width: 80px; height: 80px;
-    border-top: 2px solid var(--pink);
-    border-left: 2px solid var(--pink);
-    border-radius: 30px 0 0 0;
-    opacity: 0.6;
+  .heart-icon {
+    position: relative;
+    width: 22px;
+    height: 20px;
+  }
+  .heart-icon::before,
+  .heart-icon::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 18px;
+    background: var(--cherry);
+    border-radius: 12px 12px 0 0;
+    top: 0;
+    box-shadow: inset -2px 1px 0 rgba(255,255,255,0.3), 0 0 0 2px var(--ink);
+  }
+  .heart-icon::before {
+    left: 0;
+    transform: rotate(-45deg);
+    transform-origin: 50% 100%;
+  }
+  .heart-icon::after {
+    right: 0;
+    transform: rotate(45deg);
+    transform-origin: 50% 100%;
   }
 
-  /* Floating small kitties on sides */
-  .mini-kitty{
-    position:absolute;
-    width: 70px; height: 65px;
-    z-index: 11;
+  /* Polka dot accent corners */
+  .polka-corner {
+    position: absolute;
+    z-index: 8;
+    pointer-events: none;
   }
-  .mini-kitty .h{
-    position:absolute;
-    top: 10px; left: 6px;
-    width: 58px; height: 50px;
-    background: #FFF;
-    border: 2px solid var(--ink);
-    border-radius: 48% 52% 50% 50% / 55% 55% 45% 45%;
-  }
-  .mini-kitty .ear{
-    position:absolute;
-    width: 18px; height: 20px;
-    background: #FFF;
-    border: 2px solid var(--ink);
-    top: -2px;
-  }
-  .mini-kitty .ear.l{ left: 8px; border-radius: 60% 30% 50% 50%; transform: rotate(-18deg); }
-  .mini-kitty .ear.r{ right: 8px; border-radius: 30% 60% 50% 50%; transform: rotate(18deg); }
-  .mini-kitty .eye{
-    position:absolute;
-    width: 6px; height: 9px;
-    background: var(--ink);
+  .polka-corner.bl { bottom: 175px; left: 30px; width: 130px; height: 60px; }
+  .polka-corner.tr { top: 175px; right: 30px; width: 130px; height: 60px; }
+
+  .polka-corner .pd {
+    position: absolute;
+    background: var(--pink-soft);
     border-radius: 50%;
-    top: 28px;
+    box-shadow: 0 0 0 1.5px var(--white);
   }
-  .mini-kitty .eye.l{ left: 22px; }
-  .mini-kitty .eye.r{ right: 22px; }
-  .mini-kitty .nose{
-    position:absolute;
-    width: 8px; height: 5px;
-    background: var(--gold);
-    border: 1.5px solid var(--ink);
-    border-radius: 50%;
-    top: 40px; left: 50%;
-    transform: translateX(-50%);
-  }
-  .mini-kitty .bk{
-    position:absolute;
-    top: -3px; right: -2px;
-    width: 26px; height: 16px;
-  }
-  .mini-kitty .bk::before, .mini-kitty .bk::after{
-    content:""; position:absolute; top:0;
-    width: 12px; height: 15px;
-    background: var(--red);
-    border: 2px solid var(--ink);
-  }
-  .mini-kitty .bk::before{ left: 0; border-radius: 70% 30% 50% 50%; transform: rotate(-8deg); }
-  .mini-kitty .bk::after{ right: 0; border-radius: 30% 70% 50% 50%; transform: rotate(8deg); }
 
-  /* tiny dots scattered */
-  .sc{ position:absolute; border-radius:50%; }
-
-  /* Positioning decorations */
-  .dec{ position:absolute; z-index: 9; }
-
+  /* Responsive */
+  @media (max-width: 720px) {
+    .stage { aspect-ratio: 1 / 1.1; }
+    .title { font-size: 36px; }
+    .subtitle { font-size: 20px; }
+    .kitty, .ribbon { transform: scale(0.75); transform-origin: top left; }
+    .ribbon { transform-origin: top right; }
+    .deco-strip.top { top: 150px; }
+    .deco-strip.bottom { bottom: 100px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="booth">
+<div class="stage">
+  <div class="frame"></div>
 
-  <!-- Corner flourish borders -->
-  <div class="corner-flourish tl"></div>
-  <div class="corner-flourish tr"></div>
-  <div class="corner-flourish bl"></div>
-  <div class="corner-flourish br"></div>
-
-  <!-- TITLE -->
-  <div class="title-wrap">
-    <div class="title">Hello Kitty</div>
-    <div class="title-sub">sweet little memories</div>
+  <!-- Decorative strips -->
+  <div class="deco-strip top">
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+  </div>
+  <div class="deco-strip bottom">
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
+    <span class="dot red"></span>
+    <span class="dot gold"></span>
+    <span class="dot"></span>
   </div>
 
-  <!-- Number badges -->
-  <div class="num-badge">01</div>
-  <div class="num-badge-2">♡<br>2024</div>
+  <!-- Polka dot accent corners -->
+  <div class="polka-corner tr">
+    <span class="pd" style="width:8px;height:8px;top:0;left:20px;"></span>
+    <span class="pd" style="width:6px;height:6px;top:15px;left:50px;"></span>
+    <span class="pd" style="width:9px;height:9px;top:30px;left:80px;"></span>
+    <span class="pd" style="width:7px;height:7px;top:5px;left:95px;background:var(--cherry);"></span>
+    <span class="pd" style="width:5px;height:5px;top:45px;left:110px;background:var(--gold);"></span>
+  </div>
+  <div class="polka-corner bl">
+    <span class="pd" style="width:8px;height:8px;top:0;left:20px;"></span>
+    <span class="pd" style="width:6px;height:6px;top:15px;left:50px;"></span>
+    <span class="pd" style="width:9px;height:9px;top:30px;left:80px;"></span>
+    <span class="pd" style="width:7px;height:7px;top:5px;left:95px;background:var(--cherry);"></span>
+    <span class="pd" style="width:5px;height:5px;top:45px;left:110px;background:var(--gold);"></span>
+  </div>
 
-  <!-- SIDE LABELS -->
-  <div class="side-label left">press · smile · keep forever</div>
-  <div class="side-label right">made with love &amp; sugar</div>
-
-  <!-- TAPE -->
+  <!-- Tape pieces -->
   <div class="tape tl"></div>
   <div class="tape tr"></div>
   <div class="tape bl"></div>
   <div class="tape br"></div>
 
-  <!-- PHOTO WINDOW -->
+  <!-- HELLO KITTY (Top-Left) -->
+  <div class="kitty">
+    <div class="ear left"></div>
+    <div class="ear right"></div>
+    <div class="face"></div>
+    <div class="eye left"></div>
+    <div class="eye right"></div>
+    <div class="nose"></div>
+    <div class="whiskers">
+      <div class="whisker l1"></div>
+      <div class="whisker l2"></div>
+      <div class="whisker l3"></div>
+      <div class="whisker r1"></div>
+      <div class="whisker r2"></div>
+      <div class="whisker r3"></div>
+    </div>
+    <div class="kitty-bow">
+      <div class="loop l"></div>
+      <div class="loop r"></div>
+      <div class="knot"></div>
+    </div>
+  </div>
+
+  <!-- GIANT RIBBON BOW (Top-Right) -->
+  <div class="ribbon">
+    <div class="tail l"></div>
+    <div class="tail r"></div>
+    <div class="loop l"></div>
+    <div class="loop r"></div>
+    <div class="knot"></div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block">
+    <h1 class="title">Hello Kitty</h1>
+    <p class="subtitle">sweet moments</p>
+  </div>
+
+  <!-- Photo window -->
   <div class="photo-window"></div>
 
-  <!-- KITTY HEAD TOP LEFT -->
-  <div class="kitty kitty-top-left">
-    <div class="ear l"></div>
-    <div class="ear r"></div>
-    <div class="head">
-      <div class="eye l"></div>
-      <div class="eye r"></div>
-      <div class="nose"></div>
-      <div class="whisk w1"></div>
-      <div class="whisk w2"></div>
-      <div class="whisk w3"></div>
-      <div class="whisk w4"></div>
-      <div class="whisk w5"></div>
-      <div class="whisk w6"></div>
-    </div>
-    <div class="bow">
-      <div class="bow-l"></div>
-      <div class="bow-r"></div>
-      <div class="bow-c"></div>
-    </div>
-  </div>
+  <!-- Sparkles (5+) -->
+  <div class="sparkle cross s1"></div>
+  <div class="sparkle star5 s2"></div>
+  <div class="sparkle cross s3"></div>
+  <div class="sparkle solid s4"></div>
+  <div class="sparkle star5 s5"></div>
+  <div class="sparkle cross s6"></div>
+  <div class="sparkle solid s7"></div>
+  <div class="sparkle star5 s8"></div>
+  <div class="sparkle cross s9"></div>
+  <div class="sparkle solid s10"></div>
 
-  <!-- KITTY HEAD TOP RIGHT -->
-  <div class="kitty kitty-top-right">
-    <div class="ear l"></div>
-    <div class="ear r"></div>
-    <div class="head">
-      <div class="eye l"></div>
-      <div class="eye r"></div>
-      <div class="nose"></div>
-      <div class="whisk w1"></div>
-      <div class="whisk w2"></div>
-      <div class="whisk w3"></div>
-      <div class="whisk w4"></div>
-      <div class="whisk w5"></div>
-      <div class="whisk w6"></div>
-    </div>
-    <div class="bow">
-      <div class="bow-l"></div>
-      <div class="bow-r"></div>
-      <div class="bow-c"></div>
-    </div>
-  </div>
+  <div class="sparkle star5 st1"></div>
+  <div class="sparkle star5 st2"></div>
+  <div class="sparkle cross st3"></div>
 
-  <!-- MINI KITTY LEFT SIDE -->
-  <div class="mini-kitty" style="top: 420px; left: 30px; transform: rotate(-8deg);">
-    <div class="ear l"></div>
-    <div class="ear r"></div>
-    <div class="h">
-      <div class="eye l"></div>
-      <div class="eye r"></div>
-      <div class="nose"></div>
-    </div>
-    <div class="bk"></div>
-  </div>
+  <!-- Tiny sparkles -->
+  <div class="sparkle tiny t1"></div>
+  <div class="sparkle tiny t2"></div>
+  <div class="sparkle tiny t3"></div>
+  <div class="sparkle tiny t4"></div>
+  <div class="sparkle tiny t5"></div>
 
-  <!-- MINI KITTY RIGHT SIDE -->
-  <div class="mini-kitty" style="top: 480px; right: 30px; transform: rotate(10deg) scaleX(-1);">
-    <div class="ear l"></div>
-    <div class="ear r"></div>
-    <div class="h">
-      <div class="eye l"></div>
-      <div class="eye r"></div>
-      <div class="nose"></div>
-    </div>
-    <div class="bk"></div>
-  </div>
-
-  <!-- BOWS scattered -->
-  <div class="dec bow pink" style="top: 180px; left: 230px; transform: rotate(-15deg) scale(0.65);">
-    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
-  </div>
-  <div class="dec bow gold" style="top: 195px; right: 240px; transform: rotate(20deg) scale(0.6);">
-    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
-  </div>
-  <div class="dec bow red" style="bottom: 280px; left: 220px; transform: rotate(-25deg) scale(0.7);">
-    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
-  </div>
-  <div class="dec bow pink" style="bottom: 290px; right: 230px; transform: rotate(15deg) scale(0.65);">
-    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
-  </div>
-
-  <!-- STARS -->
-  <div class="dec star" style="top: 300px; left: 100px; transform: rotate(15deg);">
-    <div class="star-4"><div class="dot"></div></div>
-  </div>
-  <div class="dec star" style="top: 340px; right: 100px; transform: rotate(-20deg) scale(0.8);">
-    <div class="star-4"><div class="dot"></div></div>
-  </div>
-  <div class="dec star" style="bottom: 360px; left: 110px; transform: rotate(-10deg) scale(0.7);">
-    <div class="star-4"><div class="dot"></div></div>
-  </div>
-  <div class="dec star" style="bottom: 380px; right: 110px; transform: rotate(25deg) scale(0.85);">
-    <div class="star-4"><div class="dot"></div></div>
-  </div>
-
-  <div class="dec" style="top: 380px; left: 50px; transform: scale(0.7);">
-    <div class="star-burst"><i></i><i></i><i></i><i></i><div class="core"></div></div>
-  </div>
-  <div class="dec" style="bottom: 320px; right: 50px; transform: scale(0.6) rotate(20deg);">
-    <div class="star-burst"><i></i><i></i><i></i><i></i><div class="core"></div></div>
-  </div>
-
-  <!-- FLOWERS -->
-  <div class="dec flower" style="top: 270px; left: 200px; transform: scale(0.7) rotate(10deg);">
+  <!-- Flowers (3+) -->
+  <div class="flower f1">
     <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
     <div class="center"></div>
   </div>
-  <div class="dec flower white" style="top: 285px; right: 200px; transform: scale(0.6) rotate(-15deg);">
+  <div class="flower f2">
     <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
     <div class="center"></div>
   </div>
-  <div class="dec flower red" style="bottom: 330px; left: 180px; transform: scale(0.65) rotate(-20deg);">
+  <div class="flower f3">
     <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
     <div class="center"></div>
   </div>
-  <div class="dec flower white" style="bottom: 350px; right: 170px; transform: scale(0.7) rotate(15deg);">
+  <div class="flower f4">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <div class="flower small f5">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <div class="flower small f6">
     <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
     <div class="center"></div>
   </div>
 
-  <!-- HEARTS -->
-  <div class="dec heart" style="top: 250px; left: 350px; transform: scale(0.8) rotate(-10deg);"></div>
-  <div class="dec heart" style="top: 240px; right: 350px; transform: scale(0.7) rotate(15deg);"></div>
-  <div class="dec heart" style="bottom: 300px; left: 360px; transform: scale(0.85) rotate(8deg);"></div>
-  <div class="dec heart" style="bottom: 310px; right: 360px; transform: scale(0.75) rotate(-12deg);"></div>
-
-  <!-- STRAWBERRIES -->
-  <div class="dec strawberry" style="top: 320px; left: 60px; transform: rotate(-15deg);">
-    <div class="leaf"></div>
-    <div class="body"></div>
-    <div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div>
+  <!-- Corner heart accents -->
+  <div class="corner-deco tl-heart">
+    <div class="heart-icon"></div>
   </div>
-  <div class="dec strawberry" style="bottom: 300px; right: 60px; transform: rotate(20deg) scale(0.85);">
-    <div class="leaf"></div>
-    <div class="body"></div>
-    <div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div>
+  <div class="corner-deco br-heart">
+    <div class="heart-icon"></div>
   </div>
 
-  <!-- Small dots scattered -->
-  <div class="sc dot-gold" style="top: 230px; left: 320px; width:5px; height:5px;"></div>
-  <div class="sc dot-pink" style="top: 215px; left: 380px; width:4px; height:4px;"></div>
-  <div class="sc dot-white" style="top: 260px; left: 440px; width:6px; height:6px;"></div>
-  <div class="sc dot-gold" style="top: 230px; right: 320px; width:5px; height:5px;"></div>
-  <div class="sc dot-pink" style="top: 215px; right: 380px; width:4px; height:4px;"></div>
-  <div class="sc dot-white" style="top: 260px; right: 440px; width:6px; height:6px;"></div>
-  <div class="sc dot-gold" style="bottom: 260px; left: 320px; width:5px; height:5px;"></div>
-  <div class="sc dot-pink" style="bottom: 275px; left: 380px; width:4px; height:4px;"></div>
-  <div class="sc dot-gold" style="bottom: 260px; right: 320px; width:5px; height:5px;"></div>
-  <div class="sc dot-pink" style="bottom: 275px; right: 380px; width:4px; height:4px;"></div>
-  <div class="sc dot-white" style="bottom: 240px; left: 420px; width:5px; height:5px;"></div>
-  <div class="sc dot-white" style="bottom: 240px; right: 420px; width:5px; height:5px;"></div>
-
-  <!-- DATE / SIGNATURE -->
-  <div class="date-strip">♡ taken on <span>november · 01</span> ♡</div>
-  <div class="signature">a little piece of joy</div>
-
-  <!-- Corner mini flowers -->
-  <div class="dec flower" style="top: 130px; left: 160px; transform: scale(0.5) rotate(20deg);">
-    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
-    <div class="center"></div>
+  <!-- Photo label -->
+  <div class="photo-label">
+    <div>
+      <span class="tiny-heart"></span>
+      <span class="label-text">Purr-fect Day</span>
+      <span class="tiny-heart"></span>
+    </div>
+    <span class="label-script">made with love</span>
   </div>
-  <div class="dec flower" style="top: 130px; right: 160px; transform: scale(0.5) rotate(-20deg);">
-    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
-    <div class="center"></div>
+
+  <!-- Date stamp -->
+  <div class="stamp">
+    <span class="stamp-text">kitty</span>
+    <span class="stamp-year">2024</span>
   </div>
+
+  <!-- Date strip -->
+  <div class="date-strip">★  ·  photo  ·  booth  ·  ★  ·  snap  ·  smile  ·  ★</div>
 
 </div>
 
