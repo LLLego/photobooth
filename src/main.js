@@ -28,11 +28,13 @@ async function boot() {
     console.error('Missing #app mount point.');
     return;
   }
+  mount.innerHTML = '<p style="color:green">boot() started...</p>';
 
   // Supabase optional — app works offline
   if (!isSupabaseConfigured) {
     console.warn('[boot] Supabase not configured — running in offline mode');
   }
+  mount.innerHTML += '<p>supabase check done</p>';
 
   const stored = loadStoredPrefs();
   const basePrefs = getState().preferences;
@@ -95,13 +97,16 @@ async function boot() {
     set({ user: null, initialized: true });
   }
   startRouter(mount);
+  mount.innerHTML += '<p>router started</p>';
   mountToaster();
   mountNavigationHost();
 
   // Default to home — no auth required
   if (!initial?.session) {
+    mount.innerHTML += '<p>navigating home...</p>';
     navigate('home', {}, { replace: true });
   }
+  mount.innerHTML += '<p>boot() done!</p>';
 }
 
 function mountLoading(mount) {
