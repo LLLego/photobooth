@@ -64,6 +64,7 @@ async function boot() {
   defineRoute('gallery', renderGallery);
   defineRoute('settings', renderSettings);
 
+  let initial = null;
   if (isSupabaseConfigured) {
     onAuthStateChange(async (event, session) => {
       set({ user: session?.user || null, initialized: true });
