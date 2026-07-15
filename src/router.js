@@ -55,11 +55,6 @@ async function renderRoute(name, params) {
     navigate('home', {}, { replace: true });
     return;
   }
-  const session = await getSession();
-  if (!session && name !== 'login') {
-    navigate('login', {}, { replace: true });
-    return;
-  }
   if (isRendering) return;
   isRendering = true;
   try {
