@@ -158,7 +158,7 @@ function renderGrid(gallery, mount) {
   if (!gallery.items.length) {
     const take = Button({ label: 'Take a photo', variant: 'primary' });
     take.addEventListener('click', () => navigate('home'));
-    const empty = EmptyState({ title: 'No photos yet', message: 'Take your first one to fill this space.' , action: take });
+    const empty = EmptyState({ title: 'No photos yet ✨ Take your first one!', message: 'Your gallery is empty — capture a strip and it will appear here.', action: take });
     empty.classList.add('col-span-full');
     mount.append(empty);
     return;

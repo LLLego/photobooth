@@ -200,8 +200,7 @@ export async function renderSingleCamera(mount) {
     try {
       await startCountdown(stage, { duration: getState().preferences.countdownDuration });
       const theme = await loadTheme(getState().preferences.themeId || 'minimal');
-      const slots = (theme.photoSlots || {})[getState().capture.layout || layout] || [{ x: 0, y: 0, w: 1, h: 1 }];
-      const { blob } = await takePhoto(videoEl, theme?.frame?.url || null, theme, { slots, filter: getFilterCSS(getState().preferences.filterId || 'original') });
+      const { blob } = await takePhoto(videoEl, null, theme, { filter: getFilterCSS(getState().preferences.filterId || 'original') });
       localPhotos.push(blob);
       renderReview();
       updateCount();
