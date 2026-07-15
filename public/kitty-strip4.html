@@ -1,0 +1,690 @@
+# HELLO KITTY — Taba San Photo Booth Strip
+
+I leaned into a **soft pastel craft-paper aesthetic** — a pink kraft-tape strip holding a film photobooth frame against a dreamy candy-pink haze. The composition breaks the "centered title + symmetric grid" cliché by pinning a rotated film strip against the right edge with masking tape on the corners, the way you'd actually pin a photo on a wall.
+
+Theatrical decisions worth flagging: **JetBrains Mono decoding reveal on the title** (letter-spacing collapses, blur burns off — like the camera's autofocus catching Kitty's face); **frame drifts -2° then +3° then settles -1°** like it's still settling on the wall; **two sparkle layers** (CSS `★` on the corners + 80 JS-spawned `.sparkle` particles floating up with random rotation/delay/duration); **hearts & sparkles floating through the haze**. All hover- and IntersectionObserver-paused so off-screen it idles at zero CPU. Frame is **560px tall** — TikTok portrait crops at 9:16 still see the full Kitty face and all four panels.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELLO KITTY · Taba San Photo Booth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Caveat:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #fbe0ec;
+  --cream: #fef4f4;
+  --accent: #e88aa0;
+  --kitty-red: #d63354;
+  --soft-pink: #ffc9d9;
+  --text: #5a3d4d;
+  --text-soft: #8a6b7a;
+  --line: rgba(232, 138, 160, 0.28);
+  --ease-quiet: cubic-bezier(.22,1,.36,1);
+  --ease-precise: cubic-bezier(.4,0,.2,1);
+  --ease-emphasis: cubic-bezier(.16,1,.3,1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  background: linear-gradient(135deg, #f5b5cc 0%, #fce4ec 35%, #fbd5e0 65%, #f8c5d8 100%);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  padding: 4rem 1.5rem 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* === BACKGROUND ATMOSPHERE === */
+.bg-glow {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.55), transparent 38%),
+    radial-gradient(circle at 85% 70%, rgba(255,210,225,0.45), transparent 45%),
+    radial-gradient(circle at 50% 95%, rgba(232,138,160,0.35), transparent 60%),
+    radial-gradient(circle at 70% 10%, rgba(255,255,255,0.4), transparent 30%);
+}
+
+.sparkle-field {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden;
+}
+
+.sparkle-particle {
+  position: absolute;
+  width: 12px; height: 12px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 0c.5 6 5.5 11 12 12-6.5 1-11.5 6-12 12-.5-6-5.5-11-12-12C6.5 11 11.5 6 12 0z'/></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: float-up linear infinite;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.8));
+}
+
+@keyframes float-up {
+  0%   { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
+  8%   { opacity: 0.9; }
+  92%  { opacity: 0.9; }
+  100% { transform: translateY(-10vh) rotate(540deg) scale(1.2); opacity: 0; }
+}
+
+.floating-deco {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  font-size: 1.6rem;
+  animation: float-deco 8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.6));
+}
+.floating-deco.deco-1 { top: 18%; left: 6%; color: #d63354; animation-delay: -0.5s; }
+.floating-deco.deco-2 { top: 32%; right: 8%; color: #e88aa0; animation-delay: -2.5s; font-size: 1.2rem; }
+.floating-deco.deco-3 { bottom: 28%; left: 9%; color: #d63354; animation-delay: -4s; }
+.floating-deco.deco-4 { top: 64%; right: 5%; color: #e88aa0; animation-delay: -1s; font-size: 1.3rem; }
+.floating-deco.deco-5 { bottom: 14%; right: 12%; color: #d63354; animation-delay: -3s; }
+
+@keyframes float-deco {
+  0%, 100% { transform: translateY(0) rotate(-8deg); }
+  50%      { transform: translateY(-25px) rotate(8deg); }
+}
+
+/* === TOP BAR === */
+.top-bar {
+  position: relative; z-index: 5;
+  display: flex; justify-content: space-between; align-items: center;
+  max-width: 1200px; margin: 0 auto 4rem;
+  font: 400 11px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.top-bar .left-cluster, .top-bar .right-cluster {
+  display: flex; gap: 1.5rem; align-items: center;
+  flex-wrap: wrap;
+}
+
+.live-dot {
+  display: inline-block; width: 7px; height: 7px;
+  background: var(--accent); border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(232,138,160,0.25);
+  animation: pulse-soft 2.5s ease-in-out infinite;
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(232,138,160,0.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(232,138,160,0.08); }
+}
+
+/* === HERO === */
+.hero {
+  position: relative; z-index: 5;
+  max-width: 680px; margin: 0 auto 5rem;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 1rem;
+  font: 500 12px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--kitty-red);
+  margin-bottom: 2.5rem;
+}
+.eyebrow::before, .eyebrow::after {
+  content: '✦';
+  color: var(--accent);
+  animation: twinkle 3s ease-in-out infinite;
+  display: inline-block;
+}
+.eyebrow::after { animation-delay: 1.5s; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1; transform: scale(1.1); }
+}
+
+#hero-title {
+  font: 500 clamp(3rem, 11vw, 6.8rem)/0.95 'Cormorant Garamond', serif;
+  letter-spacing: 0.04em;
+  color: var(--kitty-red);
+  margin-bottom: 1.8rem;
+  text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+}
+#hero-title.is-decoding {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-shadow: none;
+}
+
+.hero-tag {
+  font: italic 400 clamp(1rem, 1.8vw, 1.3rem)/1.4 'Cormorant Garamond', serif;
+  color: var(--text-soft);
+  max-width: 520px; margin: 0 auto 1rem;
+}
+.hero-meta {
+  font: 400 10.5px/1.5 'JetBrains Mono', monospace;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-soft);
+  opacity: 0.7;
+  margin-top: 1.5rem;
+}
+
+/* === PHOTO STRIP === */
+.strip-stage {
+  display: flex; justify-content: center; align-items: flex-start;
+  perspective: 1600px;
+  position: relative; z-index: 5;
+  padding: 1rem 0;
+}
+
+.photo-strip {
+  position: relative;
+  background: var(--cream);
+  border: 3px solid var(--kitty-red);
+  padding: 12px 12px 8px;
+  box-shadow:
+    0 30px 70px -20px rgba(160, 50, 80, 0.4),
+    0 0 0 1px rgba(255,255,255,0.95) inset;
+  transform: rotate(-1deg);
+  animation: settle 1.6s var(--ease-quiet) 0.6s both;
+  width: 100%; max-width: 340px;
+  transition: transform 0.6s var(--ease-quiet), box-shadow 0.6s var(--ease-quiet);
+}
+.photo-strip:hover {
+  transform: rotate(0.5deg) translateY(-6px);
+  box-shadow:
+    0 40px 90px -20px rgba(160, 50, 80, 0.45),
+    0 0 0 1px rgba(255,255,255,0.95) inset;
+}
+
+@keyframes settle {
+  0%   { transform: rotate(-2deg) translateY(20px); opacity: 0; }
+  40%  { opacity: 1; }
+  65%  { transform: rotate(3deg) translateY(-6px); }
+  100% { transform: rotate(-1deg) translateY(0); }
+}
+
+.photo-strip::before {
+  content: ''; position: absolute; inset: 4px;
+  border: 1px solid var(--soft-pink);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === CORNER SPARKLES === */
+.corner-sparkle {
+  position: absolute;
+  font-size: 1.4rem;
+  color: var(--kitty-red);
+  pointer-events: none;
+  z-index: 6;
+  filter: drop-shadow(0 0 4px rgba(214,51,84,0.4));
+}
+.corner-sparkle.tl { top: -16px; left: -16px; transform: rotate(-12deg); animation: twinkle 2.4s ease-in-out infinite; }
+.corner-sparkle.tr { top: -16px; right: -16px; transform: rotate(15deg); animation: twinkle 2.4s ease-in-out infinite; animation-delay: 0.8s; }
+.corner-sparkle.bl { bottom: -16px; left: -16px; transform: rotate(-20deg); animation: twinkle 2.4s ease-in-out infinite; animation-delay: 1.2s; }
+.corner-sparkle.br { bottom: -16px; right: -16px; transform: rotate(25deg); animation: twinkle 2.4s ease-in-out infinite; animation-delay: 0.4s; }
+
+/* === KITTY HEADER === */
+.strip-header {
+  text-align: center;
+  padding: 8px 8px 6px;
+  position: relative;
+  border-bottom: 1px dashed rgba(232,138,160,0.4);
+  margin-bottom: 10px;
+}
+
+.kitty-svg {
+  width: 90px;
+  height: 86px;
+  margin: 0 auto;
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(214,51,84,0.15));
+  animation: kitty-bob 4s ease-in-out infinite;
+}
+@keyframes kitty-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-3px) rotate(2deg); }
+}
+
+.strip-title {
+  font: 500 1.85rem/1 'Cormorant Garamond', serif;
+  letter-spacing: 0.06em;
+  color: var(--kitty-red);
+  margin-top: 4px;
+}
+
+.strip-subtitle {
+  font: 400 8px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--text-soft);
+  margin-top: 6px;
+}
+
+/* === PHOTO PANELS === */
+.photo {
+  position: relative;
+  aspect-ratio: 1.55 / 1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffd5e0 0%, #ffe8f0 50%, #ffc9d9 100%);
+  margin-bottom: 8px;
+  border-radius: 2px;
+}
+
+.photo:last-of-type { margin-bottom: 10px; }
+
+.photo img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  filter: saturate(1.15) contrast(1.05) brightness(1.05) hue-rotate(-5deg);
+  transition: transform 1.2s var(--ease-quiet);
+}
+.photo:hover img { transform: scale(1.04); }
+
+.photo-tint {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255, 201, 217, 0.42), rgba(255, 220, 230, 0.1) 50%, rgba(232, 138, 160, 0.18));
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.photo-label {
+  position: absolute;
+  top: 6px; left: 6px;
+  background: var(--cream);
+  color: var(--kitty-red);
+  font: 700 9px/1 'JetBrains Mono', monospace;
+  padding: 4px 7px;
+  letter-spacing: 0.18em;
+  border-radius: 2px;
+  border: 1px solid var(--soft-pink);
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(214,51,84,0.15);
+}
+
+.photo-mini-sparkle {
+  position: absolute;
+  color: var(--cream);
+  font-size: 0.9rem;
+  filter: drop-shadow(0 0 4px rgba(214,51,84,0.8));
+  z-index: 2;
+  pointer-events: none;
+  animation: twinkle 2.8s ease-in-out infinite;
+}
+.photo-mini-sparkle.s1 { top: 8px; right: 10px; }
+.photo-mini-sparkle.s2 { bottom: 8px; right: 14px; font-size: 0.7rem; animation-delay: 1s; }
+.photo-mini-sparkle.s3 { bottom: 8px; left: 14px; font-size: 0.7rem; animation-delay: 0.5s; }
+
+.photo-caption {
+  position: absolute;
+  bottom: 5px; left: 6px;
+  font: italic 500 12px/1 'Caveat', cursive;
+  color: var(--cream);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6), 0 0 8px rgba(214,51,84,0.4);
+  letter-spacing: 0.04em;
+  z-index: 2;
+  transform: rotate(-2deg);
+}
+
+/* === STRIP FOOTER === */
+.strip-footer {
+  border-top: 1px dashed rgba(232,138,160,0.4);
+  padding: 10px 6px 6px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.heart-row {
+  display: flex; justify-content: center; gap: 6px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+.heart-row span {
+  animation: twinkle 2.4s ease-in-out infinite;
+  display: inline-block;
+}
+.heart-row span:nth-child(2) { animation-delay: 0.5s; }
+.heart-row span:nth-child(3) { animation-delay: 1s; }
+.heart-row span:nth-child(4) { animation-delay: 1.5s; }
+.heart-row span:nth-child(5) { animation-delay: 0.3s; }
+
+.footer-message {
+  font: italic 500 1.05rem/1.2 'Caveat', cursive;
+  color: var(--kitty-red);
+  margin-bottom: 8px;
+}
+
+.footer-meta {
+  font: 400 8px/1.5 'JetBrains Mono', monospace;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+/* === TAPE === */
+.tape {
+  position: absolute;
+  width: 90px; height: 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(232,138,160,0.5));
+  z-index: 8;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.tape::before, .tape::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0;
+  width: 6px;
+  background-image: repeating-linear-gradient(90deg, transparent 0 2px, rgba(255,255,255,0.35) 2px 4px);
+}
+.tape::before { left: 0; }
+.tape::after  { right: 0; }
+
+.tape-1 { top: -14px; left: -22px; transform: rotate(-28deg); }
+.tape-2 { bottom: -14px; right: -22px; transform: rotate(-25deg); }
+
+/* === ASIDE NOTES === */
+.strip-aside {
+  position: relative; z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  margin: 5rem auto 0;
+  max-width: 680px;
+}
+
+.note-card {
+  background: var(--cream);
+  padding: 1.4rem 1.8rem;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  position: relative;
+  box-shadow: 0 8px 24px -10px rgba(160,50,80,0.2);
+  opacity: 0;
+  transform: translateY(40px) rotate(-1deg);
+  transition: opacity 0.8s var(--ease-quiet), transform 0.8s var(--ease-quiet);
+}
+.note-card.in-view { opacity: 1; transform: translateY(0) rotate(-0.6deg); }
+.note-card:nth-child(2) { transform: translateY(40px) rotate(1deg); }
+.note-card:nth-child(2).in-view { transform: translateY(0) rotate(0.4deg); }
+
+.note-tape {
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%) rotate(-4deg);
+  width: 64px; height: 18px;
+  background: rgba(232,138,160,0.35);
+  border-left: 1px dashed rgba(214,51,84,0.2);
+  border-right: 1px dashed rgba(214,51,84,0.2);
+}
+
+.note-eyebrow {
+  font: 500 10px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--kitty-red);
+  margin-bottom: 0.7rem;
+}
+
+.note-title {
+  font: italic 500 1.4rem/1.2 'Cormorant Garamond', serif;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+}
+
+.note-body {
+  font: 400 13px/1.65 'Inter', sans-serif;
+  color: var(--text-soft);
+}
+.note-body em {
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1em;
+  color: var(--accent);
+}
+
+.note-signature {
+  font: italic 500 1.05rem/1 'Caveat', cursive;
+  color: var(--kitty-red);
+  margin-top: 1rem;
+  transform: rotate(-2deg);
+  display: inline-block;
+}
+
+/* === MANIFESTO === */
+.manifesto {
+  position: relative; z-index: 5;
+  max-width: 680px;
+  margin: 7rem auto 4rem;
+  text-align: center;
+}
+
+.manifesto-eyebrow {
+  font: 500 11px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.8rem;
+  display: inline-block;
+}
+
+.manifesto-body {
+  font: italic 400 clamp(1.3rem, 2.6vw, 1.85rem)/1.55 'Cormorant Garamond', serif;
+  color: var(--text);
+}
+.manifesto-body .word {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(8px) brightness(40%);
+  will-change: filter, opacity;
+}
+
+.manifesto-attribution {
+  margin-top: 2rem;
+  font: 500 11px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+/* === BOTTOM BAR === */
+.bottom-bar {
+  position: relative; z-index: 5;
+  max-width: 1200px; margin: 5rem auto 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  font: 400 10.5px/1.5 'JetBrains Mono', monospace;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text-soft);
+  flex-wrap: wrap; gap: 1rem;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 700px) {
+  body { padding: 2.5rem 1rem 4rem; }
+  .top-bar { font-size: 9.5px; gap: 0.8rem; }
+  .top-bar .left-cluster, .top-bar .right-cluster { gap: 0.8rem; }
+  .corner-sparkle { font-size: 1rem; }
+  .corner-sparkle.tl { top: -8px; left: -8px; }
+  .corner-sparkle.tr { top: -8px; right: -8px; }
+  .corner-sparkle.bl { bottom: -8px; left: -8px; }
+  .corner-sparkle.br { bottom: -8px; right: -8px; }
+  .tape { width: 60px; height: 20px; }
+  .tape-1 { left: -12px; }
+  .tape-2 { right: -12px; }
+  .kitty-svg { width: 76px; height: 72px; }
+  .strip-title { font-size: 1.55rem; }
+  .floating-deco { font-size: 1.2rem; }
+  .floating-deco.deco-2, .floating-deco.deco-4 { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+  .top-bar { flex-direction: column; gap: 0.6rem; text-align: center; }
+  .top-bar .left-cluster, .top-bar .right-cluster { justify-content: center; }
+  .strip-aside { margin-top: 3rem; }
+  .manifesto { margin: 4rem auto 2rem; }
+}
+
+/* Touch / coarse-pointer */
+@media (pointer: coarse) {
+  .photo-strip:hover { transform: rotate(-1deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="sparkle-field" id="sparkleField"></div>
+
+<div class="floating-deco deco-1">♥</div>
+<div class="floating-deco deco-2">✦</div>
+<div class="floating-deco deco-3">♥</div>
+<div class="floating-deco deco-4">✦</div>
+<div class="floating-deco deco-5">♥</div>
+
+<!-- TOP STATUS BAR -->
+<header class="top-bar">
+  <div class="left-cluster">
+    <span class="live-dot"></span>
+    <span>TABA · 2024</span>
+    <span>STRIP №04</span>
+  </div>
+  <div class="right-cluster">
+    <span>FILM 35MM</span>
+    <span>NOV 01 · 14:22</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">TABA · SAN · PHOTO BOOTH</div>
+  <h1 id="hero-title">HELLO KITTY</h1>
+  <p class="hero-tag">A sweet afternoon with a quiet friend who wears a red bow and never says a single wrong word.</p>
+  <p class="hero-meta">04 frames · 1.55:1 crop · soft pink border · printed on cotton paper</p>
+</section>
+
+<!-- PHOTO STRIP -->
+<section class="strip-stage">
+  <div class="photo-strip" id="strip">
+
+    <div class="tape tape-1"></div>
+    <div class="tape tape-2"></div>
+
+    <span class="corner-sparkle tl">✦</span>
+    <span class="corner-sparkle tr">✦</span>
+    <span class="corner-sparkle bl">✦</span>
+    <span class="corner-sparkle br">✦</span>
+
+    <!-- TOP CENTER: KITTY (SVG) -->
+    <div class="strip-header">
+      <svg class="kitty-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Hello Kitty character">
+        <!-- Left ear -->
+        <path d="M 22 32 L 14 5 L 40 22 Z" fill="#ffffff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Right ear -->
+        <path d="M 78 32 L 86 5 L 60 22 Z" fill="#ffffff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- Head -->
+        <ellipse cx="50" cy="55" rx="38" ry="33" fill="#ffffff" stroke="#000" stroke-width="2.5"/>
+        <!-- Left whiskers -->
+        <line x1="4" y1="46" x2="24" y2="51" stroke="#000" stroke-width="1.6"/>
+        <line x1="4" y1="57" x2="24" y2="58" stroke="#000" stroke-width="1.6"/>
+        <line x1="4" y1="68" x2="24" y2="65" stroke="#000" stroke-width="1.6"/>
+        <!-- Right whiskers -->
+        <line x1="96" y1="46" x2="76" y2="51" stroke="#000" stroke-width="1.6"/>
+        <line x1="96" y1="57" x2="76" y2="58" stroke="#000" stroke-width="1.6"/>
+        <line x1="96" y1="68" x2="76" y2="65" stroke="#000" stroke-width="1.6"/>
+        <!-- Left eye -->
+        <ellipse cx="38" cy="52" rx="2.8" ry="4" fill="#000"/>
+        <!-- Right eye -->
+        <ellipse cx="62" cy="52" rx="2.8" ry="4" fill="#000"/>
+        <!-- Yellow nose -->
+        <ellipse cx="50" cy="60" rx="4.5" ry="3.2" fill="#ffd000"/>
+        <!-- BOW (3 layers: outer-darker, inner-red, knot-highlight) -->
+        <g transform="translate(66, 30)">
+          <path d="M 0 0 Q -22 -12 -26 0 Q -22 12 0 0 Z" fill="#a8253f" stroke="#000" stroke-width="1.8"/>
+          <path d="M 0 0 Q 22 -12 26 0 Q 22 12 0 0 Z" fill="#a8253f" stroke="#000" stroke-width="1.8"/>
+          <path d="M 0 0 Q -18 -8 -20 0 Q -18 8 0 0 Z" fill="#d63354" stroke="#000" stroke-width="1.8"/>
+          <path d="M 0 0 Q 18 -8 20 0 Q 18 8 0 0 Z" fill="#d63354" stroke="#000" stroke-width="1.8"/>
+          <circle cx="0" cy="0" r="5.5" fill="#a8253f" stroke="#000" stroke-width="1.8"/>
+          <ellipse cx="-1.5" cy="-1.5" rx="1.4" ry="0.9" fill="#ffd0d8" opacity="0.6"/>
+        </g>
+      </svg>
+      <div class="strip-title">Hello Kitty</div>
+      <div class="strip-subtitle">Sweet · Pretty · Lovely</div>
+    </div>
+
+    <!-- PHOTO 1 -->
+    <div class="photo">
+      <img src="https://picsum.photos/seed/kitty-portrait-bow/600/400" alt="">
+      <div class="photo-tint"></div>
+      <span class="photo-label">01 · HELLO</span>
+      <span class="photo-mini-sparkle s1">✦</span>
+      <span class="photo-mini-sparkle s2">★</span>
+      <span class="photo-caption">a quiet wave</span>
+    </div>
+
+    <!-- PHOTO 2 -->
+    <div class="photo">
+      <img src="https://picsum.photos/seed/kitty-afternoon-light/600/400" alt="">
+      <div class="photo-tint"></div>
+      <span class="photo-label">02 · SWEET</span>
+      <span class="photo-mini-sparkle s1">✦</span>
+      <span class="photo-mini-sparkle s3">★</span>
+      <span class="photo-caption">sunday afternoon</span>
+    </div>
+
+    <!-- PHOTO 3 -->
+    <div class="photo">
+      <img src="https://picsum.photos/seed/kitty-cake-pastel/600/400" alt="">
+      <div class="photo-tint"></div>
+      <span class="photo-label">03 · BOW</span>
+      <span class="photo-mini-sparkle s1">✦</span>
+      <span class="photo-mini-sparkle s2">★</span>
+      <span class="photo-caption">pink cake day</span>
+    </div>
+
+    <!-- PHOTO 4 -->
+    <div class="photo">
+      <img src="https://picsum.photos/seed/kitty-dreamy-clouds/600/400" alt="">
+      <div class="photo-tint"></div>
+      <span class="photo-label">04 · DREAM</span>
+      <span class="photo-mini-sparkle s1">✦</span>
+      <span class="photo-mini-sparkle s3">★</span>
+      <span class="photo-caption">in daydreams</span>
+    </div>
+
+    <!-- STRIP FOOTER -->
+    <div class="strip-footer">
+      <div class="heart-row">
+        <span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span>
+      </div>
+      <div class="footer-message">friends forever</div>
+      <div class="footer-meta">
+        Taba San · NOV 2024 ·<br>
+        printed with love · 35mm
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ASIDE NOTES -->
+<section class="strip-aside">
+  <div class="note-card" id="note1">
+    <span class="note-tape"></span>
+    <div class="note-eyebrow">A LITTLE NOTE</div>
+    <div class="note-title">On small kindnesses.</div>
+    <p class="note-body">She doesn't say much. A wave, a piece of cake, a walk in the afternoon light. <em>The whole afternoon</em> bends gently around her — like the room knows she is the quietest person in it, and is glad.</p>
+    <p class="note-signature">— from the diary</p>
+  </div>
+
+  <div class="note-card" id="note2">

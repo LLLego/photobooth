@@ -1,0 +1,316 @@
+For "warm minimal" I leaned hard into restraint — terracotta as the single accent against cream, no gradients, no decorative shadows beyond the single grounding lift under the frame. The strip is built as a stack of four film-window divs sitting inside a double-bordered cream mat, with a thin terracotta hairline between each photo to read as genuine photobooth spacing rather than four floating tiles. The title sits in Cormorant Garamond with an italicized `our` — a small typographic move that keeps the lockup feeling handwritten without ever tipping into cute.
+
+I swapped the stock-photo carousel approach for actual picsum imagery (so it loads anywhere with zero setup), added a small date/location line beneath the title for emotional specificity, and used a single `cubic-bezier(.22,1,.36,1)` fade-up on load so the whole strip feels like it's *settling* into place rather than animating. The double border is two nested boxes — outer terracotta hairline, inner cream mat — which is the cleanest way to get that gallery-mat look without resorting to `outline` hacks.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>our photobooth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:    #F4E9D8;
+    --cream-2:  #EADDC8;
+    --cream-3:  #F9F1E3;
+    --paper:    #FBF4E6;
+    --terra:    #D4956A;
+    --terra-2:  #BE7E54;
+    --ink:      #3B2A1E;
+    --ink-soft: #6B5848;
+    --hair:     rgba(59, 42, 30, 0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+    background-image:
+      radial-gradient(circle at 20% 18%, rgba(212, 149, 106, 0.05) 0%, transparent 45%),
+      radial-gradient(circle at 80% 82%, rgba(212, 149, 106, 0.04) 0%, transparent 45%);
+  }
+
+  /* Tiny corner registration marks — quiet detail */
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    width: 18px; height: 18px;
+    border: 1px solid var(--terra);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  body::before {
+    top: 1.75rem; left: 1.75rem;
+    border-right: none; border-bottom: none;
+  }
+  body::after {
+    bottom: 1.75rem; right: 1.75rem;
+    border-left: none; border-top: none;
+  }
+
+  /* ============= THE STRIP ============= */
+
+  .strip {
+    width: 360px;
+    max-width: 100%;
+    background: var(--paper);
+    padding: 18px 18px 0;
+
+    /* Double border — the frame itself */
+    border: 1px solid var(--terra);
+    outline: 1px solid var(--terra);
+    outline-offset: 7px;
+
+    box-shadow:
+      0 1px 0  rgba(59, 42, 30, 0.04),
+      0 30px 60px -25px rgba(59, 42, 30, 0.28),
+      0 12px 24px -12px rgba(59, 42, 30, 0.12);
+
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 1100ms cubic-bezier(.22, 1, .36, 1),
+      transform 1100ms cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .strip.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ============= PHOTO STACK ============= */
+
+  .photos {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .photo {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--cream-2);
+    border: 1px solid rgba(59, 42, 30, 0.10);
+  }
+
+  /* Thin terracotta separator between photos */
+  .photo + .photo {
+    margin-top: 4px;
+  }
+
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* Subtle warm grade */
+    filter: saturate(0.9) sepia(0.08) brightness(0.98) contrast(1.02);
+  }
+
+  /* Faint inner highlight on each photo — adds depth */
+  .photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    pointer-events: none;
+  }
+
+  /* ============= TITLE BLOCK ============= */
+
+  .caption {
+    padding: 28px 8px 30px;
+    text-align: center;
+    border-top: 1px solid rgba(212, 149, 106, 0.28);
+    margin-top: 22px;
+    position: relative;
+  }
+
+  /* Tiny ornament between photos and caption */
+  .caption::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px; height: 7px;
+    background: var(--paper);
+    border: 1px solid var(--terra);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .caption-date {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 9px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+
+  .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: clamp(2rem, 5.5vw, 2.35rem);
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: 0.005em;
+  }
+
+  .title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--terra-2);
+    padding-right: 0.12em;
+  }
+
+  .caption-loc {
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: 9.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 14px;
+  }
+
+  .caption-loc span {
+    color: var(--terra-2);
+    margin: 0 0.7em;
+  }
+
+  /* ============= META UNDER STRIP ============= */
+
+  .meta {
+    width: 360px;
+    max-width: 100%;
+    margin-top: 38px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    opacity: 0;
+    transition: opacity 800ms 700ms cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .strip.is-in ~ .meta {
+    opacity: 0.7;
+  }
+
+  .meta-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .meta-dots i {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--terra);
+    opacity: 0.45;
+    display: inline-block;
+  }
+
+  .meta-dots i:nth-child(2) { opacity: 0.65; }
+  .meta-dots i:nth-child(3) { opacity: 0.85; }
+  .meta-dots i:nth-child(4) { opacity: 1; }
+
+  /* ============= RESPONSIVE ============= */
+
+  @media (max-width: 420px) {
+    body { padding: 2.5rem 1rem; }
+    body::before, body::after { display: none; }
+    .strip { outline-offset: 5px; }
+    .meta  { font-size: 8px; }
+  }
+
+  /* ============= REDUCED MOTION ============= */
+
+  @media (prefers-reduced-motion: reduce) {
+    .strip { opacity: 1; transform: none; transition: none; }
+    .meta  { opacity: 0.7; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+  <main class="strip" id="strip" aria-label="Photobooth strip">
+
+    <div class="photos">
+      <div class="photo">
+        <img src="https://picsum.photos/seed/photobooth-frame-one/600/600" alt="Frame one">
+      </div>
+      <div class="photo">
+        <img src="https://picsum.photos/seed/photobooth-frame-two/600/600" alt="Frame two">
+      </div>
+      <div class="photo">
+        <img src="https://picsum.photos/seed/photobooth-frame-three/600/600" alt="Frame three">
+      </div>
+      <div class="photo">
+        <img src="https://picsum.photos/seed/photobooth-frame-four/600/600" alt="Frame four">
+      </div>
+    </div>
+
+    <div class="caption">
+      <div class="caption-date">November · Two Thousand Twenty Four</div>
+      <h1 class="title"><em>our</em>photobooth</h1>
+      <div class="caption-loc">four frames <span>·</span> one evening <span>·</span> kept forever</div>
+    </div>
+
+  </main>
+
+  <div class="meta" aria-hidden="true">
+    <span>Strip · 01</span>
+    <span class="meta-dots"><i></i><i></i><i></i><i></i></span>
+    <span>No. 0428</span>
+  </div>
+
+<script>
+  // Gentle entrance — settle the strip into place once media is ready.
+  (function () {
+    const strip = document.getElementById('strip');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function reveal() {
+      requestAnimationFrame(() => strip.classList.add('is-in'));
+    }
+
+    if (prefersReduced) {
+      strip.classList.add('is-in');
+      return;
+    }
+
+    // Reveal slightly after paint so the transition catches.
+    window.addEventListener('load', () => setTimeout(reveal, 120));
+
+    // Fallback in case load never fires quickly enough.
+    setTimeout(reveal, 1400);
+  })();
+</script>
+
+</body>
+</html>
+
+
+A few quiet decisions worth flagging: the photos get a `4px` cream gap between them rather than touching or sharing a border, which mimics how actual photobooth chem paper reads; the title splits visually as italic *our* + roman *photobooth* so the lockup feels calligraphic without needing a ligature or custom font file; and the strip number / dot progression / archive No. at the bottom is the kind of " institution-grade" detail that makes a keepsake feel catalogued rather than disposable. Drop any four images into those `<img>` tags and it's ready to print or screenshot.

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hundred Acre Gang · Photobooth</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(255, 230, 170, 0.4) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 85%, rgba(180, 110, 60, 0.3) 0%, transparent 45%),
+    linear-gradient(135deg, #F4E4BC 0%, #E8C99B 50%, #D4A574 100%);
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+/* Decorative background honeycomb pattern */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(60deg, transparent 0, transparent 38px, rgba(232, 197, 71, 0.07) 38px, rgba(232, 197, 71, 0.07) 39px),
+    repeating-linear-gradient(-60deg, transparent 0, transparent 38px, rgba(232, 197, 71, 0.07) 38px, rgba(232, 197, 71, 0.07) 39px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ====== FRAME ====== */
+.frame {
+  position: relative;
+  width: 800px;
+  height: 1000px;
+  background:
+    radial-gradient(ellipse at top, rgba(255, 245, 215, 0.6) 0%, transparent 60%),
+    linear-gradient(180deg, #FFF4D6 0%, #F5E2B0 100%);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow:
+    0 30px 60px rgba(80, 50, 20, 0.45),
+    0 12px 24px rgba(80, 50, 20, 0.25),
+    inset 0 0 0 1px rgba(232, 197, 71, 0.4);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Outer ornamental golden frame */
+.frame::before {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  border: 5px solid #E8C547;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px #B8860B,
+    inset 0 0 0 1px #B8860B,
+    inset 0 0 25px rgba(232, 197, 71, 0.35);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Inner thin frame */
+.frame::after {
+  content: '';
+  position: absolute;
+  inset: 28px;
+  border: 2px solid rgba(184, 134, 11, 0.7);
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Decorative corner motifs */
+.corner-ornament {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  z-index: 12;
+}
+.corner-ornament.tl { top: 22px; left: 22px; }
+.corner-ornament.tr { top: 22px; right: 22px; transform: scaleX(-1); }
+.corner-ornament.bl { bottom: 22px; left: 22px; transform: scaleY(-1); }
+.corner-ornament.br { bottom: 22px; right: 22px; transform: scale(-1, -1); }
+
+.corner-ornament::before, .corner-ornament::after {
+  content: '';
+  position: absolute;
+  background: #E8C547;
+}
+.corner-ornament::before {
+  top: 4px; left: 4px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid #B8860B;
+  background: radial-gradient(circle at 35% 35%, #F4D768, #E8C547 60%, #C49A2D);
+  box-shadow: 0 2px 4px rgba(80,50,20,0.3);
+}
+.corner-ornament::after {
+  top: 14px; left: 14px;
+  width: 8px; height: 8px;
+  background: #8B5A2B;
+  border-radius: 50%;
+  box-shadow: 8px 0 0 #8B5A2B, 0 8px 0 #8B5A2B, 8px 8px 0 #8B5A2B;
+}
+
+/* ====== CONTENT WRAPPER ====== */
+.content {
+  flex: 1;
+  padding: 60px 75px 50px 75px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ====== TITLE ====== */
+.title-block {
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 2;
+}
+
+.title-deco-top {
+  font-size: 18px;
+  color: #B8860B;
+  margin-bottom: 2px;
+  letter-spacing: 8px;
+}
+
+.title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 46px;
+  font-weight: 900;
+  font-style: italic;
+  color: #6B3410;
+  letter-spacing: 1px;
+  text-shadow:
+    2px 2px 0 #E8C547,
+    3px 3px 0 #B8860B,
+    4px 4px 6px rgba(0,0,0,0.2);
+  line-height: 1;
+}
+
+.title-deco-bot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 8px;
+  color: #B8860B;
+}
+
+.title-deco-bot::before, .title-deco-bot::after {
+  content: '';
+  width: 80px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #B8860B, transparent);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #8B5A2B;
+  letter-spacing: 6px;
+  font-style: italic;
+}
+
+/* ====== PHOTO GRID ====== */
+.photo-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 30px;
+  position: relative;
+  padding: 0 20px;
+}
+
+.photo-slot {
+  position: relative;
+  background: linear-gradient(135deg, #FAF0D8 0%, #F0E0B0 100%);
+  border: 4px solid #E8C547;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px #B8860B,
+    inset 0 0 0 1px #B8860B,
+    inset 0 0 20px rgba(232, 197, 71, 0.2),
+    0 8px 16px rgba(80, 50, 20, 0.15);
+}
+
+/* Photo corners (tape effect) */
+.photo-slot::before, .photo-slot::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 18px;
+  background: rgba(232, 197, 71, 0.55);
+  border: 1px solid rgba(184, 134, 11, 0.3);
+  z-index: 5;
+}
+.photo-slot::before {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+}
+.photo-slot::after {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(2deg);
+}
+
+/* Empty photo center - ready for actual photos */
+.photo-slot .photo-inner {
+  position: absolute;
+  inset: 12px;
+  background: linear-gradient(135deg, #FFFAF0 0%, #FFF5DE 100%);
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(184, 134, 11, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photo-slot .photo-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(232, 197, 71, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 75% 70%, rgba(232, 197, 71, 0.15) 0%, transparent 40%);
+}
+
+.photo-slot .placeholder-text {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  color: rgba(184, 134, 11, 0.45);
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-align: center;
+  z-index: 1;
+}
+
+/* ====== CHARACTER FLOATING DECORATIONS ====== */
+.character {
+  position: absolute;
+  z-index: 8;
+  pointer-events: none;
+}
+
+/* ===== POOH (top-left, outside grid) ===== */
+.char-pooh {
+  top: 130px;
+  left: 10px;
+  width: 110px;
+  height: 130px;
+}
+.pooh-body {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle at 35% 35%, #F4B842, #D49224 80%);
+  border-radius: 50%;
+  top: 30px;
+  left: 20px;
+  border: 2.5px solid #6B3410;
+  box-shadow: 0 4px 8px rgba(80,50,20,0.2);
+}
+.pooh-head {
+  position: absolute;
+  width: 56px;
+  height: 52px;
+  background: radial-gradient(circle at 35% 35%, #F4B842, #D49224 80%);
+  border-radius: 50%;
+  top: 5px;
+  left: 27px;
+  border: 2.5px solid #6B3410;
+  z-index: 2;
+}
+.pooh-ear {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle, #D49224, #B07814);
+  border-radius: 50%;
+  top: 3px;
+  border: 2.5px solid #6B3410;
+}
+.pooh-ear.left { left: 22px; }
+.pooh-ear.right { right: 22px; }
+.pooh-face {
+  position: absolute;
+  width: 28px;
+  height: 18px;
+  background: radial-gradient(ellipse, #F5E6C8 0%, #E8C99B 100%);
+  border-radius: 50%;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1.5px solid #8B5A2B;
+}
+.pooh-eye {
+  position: absolute;
+  width: 3px;
+  height: 5px;
+  background: #2C1810;
+  border-radius: 50%;
+  top: 18px;
+}
+.pooh-eye.left { left: 16px; }
+.pooh-eye.right { right: 16px; }
+.pooh-nose {
+  position: absolute;
+  width: 8px;
+  height: 6px;
+  background: #2C1810;
+  border-radius: 50%;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.pooh-mouth {
+  position: absolute;
+  width: 10px;
+  height: 4px;
+  border: 1.5px solid #6B3410;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Pooh's red shirt hint */
+.pooh-shirt {
+  position: absolute;
+  width: 76px;
+  height: 18px;
+  background: linear-gradient(180deg, #C8302E 0%, #9E1F1D 100%);
+  border: 2.5px solid #6B3410;
+  border-radius: 30px 30px 0 0;
+  top: 60px;
+  left: 17px;
+  z-index: 1;
+}
+
+/* ===== PIGLET (top-right) ===== */
+.char-piglet {
+  top: 130px;
+  right: 10px;
+  width: 100px;
+  height: 130px;
+}
+.piglet-body {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  background: radial-gradient(circle at 35% 35%, #F8C8D0, #E89AA8 80%);
+  border-radius: 50%;
+  top: 35px;
+  left: 22px;
+  border: 2.5px solid #8B3A4A;
+  box-shadow: 0 4px 8px rgba(80,50,20,0.2);
+}
+.piglet-head {
+  position: absolute;
+  width: 50px;
+  height: 45px;
+  background: radial-gradient(circle at 35% 35%, #F8C8D0, #E89AA8 80%);
+  border-radius: 50%;
+  top: 10px;
+  left: 25px;
+  border: 2.5px solid #8B3A4A;
+  z-index: 2;
+}
+/* Piglet's striped outfit */
+.piglet-stripes {
+  position: absolute;
+  width: 60px;
+  height: 22px;
+  top: 60px;
+  left: 20px;
+  background:
+    repeating-linear-gradient(45deg,
+      #C8302E 0, #C8302E 4px,
+      #F5E6C8 4px, #F5E6C8 8px);
+  border: 2.5px solid #8B3A4A;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+.piglet-ear {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle, #F8C8D0, #E89AA8);
+  border-radius: 50%;
+  top: 4px;
+  border: 2.5px solid #8B3A4A;
+}
+.piglet-ear.left { left: 20px; }
+.piglet-ear.right { right: 20px; }
+.piglet-snout {
+  position: absolute;
+  width: 22px;
+  height: 14px;
+  background: radial-gradient(ellipse, #F8C8D0, #E89AA8);
+  border-radius: 50%;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1.5px solid #8B3A4A;
+}
+.piglet-eye {
+  position: absolute;
+  width: 3px;
+  height: 4px;
+  background: #2C1810;
+  border-radius: 50%;
+  top: 18px;
+}
+.piglet-eye.left { left: 18px; }
+.piglet-eye.right { right: 18px; }
+.piglet-nose {
+  position: absolute;
+  width: 5px;
+  height: 3px;
+  background: #8B3A4A;
+  border-radius: 50%;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ===== TIGGER (bottom-left) ===== */
+.char-tigger {
+  bottom: 130px;
+  left: 10px;
+  width: 115px;
+  height: 140px;
+}
+.tigger-body {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: #E8941E;
+  border-radius: 50%;
+  top: 30px;
+  left: 22px;
+  border: 2.5px solid #3A2410;
+  box-shadow: 0 4px 8px rgba(80,50,20,0.2);
+  overflow: hidden;
+}
+.tigger-stripes-body {
+  position: absolute;
+  inset: 0;
+}
+.tigger-stripes-body::before,
+.tigger-stripes-body::after {
+  content: '';
+  position: absolute;
+  background: #3A2410;
+  width: 6px;
+  border-radius: 50%/30px;
+}
+.tigger-stripes-body::before {
+  height: 35px;
+  top: 8px;
+  left: 18px;
+  transform: rotate(15deg);
+}
+.tigger-stripes-body::after {
+  height: 38px;
+  top: 10px;
+  right: 18px;
+  transform: rotate(-15deg);
+}
+.tigger-stripe-mid {
+  position: absolute;
+  background: #3A2410;
+  border-radius: 50%/20px;
+  width: 5px;
+  height: 28px;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.tigger-head {
+  position: absolute;
+  width: 58px;
+  height: 50px;
+  background: #E8941E;
+  border-radius: 50%;
+  top: 6px;
+  left: 28px;
+  border: 2.5px solid #3A2410;
+  z-index: 2;
+  overflow: hidden;
+}
+.tigger-stripe-head-1, .tigger-stripe-head-2, .tigger-stripe-head-3 {
+  position: absolute;
+  background: #3A2410;
+  border-radius: 50%/15px;
+}
+.tigger-stripe-head-1 {
+  width: 4px;
+  height: 22px;
+  top: -2px;
+  left: 20px;
+}
+.tigger-stripe-head-2 {
+  width: 4px;
+  height: 18px;
+  top: -2px;
+  left: 32px;
+}
+.tigger-stripe-head-3 {
+  width: 4px;
+  height: 20px;
+  top: -2px;
+  left: 44px;
+}
+.tigger-ear {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #E8941E;
+  border-radius: 50%;
+  top: 3px;
+  border: 2.5px solid #3A2410;
+  z-index: 3;
+}
+.tigger-ear.left { left: 22px; }
+.tigger-ear.right { right: 22px; }
+.tigger-ear-inner {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #F8C8D0;
+  border-radius: 50%;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.tigger-face {
+  position: absolute;
+  width: 30px;
+  height: 18px;
+  background: radial-gradient(ellipse, #F5E6C8 0%, #E8C99B 100%);
+  border-radius: 50%;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1.5px solid #8B5A2B;
+}
+.tigger-eye {
+  position: absolute;
+  width: 6px;
+  height: 7px;
+  background: #2C1810;
+  border-radius: 50%;
+  top: 16px;
+  z-index: 4;
+}
+.tigger-eye.left { left: 14px; }
+.tigger-eye.right { right: 14px; }
+.tigger-eye::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  top: 1px;
+  right: 1px;
+}
+.tigger-nose {
+  position: absolute;
+  width: 8px;
+  height: 6px;
+  background: #2C1810;
+  border-radius: 50%;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+.tigger-chin {
+  position: absolute;
+  width: 16px;
+  height: 4px;
+  background: #3A2410;
+  border-radius: 50%;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ===== EEYORE (bottom-right) ===== */
+.char-eeyore {
+  bottom: 130px;
+  right: 10px;
+  width: 120px;
+  height: 130px;
+}
+.eeyore-body {
+  position: absolute;
+  width: 65px;
+  height: 55px;
+  background: radial-gradient(circle at 35% 35%, #8FA8C0, #5F7B95 80%);
+  border-radius: 50% 50% 45% 45%;
+  top: 40px;
+  left: 30px;
+  border: 2.5px solid #2C4860;
+  box-shadow: 0 4px 8px rgba(80,50,20,0.2);
+}
+.eeyore-head {
+  position: absolute;
+  width: 55px;
+  height: 50px;
+  background: radial-gradient(circle at 35% 35%, #8FA8C0, #5F7B95 80%);
+  border-radius: 50%;
+  top: 12px;
+  left: 18px;
+  border: 2.5px solid #2C4860;
+  z-index: 2;
+}
+.eeyore-ear {
+  position: absolute;
+  width: 14px;
+  height: 22px;
+  background: #5F7B95;
+  border-radius: 50%;
+  top: 8px;
+  border: 2.5px solid #2C4860;
+}
+.eeyore-ear.left { left: 12px; transform: rotate(-15deg); }
+.eeyore-ear.right { right: 22px; transform: rotate(15deg); }
+.eeyore-muzzle {
+  position: absolute;
+  width: 26px;
+  height: 18px;
+  background: linear-gradient(180deg, #B5C8D8 0%, #8FA8C0 100%);
+  border-radius: 50%;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1.5px solid #2C4860;
+}
+.eeyore-eye {
+  position: absolute;
+  width: 4px;
+  height: 5px;
+  background: #2C1810;
+  border-radius: 50%;
+  top: 18px;
+  z-index: 4;
+}
+.eeyore-eye.left { left: 16px; }
+.eeyore-eye.right { right: 26px; }
+.eeyore-eyebrow {
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #2C4860;
+  top: 14px;
+  border-radius: 2px;
+  z-index: 4;
+}
+.eeyore-eyebrow.left { left: 14px; transform: rotate(15deg); }
+.eeyore-eyebrow.right { right: 24px; transform: rotate(-15deg); }
+.eeyore-nose {
+  position: absolute;
+  width: 10px;
+  height: 7px;
+  background: #2C1810;
+  border-radius: 50%;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.eeyore-mouth {
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #2C4860;
+  border-radius: 2px;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Eeyore's detachable tail */
+.eeyore-tail {
+  position: absolute;
+  width: 8px;
+  height: 22px;
+  background: #2C1810;
+  border-radius: 4px;
+  top: 55px;
+  right: 18px;
+  transform: rotate(25deg);
+  z-index: 1;
+  border: 2px solid #3A2410;
+}
+.eeyore-tail::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #F4B842;
+  border: 1.5px solid #6B3410;
+  border-radius: 50%;
+  bottom: -3px;
+  left: -2px;
+}
+/* Eeyore's pink bow */
+.eeyore-bow {
+  position: absolute;
+  width: 18px;
+  height: 12px;
+  top: 35px;
+  left: 12px;
+  z-index: 5;
+}
+.eeyore-bow::before, .eeyore-bow::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 11px;
+  background: radial-gradient(circle, #D8487A, #A8204E);
+  border: 1.5px solid #6B0E2E;
+  border-radius: 50%;
+  top:

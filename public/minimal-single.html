@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>our photobooth</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --terra:#D4956A;
+    --dark:#5C3A2E;
+    --deep:#3D2418;
+    --paper:#FAF3EA;
+    --cream:#F0E4D3;
+    --soft:#E8D5B7;
+  }
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 25% 20%, rgba(212,149,106,.18), transparent 55%),
+      radial-gradient(ellipse at 75% 80%, rgba(212,149,106,.10), transparent 55%),
+      linear-gradient(135deg,#2A1810 0%, #1F1208 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:Georgia,'Times New Roman',serif;
+    padding:30px;
+  }
+  .frame{
+    width:540px;
+    background:var(--paper);
+    padding:22px 22px 14px;
+    position:relative;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.55),
+      0 10px 30px rgba(0,0,0,.4),
+      inset 0 0 0 1px rgba(212,149,106,.15);
+  }
+  .frame::before{
+    content:"";
+    position:absolute;
+    inset:9px;
+    border:1.5px solid var(--terra);
+    pointer-events:none;
+    z-index:2;
+  }
+  .frame::after{
+    content:"";
+    position:absolute;
+    inset:14px;
+    border:.5px solid var(--terra);
+    opacity:.4;
+    pointer-events:none;
+    z-index:2;
+  }
+  .header{
+    text-align:center;
+    padding:6px 0 14px;
+    position:relative;
+    z-index:3;
+  }
+  .ornament{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    color:var(--terra);
+    margin-bottom:6px;
+  }
+  .line{
+    width:50px;
+    height:1px;
+    background:var(--terra);
+  }
+  .diamond{
+    width:7px;
+    height:7px;
+    background:var(--terra);
+    transform:rotate(45deg);
+  }
+  .star{
+    width:12px;
+    height:12px;
+    background:var(--terra);
+    clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  }
+  .title{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:24px;
+    color:var(--dark);
+    letter-spacing:10px;
+    font-style:italic;
+    font-weight:400;
+    padding-left:10px;
+  }
+  .subtitle{
+    font-size:8px;
+    letter-spacing:6px;
+    color:var(--terra);
+    margin-top:4px;
+    font-family:Georgia,serif;
+    font-variant:small-caps;
+    font-weight:bold;
+  }
+  /* PHOTO ZONE */
+  .photo-zone{
+    position:relative;
+    aspect-ratio:4/5;
+    background:
+      linear-gradient(135deg, rgba(232,213,183,.5) 0%, rgba(240,228,211,.5) 100%);
+    border:1.5px solid var(--dark);
+    overflow:hidden;
+    margin:0;
+  }
+  .photo-zone::before{
+    content:"";
+    position:absolute;
+    inset:8px;
+    border:.5px solid rgba(92,58,46,.35);
+    z-index:1;
+    pointer-events:none;
+  }
+  /* corner CSS-art ornaments */
+  .corner{
+    position:absolute;
+    width:54px;
+    height:54px;
+    z-index:3;
+    pointer-events:none;
+  }
+  .corner-tl{top:6px;left:6px}
+  .corner-tr{top:6px;right:6px;transform:scaleX(-1)}
+  .corner-bl{bottom:6px;left:6px;transform:scaleY(-1)}
+  .corner-br{bottom:6px;right:6px;transform:scale(-1,-1)}
+  .corner::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;
+    width:22px;height:22px;
+    border-top:2px solid var(--terra);
+    border-left:2px solid var(--terra);
+  }
+  .corner::after{
+    content:"";
+    position:absolute;
+    top:5px;left:5px;
+    width:12px;height:12px;
+    border-top:1px solid var(--terra);
+    border-left:1px solid var(--terra);
+    opacity:.6;
+  }
+  .corner-flower{
+    position:absolute;
+    top:14px;left:14px;
+    width:20px;height:20px;
+  }
+  .petal{
+    position:absolute;
+    top:50%;left:50%;
+    width:8px;height:8px;
+    background:var(--terra);
+    border-radius:50% 0 50% 50%;
+    transform-origin:0 0;
+  }
+  .petal:nth-child(1){transform:rotate(0deg) translate(-4px,-4px)}
+  .petal:nth-child(2){transform:rotate(90deg) translate(-4px,-4px)}
+  .petal:nth-child(3){transform:rotate(180deg) translate(-4px,-4px)}
+  .petal:nth-child(4){transform:rotate(270deg) translate(-4px,-4px)}
+  .center-dot{
+    position:absolute;
+    top:50%;left:50%;
+    width:4px;height:4px;
+    background:var(--deep);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    z-index:2;
+  }
+  /* edge sprigs */
+  .sprig{
+    position:absolute;
+    z-index:3;
+    pointer-events:none;
+  }
+  .sprig-top{top:10px;left:50%;transform:translateX(-50%)}
+  .sprig-bottom{bottom:10px;left:50%;transform:translateX(-50%) scaleY(-1)}
+  .leaf{
+    position:absolute;
+    width:18px;height:6px;
+    background:var(--terra);
+    border-radius:0 100% 0 100%;
+    top:0;left:50%;
+    transform-origin:0 50%;
+  }
+  .leaf:nth-child(1){transform:translateX(-50%) rotate(-40deg) translateX(-9px)}
+  .leaf:nth-child(2){transform:translateX(-50%) rotate(-20deg) translateX(-9px)}
+  .leaf:nth-child(3){transform:translateX(-50%) rotate(0deg) translateX(-9px)}
+  .leaf:nth-child(4){transform:translateX(-50%) rotate(20deg) translateX(-9px)}
+  .leaf:nth-child(5){transform:translateX(-50%) rotate(40deg) translateX(-9px)}
+  /* side flowers */
+  .side-flower{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px;height:30px;
+    z-index:3;
+    pointer-events:none;
+  }
+  .side-flower-l{left:14px}
+  .side-flower-r{right:14px;transform:translateY(-50%) scaleX(-1)}
+  .sf-petal{
+    position:absolute;
+    width:10px;height:14px;
+    background:var(--terra);
+    border-radius:50% 50% 50% 50% / 70% 70% 30% 30%;
+    top:50%;left:50%;
+    transform-origin:50% 100%;
+    opacity:.85;
+  }
+  .sf-petal:nth-child(1){transform:translate(-50%,-100%) rotate(0deg)}
+  .sf-petal:nth-child(2){transform:translate(-50%,-100%) rotate(72deg)}
+  .sf-petal:nth-child(3){transform:translate(-50%,-100%) rotate(144deg)}
+  .sf-petal:nth-child(4){transform:translate(-50%,-100%) rotate(216deg)}
+  .sf-petal:nth-child(5){transform:translate(-50%,-100%) rotate(288deg)}
+  .sf-center{
+    position:absolute;
+    width:6px;height:6px;
+    background:var(--deep);
+    border-radius:50%;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    z-index:2;
+  }
+  /* FOOTER */
+  .footer{
+    text-align:center;
+    padding:18px 0 6px;
+    position:relative;
+    z-index:3;
+  }
+  .footer-ornament{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:var(--terra);
+    margin-bottom:8px;
+  }
+  .f-line{width:38px;height:1px;background:var(--terra)}
+  .f-text{
+    font-size:9px;
+    letter-spacing:7px;
+    color:var(--dark);
+    font-style:italic;
+    font-family:Georgia,serif;
+  }
+  .date{
+    font-size:8px;
+    letter-spacing:5px;
+    color:var(--terra);
+    margin-top:6px;
+    font-family:Georgia,serif;
+    font-variant:small-caps;
+  }
+  .footer-sprig{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:8px;
+  }
+  .fs-leaf{
+    width:14px;
+    height:4px;
+    background:var(--terra);
+    border-radius:0 100% 0 100%;
+  }
+  .fs-leaf.left{transform:rotate(20deg)}
+  .fs-leaf.right{transform:rotate(-20deg) scaleX(-1)}
+  .fs-dot{
+    width:5px;height:5px;
+    background:var(--terra);
+    transform:rotate(45deg);
+  }
+  /* Subtle grain overlay */
+  .grain{
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-radial-gradient(circle at 10% 20%, rgba(92,58,46,.015) 0, rgba(92,58,46,.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    z-index:4;
+    mix-blend-mode:multiply;
+  }
+  /* Perforation marks top corners of frame */
+  .perf{
+    position:absolute;
+    width:8px;height:8px;
+    background:var(--paper);
+    border-radius:50%;
+    border:1px solid var(--terra);
+    z-index:3;
+  }
+  .perf.tl{top:-4px;left:-4px}
+  .perf.tr{top:-4px;right:-4px}
+  .perf.bl{bottom:-4px;left:-4px}
+  .perf.br{bottom:-4px;right:-4px}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="perf tl"></div>
+  <div class="perf tr"></div>
+  <div class="perf bl"></div>
+  <div class="perf br"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="ornament">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="star"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+    <div class="title">our photobooth</div>
+    <div class="subtitle">— a moment in bloom —</div>
+  </div>
+
+  <!-- PHOTO ZONE -->
+  <div class="photo-zone">
+    <div class="grain"></div>
+
+    <!-- Corner ornaments (CSS-art flowers) -->
+    <div class="corner corner-tl">
+      <div class="corner-flower">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+    <div class="corner corner-tr">
+      <div class="corner-flower">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+    <div class="corner corner-bl">
+      <div class="corner-flower">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+    <div class="corner corner-br">
+      <div class="corner-flower">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+
+    <!-- Edge sprigs -->
+    <div class="sprig sprig-top">
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+    </div>
+    <div class="sprig sprig-bottom">
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+      <div class="leaf"></div>
+    </div>
+
+    <!-- Side flowers -->
+    <div class="side-flower side-flower-l">
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-center"></div>
+    </div>
+    <div class="side-flower side-flower-r">
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-petal"></div>
+      <div class="sf-center"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-ornament">
+      <div class="f-line"></div>
+      <div class="diamond"></div>
+      <div class="f-line"></div>
+    </div>
+    <div class="f-text">forever yours</div>
+    <div class="footer-sprig">
+      <div class="fs-leaf left"></div>
+      <div class="fs-dot"></div>
+      <div class="fs-leaf right"></div>
+    </div>
+    <div class="date">est · m m x x i v</div>
+  </div>
+</div>
+
+</body>
+</html>

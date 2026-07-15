@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+    <title>KIMENA FRAME Gallery Showcase</title>
+</head>
+<body>
+    <div class="gallery-container">
+        <div class="card card-the-seal">
+            <div class="seal-container">
+                <div class="wordmark">KIMENA FRAME</div>
+                <div class="seal-text">Panel to Picture, Frame by Frame</div>
+            </div>
+        </div>
+        <div class="card card-the-extraction">
+            <div class="extraction-animation"></div>
+            <div class="extraction-text">EXTRACT</div>
+        </div>
+        <div class="card card-the-composition">
+            <div class="composition-animation"></div>
+            <div class="composition-text">COMPOSE</div>
+        </div>
+        <div class="card card-the-render">
+            <div class="render-animation"></div>
+            <div class="render-text">RENDER</div>
+        </div>
+    </div>
+
+    <style>
+        body {
+            font-family: 'Crimson Text', serif;
+            background-color: #F5F0E8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #000000;
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 20px;
+            width: 80%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: #F5F0E8;
+            border: 1px solid #000000;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .card-the-seal .seal-container {
+            background-color: #FF6F00;
+            border-radius: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .wordmark {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 5px;
+        }
+
+        .seal-text {
+            font-size: 18px;
+            color: #FFFFFF;
+        }
+
+        .card-the-extraction .extraction-animation {
+            background-image: url('extraction-animation.png');
+            background-size: cover;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .card-the-composition .composition-animation {
+            background-image: url('composition-animation.png');
+            background-size: cover;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .card-the-render .render-animation {
+            background-image: url('render-animation.png');
+            background-size: cover;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .extraction-text, .composition-text, .render-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #FF6F00;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

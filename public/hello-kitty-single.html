@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello Kitty Photobooth</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 15% 25%, rgba(255,255,255,.6) 0%, transparent 35%),
+      radial-gradient(circle at 85% 75%, rgba(255,200,215,.5) 0%, transparent 40%),
+      linear-gradient(135deg, #FBE4EA 0%, #F5D5DD 50%, #FBE4EA 100%);
+    padding:30px;
+    font-family:Georgia,'Times New Roman',serif;
+  }
+
+  .booth{
+    width:430px;
+    height:660px;
+    position:relative;
+    background:
+      repeating-linear-gradient(45deg, rgba(232,145,160,.05) 0 12px, rgba(255,255,255,.05) 12px 24px),
+      #FFFBFC;
+    border:14px solid #E891A0;
+    outline:1px solid #E891A0;
+    box-shadow:
+      inset 0 0 0 4px #FFF5F7,
+      inset 0 0 0 5px #E891A0,
+      inset 0 0 0 9px #FFF5F7,
+      inset 0 0 0 10px rgba(232,145,160,.5),
+      0 0 0 1px rgba(232,145,160,.4),
+      0 25px 70px rgba(232,145,160,.4),
+      0 10px 30px rgba(0,0,0,.1);
+    border-radius:14px;
+    overflow:visible;
+  }
+
+  .booth-inner{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    border-radius:4px;
+  }
+
+  .photo-area{
+    position:absolute;
+    top:62px;
+    bottom:108px;
+    left:38px;
+    right:38px;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.02), rgba(255,192,203,.03));
+    border:1.5px solid rgba(232,145,160,.4);
+    box-shadow:inset 0 0 25px rgba(232,145,160,.1);
+  }
+
+  .photo-area::before{
+    content:'';
+    position:absolute;
+    top:8px;left:8px;
+    width:22px;height:22px;
+    border-top:2px solid #E891A0;
+    border-left:2px solid #E891A0;
+  }
+  .photo-area::after{
+    content:'';
+    position:absolute;
+    bottom:8px;right:8px;
+    width:22px;height:22px;
+    border-bottom:2px solid #E891A0;
+    border-right:2px solid #E891A0;
+  }
+
+  /* ===== HELLO KITTY CHARACTER ===== */
+  .kitty{
+    position:absolute;
+    top:-30px;
+    left:50%;
+    transform:translateX(-50%);
+    width:140px;
+    height:115px;
+    z-index:5;
+    filter:drop-shadow(0 4px 8px rgba(232,145,160,.3));
+  }
+
+  .ear-l,.ear-r{
+    position:absolute;
+    width:50px;
+    height:46px;
+    background:#FFFFFF;
+    border:2.5px solid #3D2B2F;
+    border-radius:48% 52% 45% 55% / 55% 50% 50% 45%;
+    top:2px;
+    z-index:1;
+  }
+  .ear-l{ left:14px; transform:rotate(-22deg); }
+  .ear-r{ right:14px; transform:rotate(22deg); }
+
+  .ear-l::after,.ear-r::after{
+    content:'';
+    position:absolute;
+    width:18px;
+    height:14px;
+    background:#FFB6C1;
+    border-radius:50%;
+    top:14px;
+    opacity:.65;
+  }
+  .ear-l::after{ left:14px; transform:rotate(-20deg); }
+  .ear-r::after{ right:14px; transform:rotate(20deg); }
+
+  .head{
+    position:absolute;
+    top:18px;
+    left:50%;
+    transform:translateX(-50%);
+    width:108px;
+    height:88px;
+    background:#FFFFFF;
+    border:2.5px solid #3D2B2F;
+    border-radius:50%;
+    box-shadow:inset -5px -5px 12px rgba(232,145,160,.08);
+    z-index:2;
+  }
+
+  .eye-l,.eye-r{
+    position:absolute;
+    width:8px;
+    height:12px;
+    background:#3D2B2F;
+    border-radius:50%;
+    top:42px;
+  }
+  .eye-l{ left:34px; }
+  .eye-r{ right:34px; }
+
+  .nose{
+    position:absolute;
+    top:54px;
+    left:50%;
+    transform:translateX(-50%);
+    width:14px;
+    height:9px;
+    background:#FFD000;
+    border:1.5px solid #3D2B2F;
+    border-radius:50% 50% 60% 60%;
+    z-index:3;
+  }
+
+  .whisker{
+    position:absolute;
+    background:#3D2B2F;
+    border-radius:2px;
+    height:1.5px;
+    z-index:3;
+  }
+  .w1{ width:28px; top:52px; left:4px; transform:rotate(-12deg); }
+  .w2{ width:28px; top:60px; left:4px; transform:rotate(-2deg); }
+  .w3{ width:28px; top:68px; left:4px; transform:rotate(8deg); }
+  .w4{ width:28px; top:52px; right:4px; transform:rotate(12deg); }
+  .w5{ width:28px; top:60px; right:4px; transform:rotate(2deg); }
+  .w6{ width:28px; top:68px; right:4px; transform:rotate(-8deg); }
+
+  .bow{
+    position:absolute;
+    top:8px;
+    right:18px;
+    width:46px;
+    height:34px;
+    z-index:4;
+  }
+  .bow-l,.bow-r{
+    position:absolute;
+    width:24px;
+    height:22px;
+    background:#E891A0;
+    border:2px solid #3D2B2F;
+    top:6px;
+  }
+  .bow-l{
+    left:0;
+    border-radius:80% 20% 60% 40% / 60% 30% 70% 40%;
+    transform:rotate(-8deg);
+  }
+  .bow-r{
+    right:0;
+    border-radius:20% 80% 40% 60% / 30% 60% 40% 70%;
+    transform:rotate(8deg);
+  }
+  .bow-c{
+    position:absolute;
+    width:12px;
+    height:14px;
+    background:#E891A0;
+    border:2px solid #3D2B2F;
+    border-radius:50%;
+    top:9px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:2;
+  }
+  .bow-dot-l,.bow-dot-r{
+    position:absolute;
+    width:5px;
+    height:5px;
+    background:#FFFBFC;
+    border-radius:50%;
+    top:13px;
+    z-index:3;
+  }
+  .bow-dot-l{ left:5px; }
+  .bow-dot-r{ right:5px; }
+
+  /* ===== SPARKLE STARS ===== */
+  .sparkle{
+    position:absolute;
+    pointer-events:none;
+    z-index:4;
+  }
+
+  .sp-4{
+    width:16px;height:16px;
+    background:#FFE57F;
+    clip-path:polygon(50% 0%,55% 45%,100% 50%,55% 55%,50% 100%,45% 55%,0% 50%,45% 45%);
+    filter:drop-shadow(0 0 4px rgba(255,213,79,.6));
+  }
+  .sp-5{
+    width:20px;height:20px;
+    background:#FFB6C1;
+    clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    filter:drop-shadow(0 0 4px rgba(232,145,160,.5));
+  }
+  .sp-6{
+    width:22px;height:22px;
+    background:#FFF5A0;
+    clip-path:polygon(50% 0%,63% 27%,97% 27%,72% 50%,82% 85%,50% 65%,18% 85%,28% 50%,3% 27%,37% 27%);
+    filter:drop-shadow(0 0 5px rgba(255,245,160,.7));
+  }
+  .sp-mini{
+    width:8px;height:8px;
+    background:#FFE57F;
+    clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%);
+  }
+
+  .s1{ top:20px; left:25px; }
+  .s2{ top:45px; left:75px; width:10px; height:10px; background:#FFB6C1; clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%); }
+  .s3{ top:25px; right:30px; }
+  .s4{ top:50px; right:85px; }
+  .s5{ top:75px; left:18px; }
+  .s6{ top:85px; right:25px; }
+  .s7{ bottom:120px; left:18px; }
+  .s8{ bottom:135px; right:18px; }
+  .s9{ top:130px; left:14px; }
+  .s10{ top:140px; right:14px; }
+  .s11{ bottom:80px; left:55px; }
+  .s12{ bottom:75px; right:50px; }
+  .s13{ top:60px; left:50%; width:6px; height:6px; background:#FFD000; clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%); }
+  .s14{ bottom:160px; left:8px; width:12px; height:12px; background:#FFB6C1; clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+
+  /* ===== CORNER HEARTS ===== */
+  .heart{
+    position:absolute;
+    width:18px;
+    height:16px;
+    z-index:3;
+  }
+  .heart::before,.heart::after{
+    content:'';
+    position:absolute;
+    width:11px;
+    height:14px;
+    background:#E891A0;
+    border-radius:50% 50% 0 0;
+    top:0;
+  }
+  .heart::before{
+    left:3px;
+    transform:rotate(-45deg);
+    transform-origin:50% 100%;
+  }
+  .heart::after{
+    left:0;
+    transform:rotate(45deg);
+    transform-origin:100% 100%;
+    left:3px;
+  }
+  .heart::after{
+    left:3px;
+  }
+  .h-tl{ top:74px; left:14px; }
+  .h-tr{ top:74px; right:14px; }
+  .h-bl{ bottom:118px; left:14px; }
+  .h-br{ bottom:118px; right:14px; }
+
+  /* Side hearts (small) */
+  .heart-mini{
+    position:absolute;
+    width:10px;
+    height:9px;
+    z-index:3;
+  }
+  .heart-mini::before,.heart-mini::after{
+    content:'';
+    position:absolute;
+    width:6px;
+    height:8px;
+    background:rgba(232,145,160,.6);
+    border-radius:50% 50% 0 0;
+    top:0;
+  }
+  .heart-mini::before{ left:2px; transform:rotate(-45deg); transform-origin:50% 100%; }
+  .heart-mini::after{ left:2px; transform:rotate(45deg); transform-origin:100% 100%; }
+  .hm-l1{ top:50%; left:18px; transform:translateY(-50%); }
+  .hm-r1{ top:50%; right:18px; transform:translateY(-50%); }
+
+  /* ===== BOTTOM STRIPE BOW ===== */
+  .corner-bow{
+    position:absolute;
+    width:32px;
+    height:24px;
+    z-index:3;
+  }
+  .cb-l,.cb-r{
+    position:absolute;
+    width:16px;
+    height:14px;
+    background:#E891A0;
+    border:1.5px solid #3D2B2F;
+    top:5px;
+  }
+  .cb-l{
+    left:0;
+    border-radius:80% 20% 60% 40% / 60% 30% 70% 40%;
+  }
+  .cb-r{
+    right:0;
+    border-radius:20% 80% 40% 60% / 30% 60% 40% 70%;
+  }
+  .cb-c{
+    position:absolute;
+    width:8px;
+    height:10px;
+    background:#E891A0;
+    border:1.5px solid #3D2B2F;
+    border-radius:50%;
+    top:7px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:2;
+  }
+  .cb-bl{ bottom:130px; left:22px; }
+  .cb-br{ bottom:130px; right:22px; }
+
+  /* ===== TITLE ===== */
+  .title{
+    position:absolute;
+    bottom:55px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Playfair Display','Didot',Georgia,serif;
+    font-size:32px;
+    color:#E891A0;
+    letter-spacing:1.5px;
+    font-weight:400;
+    font-style:italic;
+    text-shadow:1px 1px 0 rgba(255,255,255,.8);
+    white-space:nowrap;
+    z-index:4;
+  }
+  .title::before,.title::after{
+    content:'';
+    position:absolute;
+    top:50%;
+    width:25px;
+    height:1px;
+    background:linear-gradient(90deg,transparent,#E891A0);
+    transform:translateY(-50%);
+  }
+  .title::before{
+    right:calc(100% + 12px);
+    background:linear-gradient(90deg,transparent,#E891A0);
+  }
+  .title::after{
+    left:calc(100% + 12px);
+    background:linear-gradient(90deg,#E891A0,transparent);
+  }
+
+  /* ===== DATE STRIP ===== */
+  .date{
+    position:absolute;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Courier New',monospace;
+    font-size:9px;
+    letter-spacing:3px;
+    color:rgba(232,145,160,.75);
+    text-transform:uppercase;
+    z-index:4;
+  }
+
+  /* ===== FILMSTRIP SIDE DOTS ===== */
+  .dots{
+    position:absolute;
+    top:65px;
+    bottom:115px;
+    width:6px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+    align-items:center;
+    padding:8px 0;
+  }
+  .dot{
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    background:rgba(232,145,160,.5);
+  }
+  .dots-l{ left:13px; }
+  .dots-r{ right:13px; }
+
+  /* ===== CORNER ORNAMENTS ===== */
+  .corner-orn{
+    position:absolute;
+    width:24px;
+    height:24px;
+    z-index:3;
+  }
+  .co-tl{ top:68px; left:8px; }
+  .co-tr{ top:68px; right:8px; }
+  .co-bl{ bottom:112px; left:8px; }
+  .co-br{ bottom:112px; right:8px; }
+  .corner-orn::before{
+    content:'';
+    position:absolute;
+    width:14px;
+    height:14px;
+    border:1.5px solid #E891A0;
+    border-radius:50%;
+    opacity:.6;
+    top:5px;
+    left:5px;
+  }
+  .corner-orn::after{
+    content:'';
+    position:absolute;
+    width:6px;
+    height:6px;
+    background:#FFE57F;
+    clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%);
+    top:9px;
+    left:9px;
+  }
+
+</style>
+</head>
+<body>
+<div class="booth">
+  <div class="booth-inner">
+
+    <!-- HELLO KITTY -->
+    <div class="kitty">
+      <div class="ear-l"></div>
+      <div class="ear-r"></div>
+      <div class="head"></div>
+      <div class="eye-l"></div>
+      <div class="eye-r"></div>
+      <div class="nose"></div>
+      <div class="whisker w1"></div>
+      <div class="whisker w2"></div>
+      <div class="whisker w3"></div>
+      <div class="whisker w4"></div>
+      <div class="whisker w5"></div>
+      <div class="whisker w6"></div>
+      <div class="bow">
+        <div class="bow-l"></div>
+        <div class="bow-r"></div>
+        <div class="bow-c"></div>
+        <div class="bow-dot-l"></div>
+        <div class="bow-dot-r"></div>
+      </div>
+    </div>
+
+    <!-- Sparkles -->
+    <div class="sparkle sp-4 s1"></div>
+    <div class="sparkle s2"></div>
+    <div class="sparkle sp-4 s3"></div>
+    <div class="sparkle sp-5 s4"></div>
+    <div class="sparkle sp-mini s5"></div>
+    <div class="sparkle sp-5 s6"></div>
+    <div class="sparkle sp-4 s7"></div>
+    <div class="sparkle sp-6 s8"></div>
+    <div class="sparkle sp-mini s9"></div>
+    <div class="sparkle sp-mini s10"></div>
+    <div class="sparkle sp-4 s11"></div>
+    <div class="sparkle sp-mini s12"></div>
+    <div class="sparkle s13"></div>
+    <div class="sparkle s14"></div>
+
+    <!-- Corner Ornaments -->
+    <div class="corner-orn co-tl"></div>
+    <div class="corner-orn co-tr"></div>
+    <div class="corner-orn co-bl"></div>
+    <div class="corner-orn co-br"></div>
+
+    <!-- Side dots (filmstrip) -->
+    <div class="dots dots-l">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="dots dots-r">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+
+    <!-- Side hearts -->
+    <div class="heart-mini hm-l1"></div>
+    <div class="heart-mini hm-r1"></div>
+
+    <!-- Bottom corner bows -->
+    <div class="corner-bow cb-bl">
+      <div class="cb-l"></div>
+      <div class="cb-r"></div>
+      <div class="cb-c"></div>
+    </div>
+    <div class="corner-bow cb-br">
+      <div class="cb-l"></div>
+      <div class="cb-r"></div>
+      <div class="cb-c"></div>
+    </div>
+
+    <!-- Title -->
+    <div class="title">Hello Kitty</div>
+
+    <!-- Date strip -->
+    <div class="date">· SWEET MEMORIES · 2025 ·</div>
+
+  </div>
+</div>
+</body>
+</html>

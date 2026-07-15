@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which Hundred Acre Wood Character Are You?</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment-light: #f6e7c1; --parchment: #ecd5a3; --parchment-dark: #d4b574;
+    --honey: #d9952b; --honey-deep: #b87317; --honey-glow: #ffc966;
+    --leaf: #7ba05b; --leaf-deep: #4a6b34; --ink: #4a2f1a; --ink-soft: #6b4a2b;
+    --rose: #d97757; --shadow: rgba(74,47,26,0.15); --shadow-strong: rgba(74,47,26,0.3);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Nunito', sans-serif; color: var(--ink); background: var(--parchment); }
+  .world {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 15%, rgba(255,201,102,0.3), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 85% 85%, rgba(217,119,87,0.2), transparent 60%),
+      radial-gradient(ellipse 100% 80% at 50% 50%, var(--parchment-light), var(--parchment) 70%, var(--parchment-dark));
+  }
+  .world::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0 0.1 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.7; mix-blend-mode: multiply; pointer-events: none;
+  }
+
+  /* Screens */
+  .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; overflow-y: auto; }
+  .screen.active { display: flex; }
+
+  /* Intro */
+  .intro-eyebrow { font-family: 'Caveat', cursive; font-size: 1.3rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .intro-title { font-family: 'Fredoka', sans-serif; font-size: clamp(28px, 5vw, 44px); text-align: center; }
+  .intro-title .accent { color: var(--honey); }
+  .intro-sub { max-width: 480px; text-align: center; color: var(--ink-soft); margin: 12px 0 24px; line-height: 1.6; }
+  .intro-cta {
+    font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 600;
+    padding: 14px 36px; border-radius: 100px; border: 3px solid var(--ink);
+    background: var(--honey-glow); color: var(--ink); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .intro-cta:hover { background: var(--honey); transform: scale(1.05); }
+  .intro-characters { display: flex; gap: 6px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+  .intro-characters img { height: 70px; width: auto; animation: floatChar 3s ease-in-out infinite; }
+  .intro-characters img:nth-child(1) { animation-delay: 0s; }
+  .intro-characters img:nth-child(2) { animation-delay: 0.3s; }
+  .intro-characters img:nth-child(3) { animation-delay: 0.6s; }
+  .intro-characters img:nth-child(4) { animation-delay: 0.9s; }
+  .intro-characters img:nth-child(5) { animation-delay: 1.2s; }
+  .intro-characters img:nth-child(6) { animation-delay: 1.5s; }
+  .intro-characters img:nth-child(7) { animation-delay: 1.8s; }
+  @keyframes floatChar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  .intro-credits { margin-top: 16px; font-size: 0.9rem; color: var(--ink-soft); opacity: 0.7; }
+
+  /* Quiz */
+  .quiz-progress { display: flex; gap: 4px; margin-bottom: 24px; }
+  .quiz-dot { width: 10px; height: 10px; border-radius: 50%; background: #e0d0b0; transition: all 0.3s; }
+  .quiz-dot.done { background: var(--honey); }
+
+  .quiz-card {
+    background: #fffef7; border: 3px solid var(--ink); border-radius: 24px;
+    padding: 28px 32px; max-width: 500px; width: 100%;
+    box-shadow: 0 12px 40px var(--shadow); text-align: center;
+    animation: cardIn 0.4s ease;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  .quiz-num { font-family: 'Fredoka', sans-serif; font-size: 0.85rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .quiz-q { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; line-height: 1.4; }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt {
+    font-family: 'Nunito', sans-serif; font-size: 1rem;
+    padding: 14px 20px; border-radius: 16px; border: 2px solid #e8d8b8;
+    background: #fefcf5; cursor: pointer; text-align: left;
+    transition: all 0.2s; color: var(--ink);
+  }
+  .quiz-opt:hover { border-color: var(--honey); background: #fff9ee; transform: translateX(4px); }
+  .quiz-opt.picked { border-color: var(--honey-deep); background: var(--honey-glow); font-weight: 700; }
+
+  /* Result */
+  .result-char-img { height: 160px; width: auto; margin-bottom: 12px; animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.3) rotate(-10deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+  .result-title { font-family: 'Fredoka', sans-serif; font-size: 2rem; margin-bottom: 4px; }
+  .result-name { font-size: 1.3rem; color: var(--honey-deep); font-weight: 700; margin-bottom: 12px; }
+  .result-desc { max-width: 440px; text-align: center; color: var(--ink-soft); line-height: 1.6; margin-bottom: 8px; }
+  .result-quote { font-family: 'Caveat', cursive; font-size: 1.2rem; color: var(--ink); margin: 12px 0 24px; font-style: italic; }
+
+  .result-bars { width: 100%; max-width: 320px; margin: 16px 0; }
+  .rbar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.8rem; font-weight: 600; }
+  .rbar-track { flex: 1; height: 10px; border-radius: 10px; background: #f0e4cc; overflow: hidden; }
+  .rbar-fill { height: 100%; border-radius: 10px; background: var(--honey); transition: width 1.5s ease; }
+
+  .btn-secondary {
+    font-family: 'Fredoka', sans-serif; font-size: 0.95rem; font-weight: 600;
+    padding: 10px 24px; border-radius: 100px; border: 2px solid var(--ink);
+    background: transparent; color: var(--ink); cursor: pointer; margin: 4px;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: #fef9ee; transform: scale(1.03); }
+
+  /* Compare */
+  .compare-pair { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
+  .compare-char { text-align: center; }
+  .compare-char img { height: 100px; width: auto; }
+  .compare-char .name { font-family: 'Fredoka', sans-serif; font-weight: 700; margin-top: 4px; }
+  .compare-vs { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--rose); font-weight: 700; }
+  .compare-dynamic { max-width: 440px; text-align: center; color: var(--ink-soft); line-height: 1.6; margin-top: 8px; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="world">
+
+  <!-- INTRO -->
+  <div class="screen active" id="introScreen">
+    <div class="intro-eyebrow">a hundred acre personality quiz</div>
+    <h1 class="intro-title">Which Wood Character<br><span class="accent">Are You?</span></h1>
+    <p class="intro-sub">Ten little questions. Answer honestly — the Hundred Acre Wood is about to tell you who you really are. Then have your partner take it too, and see what kind of duo you make.</p>
+    <button class="intro-cta" id="startBtn">Find out who I am</button>
+    <div class="intro-characters">
+      <img src="couple-quiz/characters/pooh.png" alt="Pooh">
+      <img src="couple-quiz/characters/piglet.png" alt="Piglet">
+      <img src="couple-quiz/characters/tigger.png" alt="Tigger">
+      <img src="couple-quiz/characters/eeyore.png" alt="Eeyore">
+      <img src="couple-quiz/characters/rabbit.png" alt="Rabbit">
+      <img src="couple-quiz/characters/owl.png" alt="Owl">
+      <img src="couple-quiz/characters/kanga.png" alt="Kanga">
+    </div>
+    <div class="intro-credits">— seven characters. one you.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quizScreen">
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="quiz-card" id="quizCard">
+      <div class="quiz-num" id="quizNum"></div>
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="resultScreen">
+    <img class="result-char-img" id="resultImg" src="" alt="">
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-name" id="resultName"></div>
+    <div class="result-desc" id="resultDesc"></div>
+    <div class="result-quote" id="resultQuote"></div>
+    <div class="result-bars" id="resultBars"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn-secondary" id="partnerBtn">Now have my partner take it</button>
+      <button class="btn-secondary" id="retakeBtn">Retake quiz</button>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div class="screen" id="compareScreen">
+    <div class="intro-eyebrow">the wood has spoken</div>
+    <h2 style="font-family:'Fredoka',sans-serif;font-size:1.8rem;margin-bottom:4px;">Your Couple Dynamic</h2>
+    <div class="compare-pair">
+      <div class="compare-char" id="compareYou"></div>
+      <div class="compare-vs">&</div>
+      <div class="compare-char" id="comparePartner"></div>
+    </div>
+    <div class="compare-dynamic" id="compareDynamic"></div>
+    <button class="intro-cta" id="resetAllBtn" style="margin-top:20px;">Start fresh</button>
+  </div>
+
+</div>
+
+<script>
+const CHARACTERS = {
+  pooh: {
+    name: 'Winnie the Pooh', title: 'The Gentle Soul',
+    desc: "You're kind, unhurried, and powered primarily by snacks and good intentions. You see the best in everyone, even when they're being difficult. Your life philosophy is basically \"a little smackerel of something\" and honestly? That's beautiful.",
+    quote: '"People say nothing is impossible, but I do nothing every day."',
+    image: 'couple-quiz/characters/pooh.png'
+  },
+  tigger: {
+    name: 'Tigger', title: 'The Bouncy Chaos Agent',
+    desc: "You're the energy in every room. You've probably interrupted three conversations today with something exciting you just thought of. Your enthusiasm is infectious — people either want to join your dance party or take a nap. There is no middle ground with you, and that's wonderful.",
+    quote: '"The wonderful thing about Tiggers is I\'m the only one!"',
+    image: 'couple-quiz/characters/tigger.png'
+  },
+  eeyore: {
+    name: 'Eeyore', title: 'The Melancholy Realist',
+    desc: "You see things as they are. You're not negative — you're just... not going to pretend everything's great when it's clearly raining and someone stole your tail again. You're deeply loyal, quietly funny, and the friend everyone secretly turns to when they need the unvarnished truth.",
+    quote: '"It\'s not much of a tail, but I\'m sort of attached to it."',
+    image: 'couple-quiz/characters/eeyore.png'
+  },
+  piglet: {
+    name: 'Piglet', title: 'The Brave Little Heart',
+    desc: "You might be anxious, but you show up anyway — and that's actual courage. You care deeply about everyone around you, sometimes to the point of worry. You're small in the best way: you notice things others miss, and your kindness is the glue holding everything together.",
+    quote: '"It is hard to be brave when you\'re only a Very Small Animal."',
+    image: 'couple-quiz/characters/piglet.png'
+  },
+  rabbit: {
+    name: 'Rabbit', title: 'The Organized Firecracker',
+    desc: "You have a system. You have MANY systems. Things should be done properly, and you're not afraid to say so — loudly, if necessary. Underneath the fussing is someone who genuinely wants everything to be good for everyone. You care so much it comes out as spreadsheets and exasperated sighs.",
+    quote: '"Why does Pooh always choose the exact moment I\'m busy to come visiting?"',
+    image: 'couple-quiz/characters/rabbit.png'
+  },
+  owl: {
+    name: 'Owl', title: 'The Long-Winded Wise One',
+    desc: "You love to explain things. You might not always be right, but you're always CONFIDENT, and honestly that's half the battle. You have a story for every occasion — some of them are even relevant. People come to you for advice and you deliver, at length, with anecdotes. You mean well and everyone knows it.",
+    quote: '"Now, as I was saying — or rather, as my great-uncle Clarence once remarked to a rather distinguished spruce..."',
+    image: 'couple-quiz/characters/owl.png'
+  },
+  kanga: {
+    name: 'Kanga', title: 'The Calm Competent One',
+    desc: "You're the person everyone calls when things go wrong. You handle crises with grace, you remember everyone's birthday, and you somehow always have snacks. You're maternal in the best way — nurturing without smothering, practical without being cold. The Wood would genuinely fall apart without you.",
+    quote: '"Now then, Roo, be gentle with Piglet — he\'s only small."',
+    image: 'couple-quiz/characters/kanga.png'
+  }
+};
+
+const COUPLE_DYNAMICS = {
+  'pooh-tigger': "Pooh's gentle calm meets Tigger's endless bounce. One of you is napping while the other is redecorating the living room with excitement. It shouldn't work — but it absolutely does. You balance each other perfectly: the anchor and the balloon.",
+  'pooh-eeyore': "You two are the quietest, most understanding corner of the Wood. Pooh's gentle optimism softly nudges Eeyore's gloom, and Eeyore's dry honesty keeps Pooh grounded. Lots of comfortable silences. Lots of snacks consumed in companionable melancholy.",
+  'pooh-piglet': "The sweetest duo imaginable. You're both soft-hearted, a little tentative, and powered by mutual affection. You probably have matching blankets and an elaborate snack rotation system that neither of you will admit to planning.",
+  'pooh-rabbit': "The classic odd couple. Pooh keeps Rabbit from exploding from stress; Rabbit keeps Pooh from eating literally everything in the pantry. Rabbit pretends to be annoyed. Pooh pretends not to notice. Deep down, there's real tenderness here.",
+  'pooh-owl': "One of you talks a lot. The other one listens while thinking about honey. It works! Owl feels heard, Pooh feels entertained by the rambling, and somehow everyone ends up happy. Just don't fact-check Owl's stories.",
+  'pooh-kanga': "Kanga takes care of Pooh without making it obvious, and Pooh makes Kanga's life sweeter without trying. This is the most nurturing pairing in the Wood. Warm tea, gentle conversations, and someone always checking if you've eaten.",
+  'tigger-eeyore': "The ultimate opposites. Tigger bounces; Eeyore sighs. Tigger shouts; Eeyore mutters. And yet — Tigger's relentless optimism slowly wears down Eeyore's walls, and Eeyore's dry humor is the only thing that can make Tigger stop bouncing long enough to actually listen. Electric.",
+  'tigger-piglet': "Tigger's chaos energy and Piglet's gentle anxiety seem mismatched, but Tigger brings Piglet out of their shell and Piglet gives Tigger someone to protect. Tigger learns to be gentle. Piglet learns to bounce just a little.",
+  'tigger-rabbit': "Absolute mayhem. Rabbit has a plan. Tigger has already bounced through it, knocked over three things, and started a conga line. Rabbit is exasperated. Tigger thinks Rabbit is hilarious when annoyed. Somehow, projects still get done.",
+  'tigger-owl': "Two talkers in completely different keys. Tigger speaks in exclamation points; Owl speaks in paragraphs. They take turns dominating conversations and never notice the other was also talking. Other people find this exhausting. They find it perfect.",
+  'tigger-kanga': "Kanga is the only person who can get Tigger to sit still and eat a proper meal. Tigger is the only person who can get Kanga to be spontaneously silly. She mothers; he bounces. Mutual admiration wrapped in very different energy levels.",
+  'eeyore-piglet': "Two anxious souls finding comfort in each other. Quiet understanding. Piglet worries out loud; Eeyore offers resigned solidarity. They don't try to fix each other — they just sit together in the gentle gloom. Surprisingly healing.",
+  'eeyore-rabbit': "Rabbit's organizational fury meets Eeyore's total indifference to plans. Rabbit WILL get Eeyore's tail reattached, dammit, and Eeyore WILL sigh about it the entire time. The love language here is fussing — Rabbit fusses, Eeyore tolerates being fussed over.",
+  'eeyore-owl': "Owl delivers a twenty-minute monologue of advice. Eeyore listens to approximately eight seconds of it and responds with a single dry observation that accidentally contains more wisdom than the entire speech. Owl doesn't notice. Both feel satisfied.",
+  'eeyore-kanga': "Kanga's gentle competence is the only thing that can soothe Eeyore's gloom without dismissing it. She doesn't say 'cheer up' — she brings warm soup and sits quietly. Eeyore, in turn, appreciates her without the performative gratitude others expect.",
+  'piglet-rabbit': "Rabbit protects Piglet with the ferocity of a very organized tiger. Piglet helps Rabbit realize that some things — like friendship — can't be scheduled in a planner. Rabbit made Piglet an emergency preparedness kit. Piglet almost cried.",
+  'piglet-owl': "Piglet is too polite to interrupt Owl's monologues, so they just nod and say 'oh my' at appropriate intervals. Owl thinks Piglet is an excellent conversationalist. Piglet is mostly thinking about whether they left the stove on. Sweet but asymmetrical.",
+  'piglet-kanga': "Kanga mothers Piglet in exactly the gentle way Piglet needs. Piglet blossoms under her care. This is the softest, warmest, most nurturing pairing possible. Probably own several throw blankets. Definitely have a tea routine.",
+  'rabbit-owl': "Two verbose planners who both think THEY'RE in charge. Meetings that should take five minutes take two hours. They agree on the importance of structure and disagree on literally everything about the structure. Productive chaos. Neither would change a thing.",
+  'rabbit-kanga': "The competent power couple of the Hundred Acre Wood. If they co-hosted a dinner party, every detail would be perfect, everyone would be fed, and nobody would notice the organizational empire operating behind the scenes. Mutual respect, lightly competitive.",
+  'owl-kanga': "Owl talks; Kanga listens. Then Kanga gently does what she was going to do anyway, and Owl feels consulted. This is their rhythm and it's surprisingly harmonious. Kanga appreciates Owl's enthusiasm. Owl appreciates Kanga's... everything."
+};
+
+const QUESTIONS = [
+  {
+    q: "What's your ideal Saturday?",
+    options: [
+      { text: "Sleeping in, snacks nearby, zero obligations", scores: { pooh: 3, eeyore: 1 } },
+      { text: "Bouncing between 4 different activities and 3 friend hangs", scores: { tigger: 3 } },
+      { text: "Getting through a to-do list. A SATISFYING to-do list", scores: { rabbit: 3, kanga: 1 } },
+      { text: "Whatever happens, happens. I'm not in charge of the universe", scores: { eeyore: 3, pooh: 1 } }
+    ]
+  },
+  {
+    q: "How do you handle a crisis?",
+    options: [
+      { text: "Stay calm and take care of everyone around me", scores: { kanga: 3, rabbit: 1 } },
+      { text: "Panic first, process later — but I ALWAYS show up", scores: { piglet: 3 } },
+      { text: "Deliver a long, detailed explanation of what SHOULD be done", scores: { owl: 3 } },
+      { text: "Immediately start bouncing around with ideas. ENERGY!", scores: { tigger: 3, pooh: 1 } }
+    ]
+  },
+  {
+    q: "Pick your comfort activity:",
+    options: [
+      { text: "Eating something delicious, ideally with friends nearby", scores: { pooh: 3 } },
+      { text: "Dancing/singing/moving — anything that burns off energy", scores: { tigger: 3 } },
+      { text: "A quiet corner with a book, blanket, and no obligations", scores: { piglet: 2, eeyore: 2 } },
+      { text: "Reorganizing something. Don't judge me. It's calming", scores: { rabbit: 3 } }
+    ]
+  },
+  {
+    q: "What's your biggest pet peeve?",
+    options: [
+      { text: "People who are loud for NO reason. We have indoor voices", scores: { rabbit: 2, eeyore: 1 } },
+      { text: "Being rushed. Let me process things at my own pace", scores: { pooh: 2, piglet: 2 } },
+      { text: "When someone interrupts me mid-story. I wasn't finished", scores: { owl: 3 } },
+      { text: "People who don't check in on others. It takes two seconds", scores: { kanga: 3 } }
+    ]
+  },
+  {
+    q: "Your friends would describe you as:",
+    options: [
+      { text: "The hype person. I will cheer for you at literally anything", scores: { tigger: 3 } },
+      { text: "The mom friend. I have bandaids, snacks, and a backup plan", scores: { kanga: 3 } },
+      { text: "The wise one. People come to me for advice (and I deliver at length)", scores: { owl: 3, rabbit: 1 } },
+      { text: "The quietly loyal one. I don't say much but I'll always be there", scores: { eeyore: 2, piglet: 2 } }
+    ]
+  },
+  {
+    q: "What's your relationship with plans?",
+    options: [
+      { text: "I LOVE plans. I have plans FOR my plans. Color-coded", scores: { rabbit: 3 } },
+      { text: "Plans? I thought we were just... vibing?", scores: { pooh: 2, tigger: 1 } },
+      { text: "Plans usually don't work out, but sure, we can try", scores: { eeyore: 3 } },
+      { text: "I'll plan just enough to make sure everyone's taken care of", scores: { kanga: 2, piglet: 1 } }
+    ]
+  },
+  {
+    q: "At a party, you are:",
+    options: [
+      { text: "In the center of the room, possibly on a table, definitely doing something memorable", scores: { tigger: 3 } },
+      { text: "Near the snacks, having a lovely one-on-one conversation", scores: { pooh: 3 } },
+      { text: "In the corner with one person, having a deep and slightly melancholy chat", scores: { eeyore: 2, piglet: 1 } },
+      { text: "Helping the host. Someone has to make sure the drinks are refilled", scores: { kanga: 2, rabbit: 1 } }
+    ]
+  },
+  {
+    q: "What's your texting style?",
+    options: [
+      { text: "ALL CAPS. EMOJIS. ENTHUSIASM. I text like I'm being charged by the second", scores: { tigger: 3, owl: 1 } },
+      { text: "Short and sweet. 'Yes.' 'No.' 'Snacks?' You know what I mean", scores: { pooh: 3, eeyore: 1 } },
+      { text: "Proper punctuation. Full sentences. I will send a PARAGRAPH", scores: { rabbit: 2, owl: 2 } },
+      { text: "I respond in a reasonable timeframe and always ask how YOU are", scores: { kanga: 3, piglet: 1 } }
+    ]
+  },
+  {
+    q: "How do you feel about mornings?",
+    options: [
+      { text: "I wake up BOUNCING. The day is full of POSSIBILITIES", scores: { tigger: 3 } },
+      { text: "Mornings exist? I thought those were a myth", scores: { eeyore: 3, pooh: 1 } },
+      { text: "I've already done three things by the time you wake up", scores: { rabbit: 2, kanga: 2 } },
+      { text: "I'm up, I'm just... processing. Quietly. Give me a minute", scores: { piglet: 2, owl: 1 } }
+    ]
+  },
+  {
+    q: "What matters most to you?",
+    options: [
+      { text: "Joy. Pure, simple, uncomplicated happiness", scores: { pooh: 3, tigger: 1 } },
+      { text: "Being there for the people I love, no matter what", scores: { kanga: 3, piglet: 2 } },
+      { text: "Understanding things. Knowing how the world works — or at least having a confident theory", scores: { owl: 3, rabbit: 1 } },
+      { text: "Getting through it. Whatever 'it' is. With dignity if possible, but just getting through counts", scores: { eeyore: 3 } }
+    ]
+  }
+];
+
+let scores = {};
+let currentQ = 0;
+let partnerResult = null;
+
+// Init scores
+Object.keys(CHARACTERS).forEach(c => scores[c] = 0);
+
+function buildProgress() {
+  const el = document.getElementById('quizProgress');
+  el.innerHTML = '';
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'quiz-dot' + (i < currentQ ? ' done' : '');
+    el.appendChild(dot);
+  }
+}
+
+function showQuestion(i) {
+  currentQ = i;
+  buildProgress();
+  const q = QUESTIONS[i];
+  document.getElementById('quizNum').textContent = 'Question ' + (i + 1) + ' of ' + QUESTIONS.length;
+  document.getElementById('quizQ').textContent = q.q;
+  
+  const optsEl = document.getElementById('quizOptions');
+  optsEl.innerHTML = '';
+  q.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt.text;
+    btn.addEventListener('click', () => pickAnswer(i, oi, opt.scores));
+    optsEl.appendChild(btn);
+  });
+  
+  document.getElementById('quizCard').style.animation = 'none';
+  void document.getElementById('quizCard').offsetWidth;
+  document.getElementById('quizCard').style.animation = 'cardIn 0.4s ease';
+}
+
+function pickAnswer(qi, oi, scoreMap) {
+  // Add scores
+  Object.entries(scoreMap).forEach(([char, pts]) => {
+    scores[char] = (scores[char] || 0) + pts;
+  });
+  
+  // Visual feedback
+  const btns = document.querySelectorAll('.quiz-opt');
+  btns.forEach((b, i) => { if (i === oi) b.classList.add('picked'); else b.disabled = true; });
+  
+  setTimeout(() => {
+    if (qi < QUESTIONS.length - 1) {
+      showQuestion(qi + 1);
+    } else {
+      showResult();
+    }
+  }, 400);
+}
+
+function showResult() {
+  // Find top character
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const winner = sorted[0][0];
+  const char = CHARACTERS[winner];
+  
+  document.getElementById('resultImg').src = char.image;
+  document.getElementById('resultTitle').textContent = char.title;
+  document.getElementById('resultName').textContent = 'You are ' + char.name + '!';
+  document.getElementById('resultDesc').textContent = char.desc;
+  document.getElementById('resultQuote').textContent = char.quote;
+  
+  // Bars
+  const maxScore = sorted[0][1];
+  document.getElementById('resultBars').innerHTML = sorted.map(([key, val]) => {
+    const pct = Math.round((val / maxScore) * 100);
+    return '<div class="rbar"><span style="width:70px;text-align:right;">' + CHARACTERS[key].name.split(' ').pop() + '</span><div class="rbar-track"><div class="rbar-fill" style="width:' + pct + '%"></div></div><span>' + val + '</span></div>';
+  }).join('');
+  
+  switchScreen('resultScreen');
+}
+
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function getDynamic(a, b) {
+  const key = [a, b].sort().join('-');
+  return COUPLE_DYNAMICS[key] || "Two unique souls finding their own rhythm in the Hundred Acre Wood. Some dynamics can't be captured in a chart — they're too wonderfully specific to the two of you.";
+}
+
+// Event handlers
+document.getElementById('startBtn').addEventListener('click', () => {
+  switchScreen('quizScreen');
+  showQuestion(0);
+});
+
+document.getElementById('partnerBtn').addEventListener('click', () => {
+  partnerResult = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  // Reset for partner
+  Object.keys(CHARACTERS).forEach(c => scores[c] = 0);
+  switchScreen('quizScreen');
+  showQuestion(0);
+});
+
+document.getElementById('retakeBtn').addEventListener('click', () => {
+  Object.keys(CHARACTERS).forEach(c => scores[c] = 0);
+  switchScreen('quizScreen');
+  showQuestion(0);
+});
+
+document.getElementById('resetAllBtn').addEventListener('click', () => {
+  Object.keys(CHARACTERS).forEach(c => scores[c] = 0);
+  partnerResult = null;
+  switchScreen('introScreen');
+});
+
+// Override showResult for partner mode
+const origShowResult = showResult;
+showResult = function() {
+  if (partnerResult) {
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const winner = sorted[0][0];
+    const youChar = CHARACTERS[partnerResult];
+    const partnerChar = CHARACTERS[winner];
+    
+    document.getElementById('compareYou').innerHTML = '<img src="' + youChar.image + '" alt="' + youChar.name + '"><div class="name">You: ' + youChar.name.split(' ').pop() + '</div>';
+    document.getElementById('comparePartner').innerHTML = '<img src="' + partnerChar.image + '" alt="' + partnerChar.name + '"><div class="name">Partner: ' + partnerChar.name.split(' ').pop() + '</div>';
+    document.getElementById('compareDynamic').textContent = getDynamic(partnerResult, winner);
+    
+    switchScreen('compareScreen');
+  } else {
+    origShowResult();
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pucca & Garu Photobooth</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(232,68,58,0.08), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(255,200,40,0.06), transparent 50%),
+      linear-gradient(135deg, #f7f0ea 0%, #faf5f0 50%, #f0ebe3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+    overflow-x: hidden;
+  }
+
+  .photobooth {
+    width: 560px;
+    height: 840px;
+    background: #FFFDF8;
+    position: relative;
+    border: 4px solid #E8443A;
+    padding: 6px;
+    border-radius: 6px;
+    box-shadow: 
+      0 30px 80px rgba(232,68,58,0.25),
+      0 10px 30px rgba(0,0,0,0.12),
+      inset 0 0 0 1px rgba(255,255,255,0.8);
+    overflow: hidden;
+    animation: cardIn 0.8s cubic-bezier(.2,.9,.3,1.2);
+  }
+  
+  @keyframes cardIn {
+    from { transform: scale(0.9) rotate(-1deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  .photobooth::before {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border: 2.5px solid #E8443A;
+    pointer-events: none;
+    z-index: 50;
+    border-radius: 3px;
+  }
+
+  /* Dotted texture inside border */
+  .photobooth::after {
+    content: '';
+    position: absolute;
+    inset: 22px;
+    background-image: radial-gradient(circle, rgba(232,68,58,0.15) 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.5;
+  }
+
+  /* ==== PHOTO WINDOW ==== */
+  .photo-window {
+    position: absolute;
+    top: 150px;
+    left: 55px;
+    right: 55px;
+    bottom: 110px;
+    background: 
+      repeating-linear-gradient(45deg, #fff5f3 0 12px, #fffdfd 12px 24px);
+    border: 1px dashed rgba(232,68,58,0.35);
+    z-index: 5;
+    box-shadow: inset 0 0 0 1px rgba(232,68,58,0.08);
+    overflow: hidden;
+  }
+
+  /* Tape pieces */
+  .tape {
+    position: absolute;
+    width: 70px;
+    height: 22px;
+    background: rgba(232,68,58,0.18);
+    z-index: 60;
+    border: 1px solid rgba(232,68,58,0.2);
+  }
+  .tape.tl { top: -8px; left: -15px; transform: rotate(-32deg); }
+  .tape.tr { top: -8px; right: -15px; transform: rotate(32deg); }
+  .tape.bl { bottom: -8px; left: -15px; transform: rotate(32deg); }
+  .tape.br { bottom: -8px; right: -15px; transform: rotate(-32deg); }
+
+  .photo-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    color: rgba(232,68,58,0.4);
+    font-size: 13px;
+    letter-spacing: 3px;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .photo-hint .cam {
+    width: 36px;
+    height: 28px;
+    margin: 0 auto 8px;
+    position: relative;
+    background: rgba(232,68,58,0.3);
+    border-radius: 4px;
+  }
+  .photo-hint .cam::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    border: 2px solid rgba(232,68,58,0.4);
+  }
+  .photo-hint .cam::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 6px;
+    background: rgba(232,68,58,0.3);
+    top: -5px; left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* ==== PUCCA (top-left) ==== */
+  .char {
+    position: absolute;
+    width: 130px;
+    height: 150px;
+    z-index: 30;
+  }
+  .pucca { top: 25px; left: 25px; transform: rotate(-6deg); animation: bobA 3s ease-in-out infinite; }
+  .garu { top: 25px; right: 25px; transform: rotate(6deg) scaleX(-1); animation: bobB 3.5s ease-in-out infinite; }
+
+  @keyframes bobA {
+    0%,100% { transform: rotate(-6deg) translateY(0); }
+    50% { transform: rotate(-3deg) translateY(-4px); }
+  }
+  @keyframes bobB {
+    0%,100% { transform: rotate(6deg) scaleX(-1) translateY(0); }
+    50% { transform: rotate(3deg) scaleX(-1) translateY(-4px); }
+  }
+
+  /* === Pucca head === */
+  .pucca .head {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95px;
+    height: 90px;
+    background: radial-gradient(ellipse at 50% 35%, #ffe6cc 0%, #f5c8a0 100%);
+    border-radius: 48% 48% 45% 45%;
+    border: 2.5px solid #1a1a1a;
+    box-shadow: inset -4px -4px 8px rgba(0,0,0,0.08);
+    z-index: 5;
+  }
+
+  /* Pucca hair buns */
+  .pucca .bun {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: radial-gradient(circle at 35% 30%, #2a2a2a, #000);
+    border-radius: 50%;
+    border: 2.5px solid #000;
+    z-index: 3;
+  }
+  .pucca .bun.l { top: 8px; left: 18px; }
+  .pucca .bun.r { top: 8px; right: 18px; }
+  .pucca .bun::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: radial-gradient(circle at 40% 40%, #E8443A, #a02820);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    border: 1.5px solid #000;
+  }
+
+  /* Pucca fringe */
+  .pucca .fringe {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 35px;
+    background: #0a0a0a;
+    border-radius: 50% 50% 30% 30%;
+    z-index: 4;
+  }
+  .pucca .fringe::before, .pucca .fringe::after {
+    content: '';
+    position: absolute;
+    background: #0a0a0a;
+    border-radius: 50%;
+    bottom: -8px;
+  }
+  .pucca .fringe::before { width: 28px; height: 22px; left: 8px; }
+  .pucca .fringe::after { width: 28px; height: 22px; right: 8px; }
+
+  /* Pucca eyes */
+  .pucca .eye {
+    position: absolute;
+    width: 13px;
+    height: 8px;
+    background: #000;
+    border-radius: 50%;
+    top: 52px;
+    z-index: 6;
+  }
+  .pucca .eye.l { left: 25px; }
+  .pucca .eye.r { right: 25px; }
+
+  /* Pucca blush */
+  .pucca .blush {
+    position: absolute;
+    width: 14px;
+    height: 8px;
+    background: rgba(232,68,58,0.45);
+    border-radius: 50%;
+    top: 62px;
+    z-index: 6;
+  }
+  .pucca .blush.l { left: 14px; }
+  .pucca .blush.r { right: 14px; }
+
+  /* Pucca smile */
+  .pucca .smile {
+    position: absolute;
+    width: 22px;
+    height: 12px;
+    border-bottom: 3px solid #000;
+    border-radius: 0 0 50% 50%;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+  }
+
+  /* === Garu head === */
+  .garu .head {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95px;
+    height: 90px;
+    background: radial-gradient(ellipse at 50% 35%, #ffe6cc 0%, #f5c8a0 100%);
+    border-radius: 48% 48% 45% 45%;
+    border: 2.5px solid #1a1a1a;
+    box-shadow: inset -4px -4px 8px rgba(0,0,0,0.08);
+    z-index: 5;
+  }
+
+  /* Garu hair (swept) */
+  .garu .hair {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96px;
+    height: 38px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 60% 60% 25% 25%;
+    z-index: 4;
+  }
+  .garu .hair::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 35px;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border-radius: 80% 20% 50% 50%;
+    top: -4px;
+    left: -10px;
+    transform: rotate(-15deg);
+  }
+  .garu .hair::after {
+    content: '';
+    position: absolute;
+    width: 38px;
+    height: 30px;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border-radius: 20% 80% 50% 50%;
+    top: 0px;
+    right: -8px;
+    transform: rotate(20deg);
+  }
+
+  /* Garu headband */
+  .garu .band {
+    position: absolute;
+    width: 96px;
+    height: 6px;
+    background: linear-gradient(90deg, #E8443A, #c8332a);
+    top: 42px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    border-radius: 2px;
+  }
+  .garu .band::before, .garu .band::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 8px;
+    background: #E8443A;
+    border-radius: 50%;
+    top: -1px;
+    border: 1.5px solid #000;
+  }
+  .garu .band::before { left: -6px; }
+  .garu .band::after { right: -6px; }
+
+  /* Garu eyes (closed, focused) */
+  .garu .eye {
+    position: absolute;
+    width: 14px;
+    height: 7px;
+    border-bottom: 3px solid #000;
+    border-radius: 0 0 50% 50%;
+    top: 58px;
+    z-index: 6;
+  }
+  .garu .eye.l { left: 23px; }
+  .garu .eye.r { right: 23px; }
+
+  /* Garu mouth (small line) */
+  .garu .mouth {
+    position: absolute;
+    width: 10px;
+    height: 4px;
+    border-bottom: 2.5px solid #000;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 50% 50%;
+    z-index: 6;
+  }
+
+  /* Garu small ponytail */
+  .garu .tail {
+    position: absolute;
+    width: 14px;
+    height: 22px;
+    background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+    top: 8px;
+    right: 8px;
+    border-radius: 50% 50% 30% 30%;
+    transform: rotate(15deg);
+    z-index: 3;
+  }
+
+  /* ==== FLOATING HEARTS ==== */
+  .heart {
+    position: absolute;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .heart::before, .heart::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ff5a4f 0%, #E8443A 50%, #b02820 100%);
+    border-radius: 50% 50% 0 0;
+    border: 1.5px solid #8a1a14;
+  }
+  .heart::before { transform: rotate(-45deg); left: 30%; }
+  .heart::after { transform: rotate(45deg); left: 70%; transform-origin: 0 100%; }
+
+  .heart.h1 { width: 24px; height: 22px; top: 130px; left: 38%; animation: float1 4s ease-in-out infinite; }
+  .heart.h2 { width: 16px; height: 14px; top: 90px; left: 48%; animation: float2 5s ease-in-out infinite 0.5s; }
+  .heart.h3 { width: 20px; height: 18px; top: 145px; right: 35%; animation: float1 4.5s ease-in-out infinite 1s; }
+  .heart.h4 { width: 14px; height: 12px; top: 115px; left: 30%; animation: float2 3.5s ease-in-out infinite 0.8s; }
+  .heart.h5 { width: 18px; height: 16px; top: 100px; right: 28%; animation: float1 4.2s ease-in-out infinite 0.3s; }
+  .heart.h6 { width: 12px; height: 11px; top: 160px; left: 55%; animation: float2 3.8s ease-in-out infinite 1.2s; }
+
+  @keyframes float1 {
+    0%,100% { transform: translate(0,0) rotate(-8deg) scale(1); opacity: 0.9; }
+    50% { transform: translate(8px,-12px) rotate(8deg) scale(1.15); opacity: 1; }
+  }
+  @keyframes float2 {
+    0%,100% { transform: translate(0,0) rotate(10deg) scale(1); opacity: 0.8; }
+    50% { transform: translate(-10px,-14px) rotate(-10deg) scale(1.2); opacity: 1; }
+  }
+
+  /* ==== TITLE ==== */
+  .title-band {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 25;
+    width: 80%;
+  }
+
+  .title-deco-l, .title-deco-r {
+    position: absolute;
+    top: 50%;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #E8443A);
+    transform: translateY(-50%);
+  }
+  .title-deco-l { left: -10px; }
+  .title-deco-r { right: -10px; background: linear-gradient(270deg, transparent, #E8443A); }
+
+  .title {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: #E8443A;
+    letter-spacing: 1px;
+    text-shadow: 
+      2px 2px 0 #fff,
+      4px 4px 0 rgba(232,68,58,0.2);
+    line-height: 1;
+    font-style: italic;
+  }
+  .title .amp {
+    font-family: 'Georgia', serif;
+    font-size: 30px;
+    font-style: italic;
+    color: #c8332a;
+    margin: 0 4px;
+  }
+  .subtitle {
+    font-size: 10px;
+    letter-spacing: 8px;
+    color: #8a1a14;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* Tiny heart bullets */
+  .bullets {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .bullets span {
+    width: 6px;
+    height: 6px;
+    background: #E8443A;
+    transform: rotate(45deg);
+    border-radius: 0 0 50% 50%;
+    position: relative;
+  }
+  .bullets span::before {
+    content: '';
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #E8443A;
+    border-radius: 50% 50% 0 0;
+    top: -3px; left: 0;
+  }
+  .bullets span::after {
+    content: '';
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #E8443A;
+    border-radius: 50% 50% 0 0;
+    top: 0; left: -3px;
+    transform: rotate(-90deg);
+  }
+
+  /* Corner accents */
+  .corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    z-index: 40;
+  }
+  .corner::before, .corner::after {
+    content: '';
+    position: absolute;
+    background: #E8443A;
+  }
+  .corner.tl { top: 22px; left: 22px; }
+  .corner.tl::before { width: 18px; height: 3px; top: 0; left: 0; }
+  .corner.tl::after { width: 3px; height: 18px; top: 0; left: 0; }
+
+  .corner.tr { top: 22px; right: 22px; }
+  .corner.tr::before { width: 18px; height: 3px; top: 0; right: 0; }
+  .corner.tr::after { width: 3px; height: 18px; top: 0; right: 0; }
+
+  .corner.bl { bottom: 22px; left: 22px; }
+  .corner.bl::before { width: 18px; height: 3px; bottom: 0; left: 0; }
+  .corner.bl::after { width: 3px; height: 18px; bottom: 0; left: 0; }
+
+  .corner.br { bottom: 22px; right: 22px; }
+  .corner.br::before { width: 18px; height: 3px; bottom: 0; right: 0; }
+  .corner.br::after { width: 3px; height: 18px; bottom: 0; right: 0; }
+
+  /* Small flower decorations */
+  .flower {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    z-index: 22;
+  }
+  .flower::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 50% 20%, #ffcc33 4px, transparent 5px),
+      radial-gradient(circle at 80% 50%, #ffcc33 4px, transparent 5px),
+      radial-gradient(circle at 50% 80%, #ffcc33 4px, transparent 5px),
+      radial-gradient(circle at 20% 50%, #ffcc33 4px, transparent 5px);
+  }
+  .flower::after {
+    content: '';
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #E8443A;
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+  }
+  .flower.f1 { bottom: 120px; left: 30px; transform: rotate(-20deg); }
+  .flower.f2 { bottom: 130px; right: 30px; transform: rotate(20deg); }
+
+  /* Sparkle dots */
+  .sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #E8443A;
+    border-radius: 50%;
+    z-index: 15;
+    box-shadow: 0 0 6px rgba(232,68,58,0.5);
+  }
+  .sparkle.s1 { top: 175px; left: 70px; animation: twinkle 2s ease-in-out infinite; }
+  .sparkle.s2 { top: 200px; right: 80px; animation: twinkle 2.5s ease-in-out infinite 0.5s; }
+  .sparkle.s3 { bottom: 200px; left: 90px; animation: twinkle 2.2s ease-in-out infinite 0.8s; }
+  .sparkle.s4 { bottom: 220px; right: 70px; animation: twinkle 2.8s ease-in-out infinite 1s; }
+  .sparkle.s5 { top: 185px; left: 50%; animation: twinkle 3s ease-in-out infinite 0.3s; }
+
+  @keyframes twinkle {
+    0%,100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* Bottom edge dashes */
+  .edge-deco {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    z-index: 25;
+  }
+  .edge-deco span {
+    width: 4px;
+    height: 4px;
+    background: #E8443A;
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+
+  /* Date stamp area */
+  .stamp {
+    position: absolute;
+    bottom: 22px;
+    right: 30px;
+    font-size: 8px;
+    color: rgba(232,68,58,0.6);
+    letter-spacing: 2px;
+    z-index: 25;
+    font-family: monospace;
+  }
+  .stamp-l {
+    position: absolute;
+    bottom: 22px;
+    left: 30px;
+    font-size: 8px;
+    color: rgba(232,68,58,0.6);
+    letter-spacing: 2px;
+    z-index: 25;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="photobooth">
+
+  <!-- Corner accents -->
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- Pucca (top-left) -->
+  <div class="char pucca">
+    <div class="head"></div>
+    <div class="bun l"></div>
+    <div class="bun r"></div>
+    <div class="fringe"></div>
+    <div class="eye l"></div>
+    <div class="eye r"></div>
+    <div class="blush l"></div>
+    <div class="blush r"></div>
+    <div class="smile"></div>
+  </div>
+
+  <!-- Garu (top-right) -->
+  <div class="char garu">
+    <div class="tail"></div>
+    <div class="head"></div>
+    <div class="hair"></div>
+    <div class="band"></div>
+    <div class="eye l"></div>
+    <div class="eye r"></div>
+    <div class="mouth"></div>

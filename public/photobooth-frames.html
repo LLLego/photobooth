@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>our photobooth — All Frames</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#2D1B11;color:#FFFAF0;font-family:Georgia,serif;padding:2rem}
+h1{text-align:center;font-size:2.2rem;color:#FFB400;margin-bottom:.25rem}
+.sub{text-align:center;color:#D4956A;margin-bottom:2.5rem;font-style:italic}
+.section{margin-bottom:3rem}
+.section h2{font-size:1.3rem;color:#FFB400;margin-bottom:1rem;border-bottom:2px solid #D4956A33;padding-bottom:.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem}
+.card{background:#3D2B1B;border-radius:16px;overflow:hidden;border:2px solid #D4956A33}
+.card:hover{transform:translateY(-4px);border-color:#D4956A;transition:.2s}
+.card iframe{width:100%;height:450px;border:none;display:block}
+.label{padding:.6rem .75rem;text-align:center;font-size:.85rem}
+.file{font-size:.7rem;color:#D4956A;margin-top:.2rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.65rem;margin-left:6px}
+.badge.glm{background:#FFB40033;color:#FFB400}
+</style>
+</head>
+<body>
+<h1>🎞️ our photobooth</h1>
+<p class="sub">GLM-5.2 designed frames • CSS art • characters visible on every theme</p>
+
+<!-- HUNDRED ACRE GANG -->
+<div class="section"><h2>🍯 Hundred Acre Gang</h2><div class="grid">
+
+<div class="card">
+<iframe src="hundred-acre-frame.html"></iframe>
+<div class="label">All Together <span class="badge glm">GLM-5.2</span><div class="file">hundred-acre-frame.html — Pooh, Piglet, Tigger, Eeyore, honeycomb borders</div></div></div>
+
+<div class="card">
+<iframe src="themes/hundred-acre-gang/pooh.html"></iframe>
+<div class="label">Winnie the Pooh <span class="badge glm">GLM-5.2</span><div class="file">pooh.html — Golden honey bear, warm palette</div></div></div>
+
+<div class="card">
+<iframe src="themes/hundred-acre-gang/piglet.html"></iframe>
+<div class="label">Piglet <span class="badge glm">GLM-5.2</span><div class="file">piglet.html — Pink pig with stripes</div></div></div>
+
+<div class="card">
+<iframe src="themes/hundred-acre-gang/tigger.html"></iframe>
+<div class="label">Tigger <span class="badge glm">GLM-5.2</span><div class="file">tigger.html — Orange tiger, bouncing</div></div></div>
+
+<div class="card">
+<iframe src="themes/hundred-acre-gang/eeyore.html"></iframe>
+<div class="label">Eeyore <span class="badge glm">GLM-5.2</span><div class="file">eeyore.html — Blue-grey donkey, pink bow</div></div></div>
+
+</div></div>
+
+<!-- PUCCA + HELLO KITTY pending desktop files -->
+<div class="section"><h2>❤️ Pucca &amp; 🎀 Hello Kitty</h2>
+<p style="padding:2rem;text-align:center;color:#D4956A">Frames generated on Desktop — open separately:
+<br><code>pucca-frame.html</code> • <code>kitty-frame.html</code>
+<br><br>(these are also awaiting deploy to GitHub Pages — run <code>npm run build</code> to update)</p>
+</div>
+
+<div class="section"><h2>✨ Minimal (SVG frames — camera-ready)</h2><div class="grid">
+
+<div class="card">
+<iframe src="themes/minimal/frame.svg"></iframe>
+<div class="label">Diamonds<div class="file">frame.svg — Double border with diamond corners</div></div></div>
+
+<div class="card">
+<iframe src="themes/minimal/frame_v2.svg"></iframe>
+<div class="label">Corners<div class="file">frame_v2.svg — Bold corner brackets</div></div></div>
+
+<div class="card">
+<iframe src="themes/minimal/frame_v3.svg"></iframe>
+<div class="label">Washi Tape<div class="file">frame_v3.svg — Dashed double line</div></div></div>
+
+</div></div>
+
+</body>
+</html>

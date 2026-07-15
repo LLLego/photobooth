@@ -1,0 +1,656 @@
+Here's the photobooth frame — warm minimal with terracotta accents, classic Polaroid proportions, hand-drawn CSS characters (sun, leaf, daisies, butterflies, hearts, dashed trails) decorating the edges while the center stays clean and open.
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>our photobooth</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { min-height: 100vh; }
+body {
+  background: #f0e2cd;
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(212,149,106,0.10) 0%, transparent 55%);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  padding: 44px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5c4a32;
+}
+/* Stage with dotted corner registers */
+.stage { position: relative; padding: 36px; max-width: 460px; width: 100%; }
+.reg {
+  position: absolute; width: 12px; height: 12px;
+  border: 1.5px solid rgba(92,74,50,0.45);
+  border-radius: 50%;
+}
+.reg.tl { top: 6px; left: 6px; }
+.reg.tr { top: 6px; right: 6px; }
+.reg.bl { bottom: 6px; left: 6px; }
+.reg.br { bottom: 6px; right: 6px; }
+
+/* Tiny outer label */
+.stage-label {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: rgba(92,74,50,0.5);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+
+/* Polaroid */
+.polaroid {
+  background: #fdf8ef;
+  padding: 18px 18px 78px;
+  position: relative;
+  box-shadow:
+    0 1px 0 rgba(92,74,50,0.06),
+    0 6px 14px rgba(92,74,50,0.10),
+    0 18px 32px rgba(92,74,50,0.08),
+    0 32px 60px rgba(92,74,50,0.05);
+  border: 1px solid rgba(92,74,50,0.12);
+}
+/* Clean double border */
+.polaroid::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid #d4956a;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Inner cream wash on the white border to feel warm */
+.polaroid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, transparent 70%, rgba(212,149,106,0.04) 100%);
+  pointer-events: none;
+}
+
+/* Photo well — remains empty/transparent */
+.photo-area {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(212,149,106,0.05) 0px,
+      rgba(212,149,106,0.05) 1px,
+      transparent 1px,
+      transparent 12px);
+  background-color: #f6ebd6;
+  position: relative;
+  border: 1px dashed rgba(92,74,50,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2;
+}
+.photo-area .ph-num {
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: rgba(92,74,50,0.4);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+.photo-area .ph-icon {
+  width: 28px; height: 28px;
+  border: 1.5px solid rgba(92,74,50,0.3);
+  border-radius: 50%;
+  position: relative;
+}
+.photo-area .ph-icon::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(92,74,50,0.3);
+  border-radius: 50%;
+}
+.photo-area .ph-icon::after {
+  content: '';
+  position: absolute;
+  top: 3px; right: 3px;
+  width: 4px; height: 4px;
+  background: rgba(92,74,50,0.3);
+  border-radius: 50%;
+}
+
+/* Handwriting line area */
+.handwriting {
+  position: absolute;
+  left: 26px; right: 26px; bottom: 22px;
+  height: 46px;
+  z-index: 2;
+}
+.hw-line {
+  position: absolute;
+  bottom: 16px; left: 0; right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(to right,
+    rgba(92,74,50,0.32) 0 5px,
+    transparent 5px 9px);
+}
+.hw-line2 {
+  position: absolute;
+  bottom: 0; left: 30%; right: 30%;
+  height: 1px;
+  background: repeating-linear-gradient(to right,
+    rgba(212,149,106,0.55) 0 3px,
+    transparent 3px 7px);
+}
+.hw-month {
+  position: absolute;
+  bottom: 20px; right: 0;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: rgba(92,74,50,0.45);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 26px;
+  position: relative;
+  z-index: 5;
+}
+.title {
+  font-size: 26px;
+  letter-spacing: 14px;
+  font-weight: 400;
+  color: #5c4a32;
+  text-transform: lowercase;
+  padding-left: 14px;
+  font-style: italic;
+}
+.title .amp {
+  color: #d4956a;
+  font-style: normal;
+  margin: 0 4px;
+}
+.subtitle {
+  margin-top: 10px;
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: #d4956a;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+.subtitle .dot { margin: 0 8px; color: rgba(212,149,106,0.5); }
+
+/* Floating decorations */
+.deco { position: absolute; pointer-events: none; z-index: 3; }
+
+/* SUN — top left, hand-drawn radiating lines + circle */
+.sun { top: 2px; left: -14px; width: 64px; height: 64px; }
+.sun-core {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 18px; height: 18px;
+  border: 2px solid #d4956a;
+  border-radius: 50%;
+  background: rgba(212,149,106,0.08);
+}
+.sun-ray {
+  position: absolute; top: 50%; left: 50%;
+  width: 1.5px; height: 9px;
+  background: #d4956a;
+  transform-origin: 50% 26px;
+  border-radius: 2px;
+}
+
+/* LEAF cluster — top right */
+.leaf { top: -2px; right: -22px; width: 70px; height: 70px; }
+.leaf-vein {
+  position: absolute;
+  background: #b88560;
+}
+.leaf-shape {
+  position: absolute;
+  width: 0; height: 0;
+  border-style: solid;
+}
+.leaf-1 {
+  top: 16px; left: 14px;
+  width: 30px; height: 48px;
+  background: #d4956a;
+  border-radius: 50% 0 50% 0;
+  transform: rotate(-18deg);
+  opacity: 0.92;
+}
+.leaf-1::before {
+  content:'';
+  position: absolute;
+  top: 4px; left: 50%;
+  width: 1px; height: 38px;
+  background: rgba(92,74,50,0.45);
+  transform: translateX(-50%);
+}
+.leaf-2 {
+  top: 4px; left: 32px;
+  width: 22px; height: 36px;
+  background: #c98b5e;
+  border-radius: 0 50% 0 50%;
+  transform: rotate(28deg);
+  opacity: 0.88;
+}
+.leaf-2::before {
+  content:'';
+  position: absolute;
+  top: 4px; left: 50%;
+  width: 1px; height: 28px;
+  background: rgba(92,74,50,0.45);
+  transform: translateX(-50%) rotate(8deg);
+}
+.leaf-stem {
+  position: absolute;
+  top: 2px; left: 18px;
+  width: 1.5px; height: 22px;
+  background: #8b6240;
+  transform: rotate(-22deg);
+  transform-origin: top;
+  border-radius: 2px;
+}
+
+/* BUTTERFLY 1 — left side */
+.bfly-l {
+  top: 42%; left: -34px;
+  width: 42px; height: 30px;
+  transform: rotate(-15deg);
+}
+.bfly-l .wing {
+  position: absolute;
+  width: 16px; height: 20px;
+  background: #d4956a;
+  border: 1.5px solid #8b5e3c;
+  border-radius: 80% 20% 70% 30%;
+  top: 5px;
+}
+.bfly-l .wing.left {
+  left: 0;
+  transform: rotate(-12deg);
+}
+.bfly-l .wing.right {
+  right: 0;
+  border-radius: 20% 80% 30% 70%;
+  transform: rotate(12deg);
+}
+.bfly-l .wing::after {
+  content: '';
+  position: absolute;
+  width: 4px; height: 4px;
+  background: #fdf8ef;
+  border-radius: 50%;
+  border: 1px solid #8b5e3c;
+  top: 4px; left: 5px;
+}
+.bfly-l .body {
+  position: absolute;
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
+  width: 2px; height: 22px;
+  background: #5c4a32;
+  border-radius: 2px;
+}
+.bfly-l .antenna {
+  position: absolute;
+  top: -2px; left: 50%;
+  width: 1px; height: 6px;
+  background: #5c4a32;
+}
+.bfly-l .antenna.l { transform: translateX(-50%) rotate(-25deg); transform-origin: bottom; }
+.bfly-l .antenna.r { transform: translateX(-50%) rotate(25deg); transform-origin: bottom; }
+
+/* BUTTERFLY 2 — right side */
+.bfly-r {
+  top: 60%; right: -34px;
+  width: 36px; height: 26px;
+  transform: rotate(15deg) scaleX(-1);
+}
+.bfly-r .wing {
+  position: absolute;
+  width: 14px; height: 18px;
+  background: #e0aa83;
+  border: 1.5px solid #8b5e3c;
+  border-radius: 80% 20% 70% 30%;
+  top: 4px;
+}
+.bfly-r .wing.left { left: 0; transform: rotate(-10deg); }
+.bfly-r .wing.right {
+  right: 0;
+  border-radius: 20% 80% 30% 70%;
+  transform: rotate(10deg);
+}
+.bfly-r .body {
+  position: absolute;
+  top: 3px; left: 50%;
+  transform: translateX(-50%);
+  width: 2px; height: 20px;
+  background: #5c4a32;
+  border-radius: 2px;
+}
+
+/* DAISY 1 — bottom left */
+.daisy-bl {
+  bottom: -16px; left: -22px;
+  width: 56px; height: 56px;
+}
+.petal {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 10px; height: 18px;
+  background: #fdf8ef;
+  border: 1.5px solid #c9946a;
+  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+  transform-origin: 50% 22px;
+  margin-left: -5px;
+  margin-top: -22px;
+}
+.daisy-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 12px; height: 12px;
+  background: #d4956a;
+  border: 1.5px solid #8b5e3c;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+/* DAISY 2 — bottom right (smaller) */
+.daisy-br {
+  bottom: -8px; right: -16px;
+  width: 44px; height: 44px;
+}
+.daisy-br .petal {
+  width: 8px; height: 14px;
+  transform-origin: 50% 17px;
+  margin-left: -4px;
+  margin-top: -17px;
+}
+.daisy-br .daisy-center {
+  width: 9px; height: 9px;
+}
+
+/* HEART — bottom center left */
+.heart {
+  bottom: 18px; left: 32px;
+  width: 14px; height: 13px;
+  transform: rotate(-8deg);
+}
+.heart::before, .heart::after {
+  content: '';
+  position: absolute;
+  width: 8px; height: 12px;
+  background: #d4956a;
+  border-radius: 8px 8px 0 0;
+  top: 0;
+}
+.heart::before {
+  left: 0;
+  transform: rotate(-45deg);
+  transform-origin: 50% 100%;
+}
+.heart::after {
+  right: 0;
+  transform: rotate(45deg);
+  transform-origin: 50% 100%;
+}
+
+/* Small dashed trail under butterfly */
+.trail {
+  position: absolute;
+  height: 1px;
+  background: repeating-linear-gradient(to right,
+    #d4956a 0 3px,
+    transparent 3px 7px);
+  z-index: 3;
+}
+.trail-1 {
+  top: calc(42% + 14px);
+  left: -60px;
+  width: 24px;
+  transform: rotate(-8deg);
+}
+.trail-2 {
+  top: calc(60% + 12px);
+  right: -60px;
+  width: 22px;
+  transform: rotate(8deg);
+}
+
+/* Tiny scattered dots */
+.dot {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: #d4956a;
+  border-radius: 50%;
+  z-index: 3;
+}
+.dot.d1 { top: 22%; left: -10px; opacity: 0.7; }
+.dot.d2 { top: 78%; left: -8px; width: 3px; height: 3px; opacity: 0.5; }
+.dot.d3 { top: 28%; right: -10px; opacity: 0.6; width: 3px; height: 3px; }
+.dot.d4 { top: 14%; right: 18px; opacity: 0.4; width: 2px; height: 2px; }
+.dot.d5 { bottom: 30%; left: 18px; opacity: 0.5; width: 2px; height: 2px; }
+
+/* Tiny cross marks */
+.cross {
+  position: absolute;
+  width: 8px; height: 8px;
+  z-index: 3;
+}
+.cross::before, .cross::after {
+  content: '';
+  position: absolute;
+  background: #d4956a;
+}
+.cross::before {
+  top: 50%; left: 0;
+  width: 100%; height: 1px;
+  transform: translateY(-50%);
+}
+.cross::after {
+  left: 50%; top: 0;
+  height: 100%; width: 1px;
+  transform: translateX(-50%);
+}
+.cross.c1 { top: 30%; left: -16px; }
+.cross.c2 { bottom: 24%; right: -14px; }
+.cross.c3 { top: 8%; left: 30%; opacity: 0.6; }
+
+/* Bottom signature label */
+.footer-strip {
+  position: absolute;
+  bottom: -26px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: rgba(92,74,50,0.5);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+}
+.footer-strip .line {
+  width: 28px;
+  height: 1px;
+  background: rgba(92,74,50,0.35);
+}
+
+/* Small frame number stamp */
+.stamp {
+  position: absolute;
+  top: 30px; right: 30px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: rgba(212,149,106,0.7);
+  font-family: 'Courier New', monospace;
+  border: 1px solid rgba(212,149,106,0.5);
+  padding: 3px 6px;
+  z-index: 4;
+  transform: rotate(-3deg);
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .stage { padding: 28px 18px; }
+  .title { font-size: 20px; letter-spacing: 10px; }
+  .sun, .leaf { width: 50px; height: 50px; }
+  .bfly-l { left: -22px; }
+  .bfly-r { right: -22px; }
+  .daisy-bl { left: -14px; }
+  .daisy-br { right: -10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="reg tl"></div>
+  <div class="reg tr"></div>
+  <div class="reg bl"></div>
+  <div class="reg br"></div>
+  <div class="stage-label">— film roll no. 07 —</div>
+
+  <header class="header">
+    <div class="title">our<span class="amp">·</span>photobooth</div>
+    <div class="subtitle">
+      <span>memories</span>
+      <span class="dot">●</span>
+      <span>kept warm</span>
+      <span class="dot">●</span>
+      <span>forever</span>
+    </div>
+  </header>
+
+  <div class="polaroid">
+
+    <!-- Stamp -->
+    <div class="stamp">N°&nbsp;07</div>
+
+    <!-- Photo well: empty, transparent-feeling -->
+    <div class="photo-area">
+      <div class="ph-icon"></div>
+      <div class="ph-num">— place your photo here —</div>
+    </div>
+
+    <!-- Handwriting zone -->
+    <div class="handwriting">
+      <div class="hw-line"></div>
+      <div class="hw-line2"></div>
+      <div class="hw-month">· month · year ·</div>
+    </div>
+
+    <!-- Sun, top left -->
+    <div class="deco sun">
+      <div class="sun-core"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(0deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(30deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(60deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(90deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(120deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(150deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(180deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(210deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(240deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(270deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(300deg) translateY(-26px);"></div>
+      <div class="sun-ray" style="transform: translate(-50%,-50%) rotate(330deg) translateY(-26px);"></div>
+    </div>
+
+    <!-- Leaves, top right -->
+    <div class="deco leaf">
+      <div class="leaf-stem"></div>
+      <div class="leaf-1"></div>
+      <div class="leaf-2"></div>
+    </div>
+
+    <!-- Butterfly, left -->
+    <div class="deco bfly-l">
+      <div class="antenna l"></div>
+      <div class="antenna r"></div>
+      <div class="wing left"></div>
+      <div class="wing right"></div>
+      <div class="body"></div>
+    </div>
+    <div class="trail trail-1"></div>
+
+    <!-- Butterfly, right -->
+    <div class="deco bfly-r">
+      <div class="wing left"></div>
+      <div class="wing right"></div>
+      <div class="body"></div>
+    </div>
+    <div class="trail trail-2"></div>
+
+    <!-- Daisy, bottom left -->
+    <div class="deco daisy-bl">
+      <div class="petal" style="transform: rotate(0deg);"></div>
+      <div class="petal" style="transform: rotate(45deg);"></div>
+      <div class="petal" style="transform: rotate(90deg);"></div>
+      <div class="petal" style="transform: rotate(135deg);"></div>
+      <div class="petal" style="transform: rotate(180deg);"></div>
+      <div class="petal" style="transform: rotate(225deg);"></div>
+      <div class="petal" style="transform: rotate(270deg);"></div>
+      <div class="petal" style="transform: rotate(315deg);"></div>
+      <div class="daisy-center"></div>
+    </div>
+
+    <!-- Daisy, bottom right -->
+    <div class="deco daisy-br">
+      <div class="petal" style="transform: rotate(0deg);"></div>
+      <div class="petal" style="transform: rotate(45deg);"></div>
+      <div class="petal" style="transform: rotate(90deg);"></div>
+      <div class="petal" style="transform: rotate(135deg);"></div>
+      <div class="petal" style="transform: rotate(180deg);"></div>
+      <div class="petal" style="transform: rotate(225deg);"></div>
+      <div class="petal" style="transform: rotate(270deg);"></div>
+      <div class="petal" style="transform: rotate(315deg);"></div>
+      <div class="daisy-center"></div>
+    </div>
+
+    <!-- Heart -->
+    <div class="deco heart"></div>
+
+    <!-- Scattered dots -->
+    <div class="dot d1"></div>
+    <div class="dot d2"></div>
+    <div class="dot d3"></div>
+    <div class="dot d4"></div>
+    <div class="dot d5"></div>
+
+    <!-- Cross marks -->
+    <div class="deco cross c1"></div>
+    <div class="deco cross c2"></div>
+    <div class="deco cross c3"></div>
+
+    <!-- Footer strip -->
+    <div class="footer-strip">
+      <span class="line"></span>
+      <span>developed with love</span>
+      <span class="line"></span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
+
+A few notes on the build:
+
+- **Polaroid proportions** follow the real thing: 18px white border on top/sides, ~78px at the bottom for the handwriting zone — that's where the iconic bottom-heavy white lip comes from.
+- **Double border** is the outer cream edge plus the inset terracotta line at 6px (`::before`) — clean and structural rather than decorative.
+- **Center stays open** as a soft tonal wash with a dashed outline and a small circle guide icon, so it reads as "drop a photo here" without ever filling the space.
+- **CSS-only characters** dotting the edges: a radiating sun, two leaves on a stem, two daisies, two butterflies with dashed flight trails, a tiny heart, and small crosses and dots for rhythm. Every piece is built from `div`s with `border-radius`, `transform`, and `clip-path`-style rotation — no SVG, no images.

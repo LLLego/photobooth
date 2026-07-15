@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who Does It More? · A Hundred Acre Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment-light: #f6e7c1;
+    --parchment: #ecd5a3;
+    --parchment-dark: #d4b574;
+    --honey: #d9952b;
+    --honey-deep: #b87317;
+    --honey-glow: #ffc966;
+    --leaf-green: #7ba05b;
+    --leaf-deep: #4a6b34;
+    --leaf-amber: #c47a2d;
+    --ink: #4a2f1a;
+    --ink-soft: #6b4a2b;
+    --rose: #d97757;
+    --shadow: rgba(74, 47, 26, 0.18);
+    --shadow-strong: rgba(74, 47, 26, 0.35);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Nunito', sans-serif;
+    color: var(--ink);
+    background: var(--parchment);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ THE WORLD ============ */
+  .world {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 15%, rgba(255, 201, 102, 0.35), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 85% 85%, rgba(217, 119, 87, 0.25), transparent 60%),
+      radial-gradient(ellipse 100% 80% at 50% 50%, var(--parchment-light), var(--parchment) 70%, var(--parchment-dark));
+    overflow: hidden;
+  }
+
+  /* paper texture */
+  .world::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0 0.1  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.7;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  /* vignette */
+  .world::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(74, 47, 26, 0.25) 100%);
+    pointer-events: none;
+  }
+
+  /* floating leaves */
+  .leaves-layer, .honey-layer, .pollen-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .leaf {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    opacity: 0;
+    animation: leafFloat linear infinite;
+  }
+
+  @keyframes leafFloat {
+    0% { transform: translate3d(0, -50px, 0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.7; }
+    50% { transform: translate3d(40px, 50vh, 0) rotate(180deg); }
+    90% { opacity: 0.6; }
+    100% { transform: translate3d(-30px, 105vh, 0) rotate(360deg); opacity: 0; }
+  }
+
+  .honey-drop {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle at 30% 30%, var(--honey-glow), var(--honey));
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--honey-glow), 0 0 24px rgba(255, 201, 102, 0.4);
+    opacity: 0;
+    animation: honeyDrift linear infinite;
+  }
+
+  @keyframes honeyDrift {
+    0% { transform: translate3d(0, -20px, 0) scale(0.5); opacity: 0; }
+    15% { opacity: 0.8; }
+    85% { opacity: 0.8; }
+    100% { transform: translate3d(20px, 105vh, 0) scale(1); opacity: 0; }
+  }
+
+  .pollen {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, rgba(255, 220, 130, 0.9), rgba(255, 200, 100, 0.2));
+    border-radius: 50%;
+    animation: pollenDance ease-in-out infinite alternate;
+  }
+
+  @keyframes pollenDance {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(30px, -25px); }
+  }
+
+  /* ============ SUNGLARE TREE SILHOUETTES ============ */
+  .tree-frame {
+    position: absolute;
+    bottom: 0;
+    width: 280px;
+    height: 70%;
+    pointer-events: none;
+    opacity: 0.18;
+    filter: blur(1px);
+  }
+  .tree-frame.left { left: -60px; transform: scaleX(-1); }
+  .tree-frame.right { right: -60px; }
+
+  /* ============ INTRO ============ */
+  .intro-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    text-align: center;
+    padding: 24px;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .intro-screen.gone {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+  }
+
+  .intro-eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    color: var(--honey-deep);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.2s forwards;
+  }
+
+  .intro-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2.6rem, 7vw, 5rem);
+    line-height: 0.95;
+    color: var(--ink);
+    text-shadow: 2px 3px 0 rgba(217, 119, 87, 0.25), 0 0 30px rgba(255, 201, 102, 0.4);
+    opacity: 0;
+    animation: fadeUp 1s 0.4s forwards;
+    margin-bottom: 14px;
+  }
+
+  .intro-title .accent {
+    color: var(--honey-deep);
+    font-style: italic;
+  }
+
+  .intro-sub {
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    max-width: 480px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+    margin-bottom: 36px;
+  }
+
+  .intro-cta {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    padding: 16px 42px;
+    background: linear-gradient(180deg, var(--honey-glow), var(--honey));
+    color: white;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--honey-deep), 0 12px 24px var(--shadow-strong);
+    transition: transform 0.18s, box-shadow 0.18s;
+    opacity: 0;
+    animation: fadeUp 1s 1s forwards;
+    letter-spacing: 0.5px;
+  }
+
+  .intro-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 var(--honey-deep), 0 16px 30px var(--shadow-strong);
+  }
+  .intro-cta:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--honey-deep), 0 6px 12px var(--shadow-strong);
+  }
+
+  .intro-credits {
+    margin-top: 28px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    opacity: 0;
+    animation: fadeUp 1s 1.3s forwards;
+  }
+
+  /* floating character preview */
+  .intro-characters {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    pointer-events: none;
+  }
+  .intro-characters img {
+    position: absolute;
+    bottom: -20px;
+    height: 140px;
+    filter: drop-shadow(0 8px 12px rgba(74, 47, 26, 0.3));
+    opacity: 0;
+    animation: introCharIn 1.2s forwards;
+  }
+  .intro-characters img:nth-child(1) { left: 8%; animation-delay: 0.6s; }
+  .intro-characters img:nth-child(2) { left: 26%; animation-delay: 0.8s; height: 160px;}
+  .intro-characters img:nth-child(3) { left: 44%; animation-delay: 1.0s; height: 130px;}
+  .intro-characters img:nth-child(4) { right: 26%; animation-delay: 1.2s; height: 150px;}
+  .intro-characters img:nth-child(5) { right: 8%; animation-delay: 1.4s; height: 140px;}
+
+  @keyframes introCharIn {
+    0% { opacity: 0; transform: translateY(40px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ QUIZ STAGE ============ */
+  .stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+
+  .stage.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* score (honey pots) */
+  .score-journal {
+    position: absolute;
+    top: 22px;
+    right: 26px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: rgba(255, 240, 200, 0.6);
+    padding: 8px 14px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px var(--shadow);
+    backdrop-filter: blur(4px);
+    z-index: 20;
+  }
+
+  .score-journal .label {
+    font-family: 'Caveat', cursive;
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    margin-right: 4px;
+  }
+
+  .pot {
+    width: 18px;
+    height: 18px;
+    position: relative;
+    transition: transform 0.3s;
+  }
+  .pot svg { width: 100%; height: 100%; display: block; }
+  .pot .fill { 
+    transform: scaleY(0); 
+    transform-origin: bottom;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .pot.filled .fill { transform: scaleY(1); }
+  .pot.just-filled { animation: potPop 0.5s ease; }
+
+  @keyframes potPop {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.4) translateY(-4px); }
+  }
+
+  /* question counter */
+  .counter {
+    position: absolute;
+    top: 28px;
+    left: 28px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.5rem;
+    color: var(--ink-soft);
+    z-index: 20;
+  }
+  .counter .num { color: var(--honey-deep); font-weight: 700; }
+
+  /* character stage */
+  .character-zone {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin-top: 30px;
+  }
+
+  .character {
+    position: relative;
+    height: clamp(180px, 32vh, 280px);
+    z-index: 5;
+    transform-origin: bottom center;
+  }
+
+  .character img {
+    height: 100%;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 12px 20px rgba(74, 47, 26, 0.35));
+  }
+
+  /* per-character idle animations */
+  .character.idle-pooh img { animation: poohIdle 3.5s ease-in-out infinite; }
+  .character.idle-tigger img { animation: tiggerIdle 1.8s ease-in-out infinite; }
+  .character.idle-eeyore img { animation: eeyoreIdle 4.5s ease-in-out infinite; }
+  .character.idle-piglet img { animation: pigletIdle 2.5s ease-in-out infinite; }
+  .character.idle-rabbit img { animation: rabbitIdle 2.8s ease-in-out infinite; }
+
+  @keyframes poohIdle {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+  }
+  @keyframes tiggerIdle {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-18px) rotate(3deg); }
+  }
+  @keyframes eeyoreIdle {
+    0%, 100% { transform: translateY(0) rotate(1deg); }
+    50% { transform: translateY(-3px) rotate(-1deg); }
+  }
+  @keyframes pigletIdle {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-4px) rotate(2deg); }
+  }
+  @keyframes rabbitIdle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* entrance animations */
+  .character.enter { animation: enterPooh 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .character.enter.tigger { animation: enterTigger 1.2s cubic-bezier(0.5, 0, 0.5, 1.6) both; }
+  .character.enter.eeyore { animation: enterEeyore 1.8s ease-out both; }
+  .character.enter.piglet { animation: enterPiglet 1.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .character.enter.rabbit { animation: enterRabbit 1.0s cubic-bezier(0.5, 0.05, 0.4, 1.1) both; }
+
+  @keyframes enterPooh {
+    0% { transform: translateX(-180px) translateY(20px) rotate(-15deg); opacity: 0; }
+    60% { opacity: 1; }
+    100% { transform: translateX(0) translateY(0) rotate(0deg); opacity: 1; }
+  }
+  @keyframes enterTigger {
+    0% { transform: translateY(-300px); opacity: 0; }
+    40% { transform: translateY(0); opacity: 1; }
+    55% { transform: translateY(-90px); }
+    70% { transform: translateY(0); }
+    85% { transform: translateY(-25px); }
+    100% { transform: translateY(0); }
+  }
+  @keyframes enterEeyore {
+    0% { transform: translateX(60px) translateY(-40px) rotate(8deg); opacity: 0; filter: blur(4px); }
+    100% { transform: translateX(0) translateY(0) rotate(0); opacity: 1; filter: blur(0); }
+  }
+  @keyframes enterPiglet {
+    0% { transform: translateX(120px) translateY(-30px) scale(0.6) rotate(20deg); opacity: 0; }
+    50% { transform: translateX(-15px) translateY(5px) scale(1.05) rotate(-5deg); opacity: 1; }
+    75% { transform: translateX(8px) translateY(-3px) scale(0.98) rotate(2deg); }
+    100% { transform: translateX(0) translateY(0) scale(1) rotate(0); }
+  }
+  @keyframes enterRabbit {
+    0% { transform: translateX(-220px); opacity: 0; }
+    25% { transform: translateX(-100px); opacity: 1; }
+    40% { transform: translateX(-60px); }
+    55% { transform: translateX(-90px); }
+    70% { transform: translateX(-30px); }
+    85% { transform: translateX(-50px); }
+    100% { transform: translateX(0); }
+  }
+
+  /* reaction animations */
+  .character.react-pooh img { animation: poohReact 1.2s ease-in-out; }
+  .character.react-tigger img { animation: tiggerReact 1.2s ease-in-out; }
+  .character.react-eeyore img { animation: eeyoreReact 1.4s ease-in-out; }
+  .character.react-piglet img { animation: pigletReact 1.4s ease-in-out; }
+  .character.react-rabbit img { animation: rabbitReact 1.0s ease-in-out; }
+
+  @keyframes poohReact {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-8deg) translateY(-4px); }
+    40% { transform: rotate(8deg) translateY(-4px); }
+    60% { transform: rotate(-6deg); }
+    80% { transform: rotate(4deg); }
+  }
+  @keyframes tiggerReact {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-50px) rotate(-8deg); }
+    50% { transform: translateY(0) rotate(0); }
+    75% { transform: translateY(-30px) rotate(6deg); }
+  }
+  @keyframes eeyoreReact {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(6px) rotate(-2deg); }
+    60% { transform: translateY(8px) rotate(2deg); }
+  }
+  @keyframes pigletReact {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+    30% { transform: translateY(20px) scale(0.7); opacity: 0.3; }
+    60% { transform: translateY(-5px) scale(1.05); opacity: 1; }
+    80% { transform: translateY(0) scale(1); }
+  }
+  @keyframes rabbitReact {
+    0% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-8px) rotate(-3deg); }
+    50% { transform: translateY(0) rotate(0); }
+    75% { transform: translateY(-3px) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+
+  /* speech bubble */
+  .speech-bubble {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%) scale(0.3);
+    transform-origin: bottom center;
+    background: #fffaf0;
+    border: 3px solid var(--ink);
+    border-radius: 28px;
+    padding: 22px 28px;
+    max-width: 380px;
+    min-width: 280px;
+    text-align: center;
+    box-shadow: 0 12px 30px var(--shadow-strong), inset 0 -4px 0 rgba(0,0,0,0.04);
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
+    z-index: 6;
+  }
+
+  .speech-bubble.show {
+    animation: bubbleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes bubbleIn {
+    0% { transform: translateX(-50%) translateY(-100%) scale(0.3); opacity: 0; }
+    60% { transform: translateX(-50%) translateY(-105%) scale(1.05); opacity: 1; }
+    80% { transform: translateX(-50%) translateY(-100%) scale(0.97); }
+    100% { transform: translateX(-50%) translateY(-100%) scale(1); opacity: 1; }
+  }
+
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 22px solid #fffaf0;
+    filter: drop-shadow(0 3px 0 var(--ink));
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -27px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 28px;
+    background: transparent;
+    border-radius: 50%;
+    box-shadow: 0 -3px 0 0 var(--ink);
+    z-index: -1;
+  }
+
+  .speech-name {
+    font-family: 'Caveat', cursive;
+    font-size: 1.1rem;
+    color: var(--honey-deep);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .question-text {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 500;
+    font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+    line-height: 1.25;
+    color: var(--ink);
+    min-height: 1.5em;
+  }
+
+  .question-text .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .question-text .word.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* answers */
+  .answers {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    margin-bottom: 30px;
+    z-index: 10;
+    position: relative;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .answer-btn {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    padding: 14px 38px;
+    background: #fffaf0;
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--ink), 0 10px 18px var(--shadow);
+    transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+    min-width: 130px;
+    letter-spacing: 0.5px;
+  }
+
+  .answer-btn:hover {
+    transform: translateY(-3px);
+    background: #fff5e0;
+    box-shadow: 0 8px 0 var(--ink), 0 14px 22px var(--shadow);
+  }
+
+  .answer-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--ink), 0 4px 8px var(--shadow);
+  }
+
+  .answer-btn.you { background: linear-gradient(180deg, #ffd9b8, #ffb380); }
+  .answer-btn.me { background: linear-gradient(180deg, #c8e6c9, #98d1a4); }
+  .answer-btn.both { background: linear-gradient(180deg, #ffe5a3, #ffd166); }
+
+  .answer-btn.chosen {
+    animation: chosenPop 0.5s ease;
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--ink), 0 4px 8px var(--shadow);
+  }
+
+  @keyframes chosenPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15) translateY(-6px); }
+    100% { transform: scale(1) translateY(2px); }
+  }
+
+  .answers.locked .answer-btn {
+    pointer-events: none;
+    opacity: 0.45;
+    filter: grayscale(0.4);
+  }
+  .answers.locked .answer-btn.chosen {
+    opacity: 1;
+    filter: none;
+  }
+
+  /* transition out */
+  .stage.transitioning .character,
+  .stage.transitioning .speech-bubble {
+    animation: fadeOutDown 0.5s ease forwards;
+  }
+
+  @keyframes fadeOutDown {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(40px); }
+  }
+
+  .stage.transitioning .speech-bubble.show {
+    animation: fadeOutDown 0.5s ease forwards !important;
+  }
+
+  /* ============ VERDICT ============ */
+  .verdict {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 30px 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+    z-index: 30;
+  }
+
+  .verdict.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .verdict-gathering {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 220px;
+    margin-bottom: 12px;
+  }
+
+  .verdict-char {
+    position: absolute;
+    bottom: 0;
+    height: 180px;
+    transform: translateY(50px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .verdict-char img { height: 100%; filter: drop-shadow(0 8px 14px rgba(74, 47, 26, 0.35)); }
+  .verdict-char.show { opacity: 1; transform: translateY(0); }
+  .verdict-char.show img { animation: poohIdle 3.5s ease-in-out infinite; }
+
+  .verdict-char:nth-child(1) { left: 2%; }
+  .verdict-char:nth-child(2) { left: 22%; height: 200px;}
+  .verdict-char:nth-child(3) { left: 42%; height: 170px;}
+  .verdict-char:nth-child(4) { right: 22%; height: 190px;}
+  .verdict-char:nth-child(5) { right: 2%; }
+
+  .verdict-bubble {
+    background: #fffaf0;
+    border: 3px solid var(--ink);
+    border-radius: 32px;
+    padding: 28px 36px;
+    max-width: 680px;
+    text-align: center;
+    box-shadow: 0 14px 40px var(--shadow-strong);
+    position: relative;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.7s ease 1.6s;
+  }
+
+  .verdict.active .verdict-bubble {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .verdict-eyebrow {
+    font-family: 'Caveat', cursive;
+    color: var(--honey-deep);
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+  }
+
+  .verdict-headline {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .verdict-line {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .verdict-line .speaker {
+    font-family: 'Caveat', cursive;
+    color: var(--honey-deep);
+    font-size: 1.2rem;
+    font-style: normal;
+    margin-right: 6px;
+  }
+
+  .verdict-restart {
+    margin-top: 18px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.95rem;
+    background: transparent;
+    border: 2px dashed var(--ink-soft);
+    color: var(--ink-soft);
+    padding: 8px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .verdict-restart:hover {
+    background: var(--ink-soft);
+    color: var(--parchment-light);
+  }
+
+  /* confetti leaves & honey for verdict */
+  .verdict-confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 40;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -30px;
+    opacity: 0;
+    animation: confettiFall 3s ease-in forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-30px) rotate(0); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ground shadow under characters */
+  .ground-shadow {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 14px;
+    background: radial-gradient(ellipse, rgba(74, 47, 26, 0.35), transparent 70%);
+    z-index: 1;
+    animation: shadowPulse 3s ease-in-out infinite;
+  }
+  @keyframes shadowPulse {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.35; }
+    50% { transform: translateX(-50%) scale(0.85); opacity: 0.25; }
+  }
+
+  /* character reaction text bubble (small) */
+  .reaction-bubble {
+    position: absolute;
+    top: -50px;
+    right: -10px;
+    background: var(--honey-glow);
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.2rem;
+    color: var(--ink);
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 7;
+    white-space: nowrap;
+  }
+  .reaction-bubble.show {
+    opacity: 1;
+    transform: scale(1) rotate(-8deg);
+  }
+
+  /* responsive */
+  @media (max-width: 600px) {
+    .speech-bubble { max-width: 90vw; min-width: 240px; padding: 18px 22px; }
+    .answer-btn { padding: 12px 26px; min-width: 100px; font-size: 1rem; }
+    .character-zone { margin-top: 60px; }
+    .character { height: 180px; }
+    .verdict-gathering { height: 160px; }
+    .verdict-char { height: 130px; }
+    .verdict-char:nth-child(2), .verdict-char:nth-child(4) { height: 145px; }
+    .counter { top: 18px; left: 18px; font-size: 1.2rem; }
+    .score-journal { top: 14px; right: 14px; padding: 6px 10px; }
+    .pot { width: 14px; height: 14px; }
+  }
+
+  /* ===== VERDICT SCREEN ===== */
+  .verdict-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 40px 24px;
+    background: var(--parchment);
+    overflow-y: auto;
+  }
+  .verdict-screen.show {
+    display: flex;
+    animation: verdictIn 0.8s ease;
+  }
+  @keyframes verdictIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .verdict-gathering {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    height: 180px;
+  }
+  .verdict-char {
+    height: 120px;
+    width: auto;
+    animation: charPopIn 0.5s ease both;
+  }
+  .verdict-char:nth-child(1) { animation-delay: 0.1s; }
+  .verdict-char:nth-child(2) { animation-delay: 0.25s; }
+  .verdict-char:nth-child(3) { animation-delay: 0.4s; }
+  .verdict-char:nth-child(4) { animation-delay: 0.55s; }
+  .verdict-char:nth-child(5) { animation-delay: 0.7s; }
+  @keyframes charPopIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.7); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .verdict-bubble {
+    background: #fffef7;
+    border: 3px solid var(--ink);
+    border-radius: 24px;
+    padding: 28px 32px;
+    max-width: 520px;
+    text-align: center;
+    box-shadow: 0 12px 40px var(--shadow);
+    animation: speechIn 0.6s ease 0.8s both;
+  }
+  @keyframes speechIn {
+    from { opacity: 0; transform: scale(0.8) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .verdict-eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 1.3rem;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .verdict-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.8rem;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .verdict-text {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  .verdict-bars {
+    width: 100%;
+    max-width: 320px;
+    animation: fadeUp 0.5s ease 1.2s both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .verdict-cta {
+    animation: fadeUp 0.5s ease 1.6s both;
+  }
+
+  .prev-note {
+    margin-top: 16px;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    font-family: 'Caveat', cursive;
+    opacity: 0.85;
+    animation: fadeUp 0.5s ease 0.5s both;
+  }
+  .prev-note a {
+    color: var(--honey-deep);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .prev-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--honey);
+    border-radius: 50%;
+    margin-right: 4px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+</style>
+</head>
+<body>
+
+<div class="world">
+  <div class="leaves-layer" id="leavesLayer"></div>
+  <div class="honey-layer" id="honeyLayer"></div>
+  <div class="pollen-layer" id="pollenLayer"></div>
+
+  <!-- INTRO -->
+  <div class="intro-screen" id="introScreen">
+    <div class="intro-eyebrow">a hundred acre quiz</div>
+    <h1 class="intro-title">Who Does It <span class="accent">More?</span></h1>
+    <p class="intro-sub">Your friends from the Hundred Acre Wood have some very important questions for the two of you. Ten tiny questions. Pick honestly — they're keeping score in Pooh's honey journal.</p>
+    <button class="intro-cta" id="startBtn">Begin, shall we?</button>
+    <div class="intro-credits">— hosted with love by Pooh, Tigger & friends</div>
+
+    <div class="intro-characters">
+      <img src="couple-quiz/characters/eeyore.png" alt="Eeyore">
+      <img src="couple-quiz/characters/pooh.png" alt="Pooh">
+      <img src="couple-quiz/characters/piglet.png" alt="Piglet">
+      <img src="couple-quiz/characters/tigger.png" alt="Tigger">
+      <img src="couple-quiz/characters/rabbit.png" alt="Rabbit">
+    </div>
+  </div>
+
+  <!-- STAGE -->
+  <div class="stage" id="stage">
+    <div class="counter"><span class="num" id="qNum">1</span> of 15</div>
+
+    <div class="score-journal">
+      <span class="label">Pooh's journal</span>
+      <div class="pot" data-i="0"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="1"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="2"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="3"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="4"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="5"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="6"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="7"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a052d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="8"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="9"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="10"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="11"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="12"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="13"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+      <div class="pot" data-i="14"><svg viewBox="0 0 24 24"><path d="M5 9 L19 9 L17 21 L7 21 Z" fill="#a0522d" stroke="#4a2f1a" stroke-width="1.5"/><rect x="4" y="7" width="16" height="3" fill="#8b4513" stroke="#4a2f1a" stroke-width="1.5"/><path class="fill" d="M6.5 10 L17.5 10 L16 19 L8 19 Z" fill="#ffc966"/></svg></div>
+    </div>
+
+    <div class="character-zone" id="characterZone">
+      <div class="character" id="character">
+        <div class="speech-bubble" id="speechBubble">
+          <span class="speech-name" id="speechName">Pooh</span>
+          <div class="question-text" id="questionText"></div>
+        </div>
+        <img id="characterImg" src="couple-quiz/characters/pooh.png" alt="">
+        <div class="ground-shadow"></div>
+        <div class="reaction-bubble" id="reactionBubble"></div>
+      </div>
+    </div>
+
+    <div class="answers" id="answers">
+      <button class="answer-btn you" data-answer="you">You</button>
+      <button class="answer-btn me" data-answer="me">Me</button>
+      <button class="answer-btn both" data-answer="both">Both</button>
+    </div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict-screen" id="verdictScreen">
+    <div class="verdict-gathering" id="verdictGathering">
+      <img class="verdict-char" src="couple-quiz/characters/pooh.png" alt="Pooh">
+      <img class="verdict-char" src="couple-quiz/characters/tigger.png" alt="Tigger">
+      <img class="verdict-char" src="couple-quiz/characters/eeyore.png" alt="Eeyore">
+      <img class="verdict-char" src="couple-quiz/characters/piglet.png" alt="Piglet">
+      <img class="verdict-char" src="couple-quiz/characters/rabbit.png" alt="Rabbit">
+    </div>
+    <div class="verdict-bubble" id="verdictBubble">
+      <div class="verdict-eyebrow" id="verdictEyebrow"></div>
+      <h2 class="verdict-title" id="verdictTitle"></h2>
+      <p class="verdict-text" id="verdictText"></p>
+    </div>
+    <div class="verdict-bars" id="verdictBars"></div>
+    <button class="intro-cta verdict-cta" id="restartBtn">Play again?</button>
+  </div>
+
+</div><!-- /world -->
+
+<script>
+const QUESTIONS = [
+  { character:'pooh', name:'Pooh', intro:'Oh, hello! I was just wondering…', q:"Who's more likely to have a secret snack stash?" },
+  { character:'pooh', name:'Pooh', intro:'Thinking about comfort, actually…', q:"Who takes longer to get out of bed in the morning?" },
+  { character:'pooh', name:'Pooh', intro:'One more thing, if you don\'t mind…', q:"Who would be more upset if the wifi went out?" },
+  { character:'tigger', name:'Tigger', intro:'Hoo-hoo-hoo! Got a bouncy one!', q:"Who's more likely to start a dance party in the kitchen?" },
+  { character:'tigger', name:'Tigger', intro:'The MOST important question —', q:"Who has the worse road rage?" },
+  { character:'tigger', name:'Tigger', intro:'WAIT! One more —', q:"Who's more likely to make friends with a stranger at the grocery store?" },
+  { character:'eeyore', name:'Eeyore', intro:'Not that it matters, but…', q:"Who's more likely to assume the worst-case scenario?" },
+  { character:'eeyore', name:'Eeyore', intro:'Just wondering. Probably not important.', q:"Who complains more about the weather?" },
+  { character:'eeyore', name:'Eeyore', intro:'…if you have a moment. It\'s fine if not.', q:"Who holds a grudge longer?" },
+  { character:'piglet', name:'Piglet', intro:'Oh d-d-dear… may I ask something?', q:"Who's more likely to plan a surprise for the other?" },
+  { character:'piglet', name:'Piglet', intro:'I\'m just a tiny bit curious…', q:"Who worries more about what other people think?" },
+  { character:'piglet', name:'Piglet', intro:'Oh! One last thing, if that\'s okay…', q:"Who's the bigger softie when it comes to animals?" },
+  { character:'rabbit', name:'Rabbit', intro:'Now see here — this needs answering.', q:"Who's more likely to reorganize the fridge for fun?" },
+  { character:'rabbit', name:'Rabbit', intro:'Frankly, it\'s about time someone asked.', q:"Who's more annoyed by loud chewing?" },
+  { character:'rabbit', name:'Rabbit', intro:'And while I have you here —', q:"Who's more likely to read the instructions before building IKEA furniture?" }
+];
+
+const REACTIONS = {
+  pooh: ["Oh my!", "How interesting!", "*wiggles happily*", "Hmm, yes…"],
+  tigger: ["WOO-HOO!", "That's the stuff!", "*double bounce*", "Tigerrrific!"],
+  eeyore: ["…figures.", "Not surprised.", "*small sigh*", "If you say so."],
+  piglet: ["Oh my goodness!", "*hides slightly*", "How sweet…", "D-d-dear me!"],
+  rabbit: ["I KNEW it.", "Well! Finally.", "*satisfied nod*", "As I suspected."]
+};
+
+let currentIndex = 0;
+const answers = {};
+let scoreYou = 0, scoreMe = 0, scoreBoth = 0;
+
+const introScreen = document.getElementById('introScreen');
+const stage = document.getElementById('stage');
+const verdictScreen = document.getElementById('verdictScreen');
+const characterImg = document.getElementById('characterImg');
+const speechName = document.getElementById('speechName');
+const questionText = document.getElementById('questionText');
+const speechBubble = document.getElementById('speechBubble');
+const reactionBubble = document.getElementById('reactionBubble');
+const qNum = document.getElementById('qNum');
+const characterEl = document.getElementById('character');
+const answersEl = document.getElementById('answers');
+
+// localStorage save/load
+const STORAGE_KEY = 'hundred-acre-quiz';
+
+function saveProgress() {
+  const data = { answers, scoreYou, scoreMe, scoreBoth, currentIndex, timestamp: Date.now() };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+// Show previous results if they exist
+(function() {
+  const prev = loadProgress();
+  if (prev && prev.timestamp) {
+    const daysAgo = Math.floor((Date.now() - prev.timestamp) / 86400000);
+    const ago = daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : daysAgo + ' days ago';
+    const note = document.createElement('div');
+    note.className = 'prev-note';
+    note.innerHTML = '<span class="prev-dot"></span> You played ' + ago + ' — <a href="#" id="loadPrev">pick up where you left off?</a>';
+    document.querySelector('.intro-credits').after(note);
+    document.getElementById('loadPrev').addEventListener('click', (e) => {
+      e.preventDefault();
+      const p = loadProgress();
+      if (p) {
+        Object.assign(answers, p.answers || {});
+        scoreYou = p.scoreYou || 0;
+        scoreMe = p.scoreMe || 0;
+        scoreBoth = p.scoreBoth || 0;
+        introScreen.classList.add('fade-out');
+        setTimeout(() => {
+          introScreen.style.display = 'none';
+          stage.classList.add('active');
+          spawnAmbientParticles();
+          // Fill pots up to where they left off
+          for (let i = 0; i < Object.keys(answers).length; i++) {
+            const pot = document.querySelector('.pot[data-i="' + i + '"]');
+            if (pot) { pot.classList.add('filled'); const fill = pot.querySelector('.fill'); if(fill) fill.setAttribute('fill','#d9952b'); }
+          }
+          showQuestion(p.currentIndex || Object.keys(answers).length);
+        }, 600);
+      }
+    });
+  }
+})();
+
+// Start
+document.getElementById('startBtn').addEventListener('click', () => {
+  introScreen.classList.add('fade-out');
+  setTimeout(() => {
+    introScreen.style.display = 'none';
+    stage.classList.add('active');
+    spawnAmbientParticles();
+    showQuestion(0);
+  }, 600);
+});
+
+function showQuestion(i) {
+  currentIndex = i;
+  const q = QUESTIONS[i];
+  qNum.textContent = i + 1;
+  
+  // Update character
+  characterImg.src = 'couple-quiz/characters/' + q.character + '.png';
+  characterImg.alt = q.name;
+  speechName.textContent = q.name;
+  
+  // Reset animation
+  characterEl.classList.remove('enter-bounce','enter-float','enter-peek','enter-march','enter-amble','reacted');
+  speechBubble.classList.remove('show','wobble');
+  reactionBubble.classList.remove('show');
+  
+  // Character-specific entrance
+  const entrances = { pooh:'enter-amble', tigger:'enter-bounce', eeyore:'enter-float', piglet:'enter-peek', rabbit:'enter-march' };
+  const entrance = entrances[q.character] || 'enter-float';
+  
+  void characterEl.offsetWidth;
+  characterEl.classList.add(entrance);
+  
+  // Speech bubble
+  setTimeout(() => {
+    speechBubble.querySelector('.character-intro-text') && speechBubble.querySelector('.character-intro-text').remove();
+    const introEl = document.createElement('div');
+    introEl.className = 'character-intro-text';
+    introEl.style.cssText = 'font-family:Caveat,cursive;font-size:1.1rem;color:var(--ink-soft);margin-bottom:6px;opacity:0.8;';
+    introEl.textContent = q.intro;
+    speechBubble.insertBefore(introEl, questionText);
+    questionText.textContent = q.q;
+    speechBubble.classList.add('show');
+    setTimeout(() => speechBubble.classList.add('wobble'), 100);
+  }, 300);
+  
+  // Reset answers
+  answersEl.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('picked'));
+}
+
+answersEl.addEventListener('click', e => {
+  const btn = e.target.closest('.answer-btn');
+  if (!btn || btn.classList.contains('picked')) return;
+  
+  const choice = btn.dataset.answer;
+  answers[currentIndex] = choice;
+  
+  answersEl.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('picked'));
+  btn.classList.add('picked');
+  
+  if (choice === 'you') scoreYou++;
+  else if (choice === 'me') scoreMe++;
+  else scoreBoth++;
+  
+  // Fill honey pot
+  saveProgress();
+  const pot = document.querySelector('.pot[data-i="' + currentIndex + '"]');
+  if (pot) {
+    pot.classList.add('filled');
+    const fill = pot.querySelector('.fill');
+    if (fill) fill.setAttribute('fill', '#d9952b');
+  }
+  
+  // Character reaction
+  const q = QUESTIONS[currentIndex];
+  const reactions = REACTIONS[q.character];
+  const reaction = reactions[Math.floor(Math.random() * reactions.length)];
+  reactionBubble.textContent = reaction;
+  reactionBubble.classList.add('show');
+  characterEl.classList.add('reacted');
+  
+  setTimeout(() => {
+    reactionBubble.classList.remove('show');
+    
+    if (currentIndex < QUESTIONS.length - 1) {
+      // Next question
+      characterEl.classList.remove('enter-bounce','enter-float','enter-peek','enter-march','enter-amble','reacted');
+      speechBubble.classList.remove('show','wobble');
+      setTimeout(() => showQuestion(currentIndex + 1), 400);
+    } else {
+      // Verdict
+      setTimeout(showVerdict, 800);
+    }
+  }, 2000);
+});
+
+function showVerdict() {
+  stage.classList.remove('active');
+  verdictScreen.classList.add('show');
+  
+  const total = scoreYou + scoreMe + scoreBoth;
+  let eyebrow, title, text;
+  
+  if (scoreBoth >= 5) {
+    eyebrow = '— the Wood has conferred —';
+    title = 'Two peas in a honey pot';
+    text = 'Most things, you do together. Pooh finds this very sensible. Tigger is slightly disappointed there isn\'t more chaos.';
+  } else if (scoreYou > scoreMe) {
+    eyebrow = '— the Wood has conferred —';
+    title = 'It\'s mostly… YOU';
+    text = 'You bring the energy, the blanket-hogging, the snack-weirdness. And they love you for every last bit of it. Rabbit is taking notes.';
+  } else if (scoreMe > scoreYou) {
+    eyebrow = '— the Wood has conferred —';
+    title = 'It\'s mostly… THEM';
+    text = 'They\'re the sparkplug. The chaos agent. The one who laughs at their own jokes. Lucky you — you get to love all that big energy every day. Piglet thinks it\'s very sweet.';
+  } else {
+    eyebrow = '— the Wood has conferred —';
+    title = 'Perfectly, beautifully balanced';
+    text = 'Dead even. Neither of you is the main character. Equal parts chaos and charm. Eeyore is genuinely impressed. Sort of.';
+  }
+  
+  document.getElementById('verdictEyebrow').textContent = eyebrow;
+  document.getElementById('verdictTitle').textContent = title;
+  document.getElementById('verdictText').textContent = text;
+  
+  // Bars
+  const maxVal = Math.max(scoreYou, scoreMe, scoreBoth, 1);
+  document.getElementById('verdictBars').innerHTML = `
+    <div class="vbar-row"><span>You</span><div class="vbar-track"><div class="vbar-fill you-fill" style="width:${(scoreYou/maxVal)*100}%"></div></div><span>${scoreYou}</span></div>
+    <div class="vbar-row"><span>Me</span><div class="vbar-track"><div class="vbar-fill me-fill" style="width:${(scoreMe/maxVal)*100}%"></div></div><span>${scoreMe}</span></div>
+    <div class="vbar-row"><span>Both</span><div class="vbar-track"><div class="vbar-fill both-fill" style="width:${(scoreBoth/maxVal)*100}%"></div></div><span>${scoreBoth}</span></div>
+  `;
+  
+  spawnConfetti();
+}
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  currentIndex = 0;
+  Object.keys(answers).forEach(k => delete answers[k]);
+  scoreYou = scoreMe = scoreBoth = 0;
+  document.querySelectorAll('.pot').forEach(p => { p.classList.remove('filled'); const f = p.querySelector('.fill'); if(f) f.setAttribute('fill','#ffc966'); });
+  verdictScreen.classList.remove('show');
+  showQuestion(0);
+  stage.classList.add('active');
+});
+
+function spawnAmbientParticles() {
+  const leaves = document.getElementById('leavesLayer');
+  for (let i = 0; i < 12; i++) {
+    const leaf = document.createElement('div');
+    leaf.className = 'leaf';
+    leaf.style.left = Math.random() * 100 + '%';
+    leaf.style.animationDelay = Math.random() * 12 + 's';
+    leaf.style.animationDuration = (8 + Math.random() * 14) + 's';
+    leaves.appendChild(leaf);
+  }
+  
+  const honey = document.getElementById('honeyLayer');
+  for (let i = 0; i < 8; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'honey-drop';
+    drop.style.left = Math.random() * 100 + '%';
+    drop.style.animationDelay = Math.random() * 10 + 's';
+    drop.style.animationDuration = (6 + Math.random() * 10) + 's';
+    honey.appendChild(drop);
+  }
+  
+  const pollen = document.getElementById('pollenLayer');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'pollen';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 8 + 's';
+    p.style.animationDuration = (4 + Math.random() * 8) + 's';
+    pollen.appendChild(p);
+  }
+}
+
+function spawnConfetti() {
+  const colors = ['#d9952b','#ffc966','#7ba05b','#d97757','#c47a2d','#f6e7c1'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.style.cssText = 'position:fixed;z-index:200;pointer-events:none;';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.top = '-20px';
+    c.style.width = (6 + Math.random() * 10) + 'px';
+    c.style.height = (6 + Math.random() * 10) + 'px';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    const dur = 2.5 + Math.random() * 3;
+    c.style.animation = 'confettiFall ' + dur + 's ease-out forwards';
+    c.style.animationDelay = Math.random() * 1.5 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), (dur + 2) * 1000);
+  }
+}
+
+// Inject confetti keyframe if not present
+if (!document.getElementById('confetti-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'confetti-keyframes';
+  style.textContent = '@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}';
+  document.head.appendChild(style);
+}
+
+// Inject verdict bar styles
+const vstyle = document.createElement('style');
+vstyle.textContent = '.vbar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-weight:700;font-size:14px}.vbar-track{flex:1;height:18px;border-radius:100px;background:#f0e4cc;overflow:hidden}.vbar-fill{height:100%;border-radius:100px;transition:width 1s ease}.you-fill{background:linear-gradient(90deg,#d97757,#e89070)}.me-fill{background:linear-gradient(90deg,#7ba05b,#9cc47a)}.both-fill{background:linear-gradient(90deg,#d9952b,#e8b84d)}';
+document.head.appendChild(vstyle);
+</script>
+</body>
+</html>
