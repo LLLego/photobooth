@@ -63,7 +63,7 @@ export async function listStrips({ limit = 24, offset = 0, themeSlug, mode, favo
   const c = requireSupabase();
   let query = c
     .from('photo_strips')
-    .select('id, session_id, storage_path, layout, theme_id, is_private, created_at, sessions:session_id (mode, created_by, partner_id), themes:theme_id (slug, display_name, preview_color)')
+    .select('id, session_id, storage_path, layout, theme_id, is_private, created_at, sessions:session_id (mode, created_by, partner_id)')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 

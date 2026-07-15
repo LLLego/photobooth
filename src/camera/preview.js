@@ -41,8 +41,12 @@ export async function setPreviewFrame(frameEl, themeId) {
   try {
     const theme = await loadTheme(themeId);
     if (theme?.frame?.url) {
+      // Reset img state before assigning new src
+      frameEl.removeAttribute('src');
+      frameEl.onerror = null;
+      // Set handler first, then src — prevents race
       frameEl.onerror = () => {
-        console.warn('[preview] frame image failed to load', themeId);
+        console.warn('[preview] frame image failed to load', themeId, theme.frame.url);
         frameEl.style.display = 'none';
       };
       frameEl.src = theme.frame.url;
