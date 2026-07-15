@@ -6,72 +6,62 @@
 <title>our photobooth — All Frames</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#2D1B11;color:#FFFAF0;font-family:Georgia,serif;padding:2rem}
-h1{text-align:center;font-size:2.2rem;color:#FFB400;margin-bottom:.25rem}
-.sub{text-align:center;color:#D4956A;margin-bottom:2.5rem;font-style:italic}
-.section{margin-bottom:3rem}
-.section h2{font-size:1.3rem;color:#FFB400;margin-bottom:1rem;border-bottom:2px solid #D4956A33;padding-bottom:.5rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem}
-.card{background:#3D2B1B;border-radius:16px;overflow:hidden;border:2px solid #D4956A33}
-.card:hover{transform:translateY(-4px);border-color:#D4956A;transition:.2s}
-.card iframe{width:100%;height:450px;border:none;display:block}
-.label{padding:.6rem .75rem;text-align:center;font-size:.85rem}
-.file{font-size:.7rem;color:#D4956A;margin-top:.2rem}
-.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.65rem;margin-left:6px}
-.badge.glm{background:#FFB40033;color:#FFB400}
+body{background:#1A1512;color:#FFFAF0;font-family:Georgia,serif;padding:24px}
+h1{font-family:'Playfair Display',Georgia,serif;font-size:2rem;margin-bottom:4px}
+.sub{color:#D4956A;font-size:.9rem;margin-bottom:24px}
+.theme-group{margin-bottom:32px}
+.theme-group h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:#E8C547;margin-bottom:12px}
+.grid{display:flex;flex-wrap:wrap;gap:12px}
+.card{background:#2D241F;border-radius:12px;overflow:hidden;border:1px solid #D4956A33;width:280px;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.card a{display:block;text-decoration:none;color:inherit}
+.card iframe{width:100%;height:200px;border:none;pointer-events:none}
+.card .label{padding:10px 12px;font-size:.85rem;text-align:center}
+.card .label span{display:block;color:#D4956A;font-size:.7rem;text-transform:uppercase;letter-spacing:1px}
 </style>
 </head>
 <body>
 <h1>🎞️ our photobooth</h1>
-<p class="sub">GLM-5.2 designed frames • CSS art • characters visible on every theme</p>
+<p class="sub">24 frames — 4 layouts × 4 themes + extras. Double-click any file on Desktop to view full-size.</p>
 
-<!-- HUNDRED ACRE GANG -->
-<div class="section"><h2>🍯 Hundred Acre Gang</h2><div class="grid">
-
-<div class="card">
-<iframe src="hundred-acre-frame.html"></iframe>
-<div class="label">All Together <span class="badge glm">GLM-5.2</span><div class="file">hundred-acre-frame.html — Pooh, Piglet, Tigger, Eeyore, honeycomb borders</div></div></div>
-
-<div class="card">
-<iframe src="themes/hundred-acre-gang/pooh.html"></iframe>
-<div class="label">Winnie the Pooh <span class="badge glm">GLM-5.2</span><div class="file">pooh.html — Golden honey bear, warm palette</div></div></div>
-
-<div class="card">
-<iframe src="themes/hundred-acre-gang/piglet.html"></iframe>
-<div class="label">Piglet <span class="badge glm">GLM-5.2</span><div class="file">piglet.html — Pink pig with stripes</div></div></div>
-
-<div class="card">
-<iframe src="themes/hundred-acre-gang/tigger.html"></iframe>
-<div class="label">Tigger <span class="badge glm">GLM-5.2</span><div class="file">tigger.html — Orange tiger, bouncing</div></div></div>
-
-<div class="card">
-<iframe src="themes/hundred-acre-gang/eeyore.html"></iframe>
-<div class="label">Eeyore <span class="badge glm">GLM-5.2</span><div class="file">eeyore.html — Blue-grey donkey, pink bow</div></div></div>
-
-</div></div>
-
-<!-- PUCCA + HELLO KITTY pending desktop files -->
-<div class="section"><h2>❤️ Pucca &amp; 🎀 Hello Kitty</h2>
-<p style="padding:2rem;text-align:center;color:#D4956A">Frames generated on Desktop — open separately:
-<br><code>pucca-frame.html</code> • <code>kitty-frame.html</code>
-<br><br>(these are also awaiting deploy to GitHub Pages — run <code>npm run build</code> to update)</p>
+<div class="theme-group">
+<h2>🍯 Hundred Acre Gang</h2>
+<div class="grid">
+<div class="card"><a href="hundred-acre-strip4.html" target="_blank"><iframe src="hundred-acre-strip4.html"></iframe><div class="label">Strip 4<br><span>4 vertical photos</span></div></a></div>
+<div class="card"><a href="hundred-acre-grid2x2.html" target="_blank"><iframe src="hundred-acre-grid2x2.html"></iframe><div class="label">Grid 2×2<br><span>4 square photos</span></div></a></div>
+<div class="card"><a href="hundred-acre-polaroid.html" target="_blank"><iframe src="hundred-acre-polaroid.html"></iframe><div class="label">Polaroid<br><span>1 large photo</span></div></a></div>
+<div class="card"><a href="hundred-acre-single.html" target="_blank"><iframe src="hundred-acre-single.html"></iframe><div class="label">Single<br><span>1 full-frame photo</span></div></a></div>
+</div>
 </div>
 
-<div class="section"><h2>✨ Minimal (SVG frames — camera-ready)</h2><div class="grid">
+<div class="theme-group">
+<h2>❤️ Pucca & Garu</h2>
+<div class="grid">
+<div class="card"><a href="pucca-strip4.html" target="_blank"><iframe src="pucca-strip4.html"></iframe><div class="label">Strip 4</div></a></div>
+<div class="card"><a href="pucca-grid2x2.html" target="_blank"><iframe src="pucca-grid2x2.html"></iframe><div class="label">Grid 2×2</div></a></div>
+<div class="card"><a href="pucca-polaroid.html" target="_blank"><iframe src="pucca-polaroid.html"></iframe><div class="label">Polaroid</div></a></div>
+<div class="card"><a href="pucca-single.html" target="_blank"><iframe src="pucca-single.html"></iframe><div class="label">Single</div></a></div>
+</div>
+</div>
 
-<div class="card">
-<iframe src="themes/minimal/frame.svg"></iframe>
-<div class="label">Diamonds<div class="file">frame.svg — Double border with diamond corners</div></div></div>
+<div class="theme-group">
+<h2>🎀 Hello Kitty</h2>
+<div class="grid">
+<div class="card"><a href="hello-kitty-strip4.html" target="_blank"><iframe src="hello-kitty-strip4.html"></iframe><div class="label">Strip 4</div></a></div>
+<div class="card"><a href="hello-kitty-grid2x2.html" target="_blank"><iframe src="hello-kitty-grid2x2.html"></iframe><div class="label">Grid 2×2</div></a></div>
+<div class="card"><a href="hello-kitty-polaroid.html" target="_blank"><iframe src="hello-kitty-polaroid.html"></iframe><div class="label">Polaroid</div></a></div>
+<div class="card"><a href="hello-kitty-single.html" target="_blank"><iframe src="hello-kitty-single.html"></iframe><div class="label">Single</div></a></div>
+</div>
+</div>
 
-<div class="card">
-<iframe src="themes/minimal/frame_v2.svg"></iframe>
-<div class="label">Corners<div class="file">frame_v2.svg — Bold corner brackets</div></div></div>
-
-<div class="card">
-<iframe src="themes/minimal/frame_v3.svg"></iframe>
-<div class="label">Washi Tape<div class="file">frame_v3.svg — Dashed double line</div></div></div>
-
-</div></div>
-
+<div class="theme-group">
+<h2>✨ Minimal</h2>
+<div class="grid">
+<div class="card"><a href="minimal-strip4.html" target="_blank"><iframe src="minimal-strip4.html"></iframe><div class="label">Strip 4</div></a></div>
+<div class="card"><a href="minimal-grid2x2.html" target="_blank"><iframe src="minimal-grid2x2.html"></iframe><div class="label">Grid 2×2</div></a></div>
+<div class="card"><a href="minimal-polaroid.html" target="_blank"><iframe src="minimal-polaroid.html"></iframe><div class="label">Polaroid</div></a></div>
+<div class="card"><a href="minimal-single.html" target="_blank"><iframe src="minimal-single.html"></iframe><div class="label">Single</div></a></div>
+</div>
+</div>
 </body>
 </html>
