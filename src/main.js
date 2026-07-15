@@ -95,7 +95,7 @@ async function boot() {
   mountNavigationHost();
 
   // Default to home — no auth required
-  if (!initial) {
+  if (!initial?.session) {
     navigate('home', {}, { replace: true });
   }
 }
