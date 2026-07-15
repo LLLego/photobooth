@@ -1,229 +1,940 @@
-Below is a complete, self-contained HTML file. I went with a **paper-cutout / storybook** treatment — warm kraft-paper cream background, a hand-illustrated double border (dashed honey outer + solid brown inner with a gold pinstripe), a `conic-gradient` honeycomb corner medallion behind each character (the gold → honey → dark-brown rotation gives a real suggestion of honeycomb cells without using any image), and a serif title ("Hundred Acre Gang") set italic and amber, with small brown hearts floating between words instead of the usual em-dash. All four characters sit inside circular vignettes with their own little name-tape labels so the corners read as composed scenes rather than emoji scattered onto a frame.
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hundred Acre Gang — Photobooth Frame</title>
-</head>
-<body style="margin:0;min-height:100vh;background:linear-gradient(135deg,#1a0f08,#2a1810);display:flex;align-items:center;justify-content:center;padding:32px 16px;font-family:Georgia,'Times New Roman',serif;">
-
-<div style="
-  width:1200px;
-  height:1600px;
-  position:relative;
-  background:
-    radial-gradient(ellipse at 30% 20%, #FFF6E0 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, #FBE5B6 0%, transparent 70%),
-    linear-gradient(135deg,#FAEBD2 0%,#F2D8A8 100%);
-  border-radius:48px;
-  box-shadow:
-    0 30px 80px rgba(0,0,0,0.55),
-    0 10px 30px rgba(0,0,0,0.35),
-    inset 0 0 100px rgba(232,197,71,0.18);
-  overflow:hidden;
-  flex-shrink:0;
-">
-
-  <!-- Ornate double border -->
-  <div style="
-    position:absolute;inset:24px;
-    border:4px dashed #4A2515;
-    border-radius:36px;
+<title>Hundred Acre Gang — Photobooth</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400;9..144,600;9..144,800;9..144,900&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Fraunces', serif;
+    background:
+      radial-gradient(ellipse at 30% 20%, #FFE9B8 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 80%, #FFD89E 0%, transparent 60%),
+      linear-gradient(135deg, #FBE5BB 0%, #F4C878 100%);
+    background-attachment: fixed;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 14px;
+  }
+  body::before {
+    content:"";
+    position: fixed; inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(74,37,21,.03) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(-45deg, rgba(74,37,21,.03) 0 2px, transparent 2px 5px);
     pointer-events:none;
-    opacity:0.5;
-  "></div>
-  <div style="
-    position:absolute;inset:40px;
-    border:10px solid #4A2515;
-    border-radius:32px;
+    mix-blend-mode: multiply;
+    z-index:1;
+  }
+  body::after {
+    content:"";
+    position: fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 12% 33%, rgba(74,37,21,.18) 0 0.4px, transparent 0.5px),
+      radial-gradient(circle at 78% 61%, rgba(74,37,21,.15) 0 0.4px, transparent 0.5px),
+      radial-gradient(circle at 44% 88%, rgba(74,37,21,.18) 0 0.4px, transparent 0.5px),
+      radial-gradient(circle at 91% 12%, rgba(74,37,21,.13) 0 0.4px, transparent 0.5px);
+    background-size: 7px 7px, 11px 11px, 13px 13px, 9px 9px;
+    pointer-events:none;
+    mix-blend-mode: multiply;
+    opacity:.7;
+    z-index:1;
+  }
+
+  /* ===== FRAME ===== */
+  .frame {
+    position: relative;
+    width: min(92vmin, 740px);
+    aspect-ratio: 4/5;
+    z-index: 2;
+    filter: drop-shadow(0 28px 28px rgba(74,37,21,.28)) drop-shadow(0 8px 6px rgba(74,37,21,.18));
+  }
+
+  .paper {
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.6), transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(74,37,21,.06), transparent 60%),
+      linear-gradient(170deg, #FFFAF0 0%, #FBEAD0 100%);
+    border-radius: 6px 8px 7px 9px / 9px 7px 8px 6px;
     box-shadow:
-      inset 0 0 0 2px #E8C547,
-      inset 0 0 0 14px transparent,
-      inset 0 0 0 16px #E8C547,
-      inset 0 0 0 18px transparent;
+      inset 0 0 0 4px #4A2515,
+      inset 0 0 0 5px #FFFAF0,
+      inset 0 0 0 9px #C8961F,
+      inset 0 0 0 11px #4A2515,
+      inset 0 0 70px rgba(74,37,21,.15),
+      inset 0 0 18px rgba(255,180,0,.18);
+  }
+  .paper::before {
+    content:"";
+    position:absolute; inset:14px;
+    border-radius: 4px 6px 5px 7px / 7px 5px 6px 4px;
+    background-image:
+      repeating-linear-gradient(43deg, rgba(74,37,21,.045) 0 1.5px, transparent 1.5px 4.5px),
+      repeating-linear-gradient(-47deg, rgba(74,37,21,.045) 0 1.5px, transparent 1.5px 4.5px);
+    mix-blend-mode: multiply;
     pointer-events:none;
-  "></div>
+  }
+  .paper::after {
+    /* corner burn */
+    content:"";
+    position:absolute; inset:0;
+    border-radius: 6px 8px 7px 9px / 9px 7px 8px 6px;
+    background:
+      radial-gradient(ellipse 60% 40% at 0% 0%, rgba(74,37,21,.18), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 100% 100%, rgba(74,37,21,.15), transparent 70%);
+    mix-blend-mode: multiply;
+    pointer-events:none;
+  }
 
-  <!-- Inner photo stage -->
-  <div style="
+  .photo-hole {
+    position: absolute;
+    top: 16%; left: 14%; right: 14%; bottom: 22%;
+    background:
+      repeating-linear-gradient(45deg, #C8A07A 0 8px, #B8916A 8px 16px),
+      linear-gradient(#C8A07A, #A87B4E);
+    border-radius: 3px 4px 4px 3px / 4px 3px 3px 4px;
+    box-shadow:
+      inset 0 0 0 3px #4A2515,
+      inset 0 0 30px rgba(0,0,0,.35),
+      inset 0 6px 14px rgba(0,0,0,.25);
+    overflow: hidden;
+  }
+  .photo-hole::before {
+    content:"your story lives here";
     position:absolute;
-    top:80px;left:80px;right:80px;bottom:80px;
-    background:rgba(255,255,255,0.5);
-    border-radius:24px;
-    display:flex;align-items:center;justify-content:center;
-    flex-direction:column;gap:18px;
-    box-shadow:inset 0 4px 24px rgba(74,37,21,0.18);
-  ">
-    <div style="font-size:120px;line-height:1;filter:drop-shadow(0 8px 18px rgba(74,37,21,0.35));">📷</div>
-    <div style="font-family:'Georgia',serif;font-style:italic;color:#4A2515;font-size:26px;letter-spacing:4px;text-transform:uppercase;font-weight:600;opacity:0.78;">Photo Window</div>
-    <div style="width:160px;height:2px;background:#E8C547;margin-top:4px;border-radius:2px;"></div>
-  </div>
+    top:50%; left:50%;
+    transform: translate(-50%,-50%) rotate(-3deg);
+    font-family:'Caveat', cursive;
+    color: rgba(74,37,21,.5);
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+  }
+  .photo-hole::after {
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,250,240,.1), transparent 60%),
+      radial-gradient(circle at 70% 70%, rgba(0,0,0,.2), transparent 60%);
+    mix-blend-mode: overlay;
+  }
 
-  <!-- TOP-LEFT: Pooh bear -->
-  <div style="
+  /* ===== TITLE PLATE ===== */
+  .title-plate {
     position:absolute;
-    top:60px;left:60px;
-    width:200px;height:200px;
-    display:flex;align-items:center;justify-content:center;
+    top: 3.2%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    background:
+      radial-gradient(ellipse at 40% 30%, #FFFAF0, #F4DDB5 70%, #E8C58F);
+    padding: 6px 22px 9px;
+    border-radius: 14px 16px 12px 15px / 14px 12px 16px 12px;
+    box-shadow:
+      inset 0 0 0 2px #4A2515,
+      inset 0 0 0 3px #FFFAF0,
+      inset 0 0 0 4px #C8961F,
+      0 4px 0 #6B3819,
+      0 6px 8px rgba(74,37,21,.3);
+    text-align: center;
+    z-index: 25;
+  }
+  .title-plate h1 {
+    font-family:'Fraunces', serif;
+    font-weight: 900;
+    font-style: italic;
+    font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+    font-size: clamp(1.3rem, 3.6vmin, 2rem);
+    color: #4A2515;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 rgba(255,255,255,.5);
+  }
+  .title-plate .sub {
+    font-family:'Caveat', cursive;
+    font-size: clamp(.8rem, 2vmin, 1.05rem);
+    color: #6B3819;
+    margin-top: 1px;
+    letter-spacing: 2px;
+  }
+  .title-plate .corner-dot {
+    position:absolute;
+    width:6px; height:6px;
+    background:#4A2515;
     border-radius:50%;
-    background:conic-gradient(from 0deg,#E8C547 0deg 60deg,#FFB400 60deg 120deg,#4A2515 120deg 180deg,#E8C547 180deg 240deg,#FFB400 240deg 300deg,#4A2515 300deg 360deg);
-    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
-    z-index:5;
-  ">
-    <div style="
-      width:168px;height:168px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
-    ">
-      <div style="font-size:130px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🧸</div>
-    </div>
-  </div>
-  <div style="
-    position:absolute;top:252px;left:108px;
-    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
-    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
-  ">— Pooh Bear —</div>
+  }
+  .title-plate .d1 { top:4px; left:6px; }
+  .title-plate .d2 { top:4px; right:6px; }
+  .title-plate .d3 { bottom:4px; left:6px; }
+  .title-plate .d4 { bottom:4px; right:6px; }
 
-  <!-- TOP-RIGHT: Piglet -->
-  <div style="
+  /* ===== CORNER FLOURISHES ===== */
+  .corner-flourish { position:absolute; z-index:22; }
+  .corner-flourish .leaf {
     position:absolute;
-    top:60px;right:60px;
-    width:190px;height:190px;
-    display:flex;align-items:center;justify-content:center;
-    border-radius:50%;
-    background:conic-gradient(from 30deg,#FFB400 0deg 60deg,#E8C547 60deg 120deg,#4A2515 120deg 180deg,#FFB400 180deg 240deg,#E8C547 240deg 300deg,#4A2515 300deg 360deg);
-    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
-    z-index:5;
-  ">
-    <div style="
-      width:158px;height:158px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
-    ">
-      <div style="font-size:120px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🐷</div>
-    </div>
-  </div>
-  <div style="
-    position:absolute;top:242px;right:108px;
-    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
-    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
-  ">— Piglet —</div>
+    width:22px; height:9px;
+    background: #7A9A4A;
+    border-radius: 9px 0 9px 0;
+    box-shadow: inset -1px -1px 0 rgba(0,0,0,.2);
+    transform-origin: left center;
+  }
 
-  <!-- BOTTOM-LEFT: Tigger -->
-  <div style="
+  /* ============ CHARACTER SCAFFOLDING ============ */
+  .char { position:absolute; z-index: 20; }
+  .blob {
+    border-radius: 50%;
+    filter: drop-shadow(2px 3px 0 rgba(74,37,21,.18));
+  }
+
+  /* ====================== BEAR (top-left, the honey one) ====================== */
+  .bear {
+    top: -3%;
+    left: -5%;
+    width: 38%;
+    aspect-ratio: 1/1;
+  }
+  .bear .ear-l, .bear .ear-r {
     position:absolute;
-    bottom:60px;left:60px;
-    width:195px;height:195px;
-    display:flex;align-items:center;justify-content:center;
-    border-radius:50%;
-    background:conic-gradient(from 60deg,#E8C547 0deg 60deg,#FFB400 60deg 120deg,#4A2515 120deg 180deg,#E8C547 180deg 240deg,#FFB400 240deg 300deg,#4A2515 300deg 360deg);
-    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
-    z-index:5;
-  ">
-    <div style="
-      width:163px;height:163px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
-    ">
-      <div style="font-size:125px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🐯</div>
-    </div>
-  </div>
-  <div style="
-    position:absolute;bottom:252px;left:108px;
-    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
-    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
-  ">— Tigger —</div>
-
-  <!-- BOTTOM-RIGHT: Eeyore -->
-  <div style="
+    width: 30%;
+    height: 30%;
+    background:
+      radial-gradient(ellipse at 35% 35%, #FFB400 0%, #C8861B 60%, #8C5A0F 100%);
+    border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+    box-shadow:
+      inset -4px -6px 0 rgba(74,37,21,.18),
+      inset 0 0 0 2px #4A2515;
+    top: 4%;
+  }
+  .bear .ear-l { left: 4%; transform: rotate(-12deg); }
+  .bear .ear-r { right: 4%; transform: rotate(12deg); }
+  .bear .ear-l::after, .bear .ear-r::after {
+    content:"";
     position:absolute;
-    bottom:60px;right:60px;
-    width:195px;height:195px;
-    display:flex;align-items:center;justify-content:center;
-    border-radius:50%;
-    background:conic-gradient(from 90deg,#FFB400 0deg 60deg,#E8C547 60deg 120deg,#4A2515 120deg 180deg,#FFB400 180deg 240deg,#E8C547 240deg 300deg,#4A2515 300deg 360deg);
-    box-shadow:0 8px 24px rgba(74,37,21,0.4),inset 0 0 0 4px #FAEBD2,inset 0 0 0 8px #4A2515;
-    z-index:5;
-  ">
-    <div style="
-      width:163px;height:163px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 28%,#FFF6E0 0%,#FBE5B6 65%,#E8C547 100%);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:inset 0 0 0 2px #4A2515, inset 0 -8px 18px rgba(74,37,21,0.18);
-    ">
-      <div style="font-size:125px;line-height:1;filter:drop-shadow(0 4px 6px rgba(74,37,21,0.3));">🐴</div>
-    </div>
-  </div>
-  <div style="
-    position:absolute;bottom:252px;right:108px;
-    font-family:'Georgia',serif;font-style:italic;font-size:22px;color:#4A2515;font-weight:700;letter-spacing:1px;z-index:6;
-    text-shadow:0 1px 0 #FAEBD2, 0 2px 4px rgba(74,37,21,0.3);
-  ">— Eeyore —</div>
-
-  <!-- TOP-CENTER: honey drip cluster -->
-  <div style="
+    width: 45%; height: 45%;
+    top: 27%; left: 27%;
+    background: #F4DDB5;
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 0 rgba(74,37,21,.12);
+  }
+  .bear .head {
     position:absolute;
-    top:38px;left:50%;
-    transform:translateX(-50%);
-    display:flex;align-items:flex-start;gap:0;
-    z-index:6;
-  ">
-    <span style="font-size:56px;filter:drop-shadow(0 4px 4px rgba(74,37,21,0.35));transform:rotate(-22deg) translateY(8px);display:inline-block;">🍯</span>
-    <span style="font-size:74px;filter:drop-shadow(0 6px 6px rgba(74,37,21,0.4));margin:0 -14px;z-index:2;display:inline-block;">🍯</span>
-    <span style="font-size:56px;filter:drop-shadow(0 4px 4px rgba(74,37,21,0.35));transform:rotate(22deg) translateY(8px);display:inline-block;">🍯</span>
-  </div>
-
-  <!-- BOTTOM-CENTER: title -->
-  <div style="
+    width: 78%; height: 74%;
+    left: 11%; top: 18%;
+    background:
+      radial-gradient(ellipse at 35% 28%, #FFB400 0%, #E89A12 55%, #A66C0D 100%);
+    border-radius: 50% 50% 48% 52% / 52% 48% 50% 50%;
+    box-shadow:
+      inset 0 0 0 2.5px #4A2515,
+      inset -10px -12px 0 rgba(74,37,21,.12),
+      inset 6px 8px 6px rgba(255,255,255,.18);
+  }
+  .bear .muzzle {
     position:absolute;
-    bottom:28px;left:50%;
-    transform:translateX(-50%);
-    text-align:center;
-    z-index:6;
-    width:600px;
-  ">
-    <div style="
-      font-family:'Playfair Display',Georgia,'Times New Roman',serif;
-      font-size:64px;
-      font-style:italic;
-      font-weight:900;
-      letter-spacing:2px;
-      color:#4A2515;
-      text-shadow:
-        2px 2px 0 #E8C547,
-        4px 4px 0 #FFB400,
-        6px 6px 12px rgba(74,37,21,0.4);
-      line-height:1;
-    ">Hundred Acre Gang</div>
-    <div style="
-      display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;
-    ">
-      <span style="width:50px;height:1px;background:#4A2515;display:inline-block;"></span>
-      <span style="font-size:14px;letter-spacing:10px;color:#4A2515;font-weight:700;text-transform:uppercase;font-family:Georgia,serif;">est. forever</span>
-      <span style="width:50px;height:1px;background:#4A2515;display:inline-block;"></span>
-    </div>
-    <div style="font-size:18px;letter-spacing:14px;color:#FFB400;margin-top:10px;font-family:Georgia,serif;">♥ ♥ ♥</div>
-  </div>
+    width: 46%; height: 38%;
+    left: 27%; top: 50%;
+    background:
+      radial-gradient(ellipse at 50% 40%, #FFE3B0 0%, #F4DDB5 70%, #D9B97E 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+  }
+  .bear .nose {
+    position:absolute;
+    width: 16%; height: 12%;
+    background: #4A2515;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    left: 42%; top: 55%;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,.18);
+  }
+  .bear .eye-l, .bear .eye-r {
+    position:absolute;
+    width: 8%; height: 11%;
+    background: #4A2515;
+    border-radius: 50%;
+    top: 40%;
+  }
+  .bear .eye-l { left: 33%; }
+  .bear .eye-r { right: 33%; }
+  .bear .eye-l::after, .bear .eye-r::after {
+    content:"";
+    position:absolute;
+    width: 35%; height: 30%;
+    background: #FFFAF0;
+    border-radius: 50%;
+    top: 18%; left: 22%;
+  }
+  .bear .brow-l, .bear .brow-r {
+    position:absolute;
+    width: 14%; height: 4px;
+    background: #4A2515;
+    border-radius: 50%;
+    top: 33%;
+    box-shadow: 0 1px 0 rgba(0,0,0,.2);
+  }
+  .bear .brow-l { left: 30%; transform: rotate(-12deg); }
+  .bear .brow-r { right: 30%; transform: rotate(12deg); }
+  /* red shirt collar peek */
+  .bear .collar {
+    position:absolute;
+    bottom: -4%;
+    left: 14%;
+    width: 72%;
+    height: 18%;
+    background:
+      repeating-linear-gradient(115deg, #D04330 0 5px, #B83520 5px 10px);
+    border-radius: 50% 50% 6px 6px / 70% 70% 6px 6px;
+    box-shadow:
+      inset 0 0 0 2px #4A2515,
+      inset 3px 3px 0 rgba(255,255,255,.1);
+    z-index: -1;
+  }
+  /* honey pot at his feet */
+  .honeypot {
+    position:absolute;
+    bottom: -8%;
+    right: -2%;
+    width: 22%;
+    aspect-ratio: 1/1.2;
+    z-index: 10;
+    transform: rotate(-8deg);
+  }
+  .honeypot .pot {
+    position:absolute;
+    inset: 18% 0 0 0;
+    background:
+      linear-gradient(180deg, #B85A2C 0%, #8C3F1E 100%);
+    border-radius: 30% 30% 45% 45% / 20% 20% 50% 50%;
+    box-shadow:
+      inset 0 0 0 2.5px #4A2515,
+      inset 6px 0 0 rgba(255,255,255,.08);
+  }
+  .honeypot .pot::before {
+    /* honey dripping */
+    content:"";
+    position:absolute;
+    top: -8px; left: 12%;
+    width: 76%;
+    height: 22%;
+    background: linear-gradient(180deg, #FFB400, #E89A12);
+    border-radius: 50% 50% 50% 50% / 30% 30% 90% 90%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+  }
+  .honeypot .pot::after {
+    /* HUNNY label */
+    content:"HUNNY";
+    position:absolute;
+    bottom: 30%; left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    background: #FFFAF0;
+    color: #4A2515;
+    font-family:'Caveat', cursive;
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+    letter-spacing: 1px;
+  }
+  .honeypot .lid {
+    position:absolute;
+    top: 6%;
+    left: 22%;
+    width: 56%;
+    height: 14%;
+    background: linear-gradient(180deg, #6B3819, #4A2515);
+    border-radius: 40% 40% 10% 10%;
+    box-shadow: inset 0 0 0 2px #2C160A;
+  }
 
-</div>
+  /* ====================== PIGLET (bottom-left, the small one) ====================== */
+  .pig {
+    bottom: 0%;
+    left: -6%;
+    width: 30%;
+    aspect-ratio: 1/1.1;
+    z-index: 21;
+  }
+  .pig .ear-l, .pig .ear-r {
+    position:absolute;
+    width: 22%; height: 22%;
+    background: linear-gradient(135deg, #FFB6C1, #E78FA3);
+    top: 14%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+  }
+  .pig .ear-l {
+    left: 10%;
+    border-radius: 50% 30% 50% 50% / 50% 30% 50% 50%;
+    transform: rotate(-25deg);
+  }
+  .pig .ear-r {
+    right: 10%;
+    border-radius: 30% 50% 50% 50% / 30% 50% 50% 50%;
+    transform: rotate(25deg);
+  }
+  .pig .head {
+    position:absolute;
+    width: 80%; height: 78%;
+    left: 10%; top: 14%;
+    background:
+      radial-gradient(ellipse at 38% 30%, #FFD0DA 0%, #FFB6C1 50%, #E597A8 100%);
+    border-radius: 50% 50% 48% 52% / 50% 50% 52% 48%;
+    box-shadow:
+      inset 0 0 0 2.5px #4A2515,
+      inset -8px -10px 0 rgba(74,37,21,.08),
+      inset 4px 6px 4px rgba(255,255,255,.25);
+  }
+  .pig .snout {
+    position:absolute;
+    width: 36%; height: 26%;
+    left: 32%; top: 48%;
+    background: linear-gradient(180deg, #FFB6C1, #E78FA3);
+    border-radius: 60% 60% 60% 60% / 50% 50% 50% 50%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+  }
+  .pig .nostril-l, .pig .nostril-r {
+    position:absolute;
+    width: 6px; height: 9px;
+    background: #6B3819;
+    border-radius: 50%;
+    top: 35%;
+  }
+  .pig .nostril-l { left: 30%; }
+  .pig .nostril-r { right: 30%; }
+  .pig .eye-l, .pig .eye-r {
+    position:absolute;
+    width: 9%; height: 11%;
+    background: #4A2515;
+    border-radius: 50%;
+    top: 36%;
+  }
+  .pig .eye-l { left: 32%; }
+  .pig .eye-r { right: 32%; }
+  .pig .eye-l::after, .pig .eye-r::after {
+    content:"";
+    position:absolute;
+    width: 40%; height: 35%;
+    background:#FFFAF0;
+    border-radius: 50%;
+    top: 18%; left: 22%;
+  }
+  /* striped onesie — collar only */
+  .pig .collar {
+    position:absolute;
+    bottom: -3%;
+    left: 18%;
+    width: 64%;
+    height: 22%;
+    background:
+      repeating-linear-gradient(105deg,
+        #FFB6C1 0 4px,
+        #FFFAF0 4px 8px);
+    border-radius: 30% 30% 8px 8px / 60% 60% 8px 8px;
+    box-shadow:
+      inset 0 0 0 2px #4A2515,
+      inset 0 4px 0 rgba(255,255,255,.25);
+    z-index: -1;
+  }
+  .pig .arm {
+    position:absolute;
+    width: 14%;
+    height: 22%;
+    bottom: 5%;
+    background: repeating-linear-gradient(105deg,
+        #FFB6C1 0 3px,
+        #FFFAF0 3px 6px);
+    box-shadow: inset 0 0 0 2px #4A2515;
+    border-radius: 40% 40% 50% 50%;
+  }
+  .pig .arm-l { left: 8%; transform: rotate(-15deg); }
+  .pig .arm-r { right: 8%; transform: rotate(15deg); }
 
-</body>
-</html>
+  /* a tiny heart near piglet */
+  .heart {
+    position:absolute;
+    bottom: 28%;
+    left: 24%;
+    width: 14px;
+    height: 14px;
+    z-index: 30;
+    transform: rotate(-15deg);
+  }
+  .heart::before, .heart::after {
+    content:"";
+    position:absolute;
+    width: 10px; height: 14px;
+    background: #D04330;
+    border-radius: 6px 6px 0 0;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+    top: 0;
+  }
+  .heart::before { left: 0; transform: rotate(-45deg); transform-origin: 50% 100%; }
+  .heart::after  { right: 0; transform: rotate(45deg); transform-origin: 50% 100%; }
 
+  /* ====================== TIGGER (bottom-right) ====================== */
+  .tiger {
+    bottom: -2%;
+    right: -5%;
+    width: 32%;
+    aspect-ratio: 1/1.15;
+    z-index: 21;
+  }
+  /* springy tail goes UP and around */
+  .tiger .tail {
+    position:absolute;
+    width: 8%;
+    height: 70%;
+    right: 6%;
+    top: -50%;
+    background: #F4A460;
+    border-radius: 40% 40% 50% 50%;
+    box-shadow: inset 0 0 0 2.5px #4A2515;
+    transform: rotate(8deg);
+    z-index: -1;
+  }
+  .tiger .tail::before {
+    content:"";
+    position:absolute;
+    top: -18%;
+    width: 240%;
+    height: 28%;
+    background: #F4A460;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2.5px #4A2515;
+    left: -70%;
+  }
+  /* stripes on tail */
+  .tiger .tail::after {
+    content:"";
+    position:absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(180deg,
+        transparent 0 4px,
+        #2C160A 4px 7px);
+    border-radius: inherit;
+    opacity: .85;
+  }
+  .tiger .ear-l, .tiger .ear-r {
+    position:absolute;
+    width: 24%; height: 24%;
+    background:
+      radial-gradient(ellipse at 40% 40%, #F4A460 0%, #D98645 100%);
+    top: 6%;
+    box-shadow: inset 0 0 0 2.5px #4A2515;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  }
+  .tiger .ear-l { left: 10%; transform: rotate(-20deg); }
+  .tiger .ear-r { right: 10%; transform: rotate(20deg); }
+  .tiger .ear-l::before, .tiger .ear-r::before {
+    content:"";
+    position:absolute;
+    inset: 28% 22% 12% 22%;
+    background:
+      repeating-linear-gradient(120deg, #2C160A 0 3px, transparent 3px 6px);
+    border-radius: 50%;
+  }
+  .tiger .head {
+    position:absolute;
+    width: 80%; height: 76%;
+    left: 10%; top: 12%;
+    background:
+      radial-gradient(ellipse at 38% 30%, #F4A460 0%, #E68E48 60%, #B3682F 100%);
+    border-radius: 52% 48% 50% 50% / 50% 52% 48% 50%;
+    box-shadow:
+      inset 0 0 0 2.5px #4A2515,
+      inset -8px -10px 0 rgba(74,37,21,.12),
+      inset 4px 6px 6px rgba(255,255,255,.2);
+    overflow: hidden;
+  }
+  /* tiger stripes inside head */
+  .tiger .head::before {
+    content:"";
+    position:absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 14% 30% at 24% 26%, rgba(44,22,10,.9), transparent 70%),
+      radial-gradient(ellipse 14% 30% at 76% 26%, rgba(44,22,10,.9), transparent 70%),
+      radial-gradient(ellipse 8% 22% at 50% 12%, rgba(44,22,10,.85), transparent 70%),
+      radial-gradient(ellipse 10% 18% at 50% 78%, rgba(44,22,10,.7), transparent 70%);
+  }
+  .tiger .muzzle {
+    position:absolute;
+    width: 50%; height: 38%;
+    left: 25%; top: 50%;
+    background:
+      linear-gradient(180deg, #FFE3B0, #F4DDB5);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+  }
+  .tiger .nose {
+    position:absolute;
+    width: 16%; height: 12%;
+    background: #2C160A;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    left: 42%; top: 52%;
+  }
+  .tiger .eye-l, .tiger .eye-r {
+    position:absolute;
+    width: 11%; height: 13%;
+    background: #2C160A;
+    border-radius: 50%;
+    top: 38%;
+  }
+  .tiger .eye-l { left: 32%; }
+  .tiger .eye-r { right: 32%; }
+  .tiger .eye-l::after, .tiger .eye-r::after {
+    content:"";
+    position:absolute;
+    width: 40%; height: 35%;
+    background: #FFFAF0;
+    border-radius: 50%;
+    top: 18%; left: 22%;
+  }
+  /* bouncy expression — wide grin */
+  .tiger .grin {
+    position:absolute;
+    width: 30%; height: 8%;
+    left: 35%; top: 68%;
+    background: #2C160A;
+    border-radius: 0 0 50% 50%;
+    box-shadow: inset 0 -2px 0 #D04330;
+  }
 
-A few decisions worth flagging:
+  /* ====================== EEYORE (top-right) ====================== */
+  .eeyore {
+    top: -2%;
+    right: -6%;
+    width: 32%;
+    aspect-ratio: 1/1.05;
+    z-index: 20;
+  }
+  /* droopy long ears */
+  .eeyore .ear-l, .eeyore .ear-r {
+    position:absolute;
+    width: 14%;
+    height: 50%;
+    background:
+      linear-gradient(180deg, #9AA0B0 0%, #6E7484 100%);
+    top: 8%;
+    box-shadow: inset 0 0 0 2.5px #4A2515;
+    border-radius: 30% 30% 50% 50% / 20% 20% 80% 80%;
+  }
+  .eeyore .ear-l { left: -2%; transform: rotate(8deg); }
+  .eeyore .ear-r { right: 18%; transform: rotate(-25deg); top: 24%; }
+  .eeyore .ear-l::before, .eeyore .ear-r::before {
+    content:"";
+    position:absolute;
+    inset: 12% 18% 60% 18%;
+    background: #A8AEBC;
+    border-radius: 50% 50% 0 0;
+    opacity: .6;
+  }
+  .eeyore .head {
+    position:absolute;
+    width: 72%; height: 70%;
+    left: 14%; top: 16%;
+    background:
+      radial-gradient(ellipse at 40% 30%, #B8BECC 0%, #9096A6 55%, #6E7484 100%);
+    border-radius: 50% 50% 45% 55% / 55% 50% 50% 50%;
+    box-shadow:
+      inset 0 0 0 2.5px #4A2515,
+      inset -8px -10px 0 rgba(74,37,21,.15),
+      inset 4px 6px 4px rgba(255,255,255,.18);
+  }
+  /* mane tuft */
+  .eeyore .tuft {
+    position:absolute;
+    width: 30%;
+    height: 16%;
+    top: 8%;
+    left: 35%;
+    background: #2C160A;
+    border-radius: 50% 50% 30% 30% / 80% 80% 30% 30%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+    z-index: 1;
+  }
+  .eeyore .muzzle {
+    position:absolute;
+    width: 40%; height: 32%;
+    left: 30%; top: 52%;
+    background:
+      linear-gradient(180deg, #DCDCE4 0%, #B8BECC 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 50% 50%;
+    box-shadow: inset 0 0 0 2px #4A2515;
+  }
+  .eeyore .nose-holes {
+    position:absolute;
+    width: 30%;
+    left: 35%;
+    top: 58%;
+    display:flex;
+    justify-content: space-between;
+  }
+  .eeyore .nose-holes span {
+    width: 5px; height: 7px;
+    background: #2C160A;
+    border-radius: 50%;
+  }
+  /* droopy sad eyes */
+  .eeyore .eye-l, .eeyore .eye-r {
+    position:absolute;
+    width: 9%; height: 7%;
+    background: #2C160A;
+    border-radius: 50%;
+    top: 42%;
+    overflow: hidden;
+  }
+  .eeyore .eye-l { left: 32%; transform: rotate(-10deg); }
+  .eeyore .eye-r { right: 32%; transform: rotate(10deg); }
+  .eeyore .eye-l::after, .eeyore .eye-r::after {
+    content:"";
+    position:absolute;
+    width: 80%; height: 50%;
+    background: #FFFAF0;
+    bottom: -10%; left: 10%;
+    border-radius: 50%;
+    opacity: .8;
+  }
+  .eeyore .brow-l, .eeyore .brow-r {
+    position:absolute;
+    width: 16%; height: 3px;
+    background: #2C160A;
+    border-radius: 50%;
+    top: 38%;
+  }
+  .eeyore .brow-l { left: 28%; transform: rotate(18deg); }
+  .eeyore .brow-r { right: 28%; transform: rotate(-18deg); }
+  /* pink bow on ear */
+  .eeyore .bow {
+    position:absolute;
+    width: 14px; height: 12px;
+    top: 30%;
+    right: 4%;
+    z-index: 5;
+    transform: rotate(-15deg);
+  }
+  .eeyore .bow::before, .eeyore .bow::after {
+    content:"";
+    position:absolute;
+    width: 8px; height: 12px;
+    background: #D04330;
+    border-radius: 50% 20% 50% 20%;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+    top: 0;
+  }
+  .eeyore .bow::before { left: 0; }
+  .eeyore .bow::after  { right: 0; transform: scaleX(-1); }
+  .eeyore .bow .knot {
+    position:absolute;
+    width: 4px; height: 6px;
+    background: #A53320;
+    border-radius: 50%;
+    top: 3px; left: 5px;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+  }
 
-- **Center is a real window, not just blank space.** A semi-translucent cream panel with `inset 0 4px 24px rgba(74,37,21,0.18)` gives the photo area a subtle framed-mat look, so when a real photo is composited in, it won't fight the border. The 📷 is just a placeholder marker.
-- **The corner vignettes use `conic-gradient` as a honeycomb suggestion.** Six segments rotating gold → honey → brown read as蜂窝 cells at a glance, and the inner cream radial-gradient keeps each character lifted off the busy ring. Each character is set at 120–130px so they clearly dominate the corner, not nestle inside it.
-- **The title gets a triple-stacked `text-shadow`** (gold → honey → dark-brown blur) instead of a flat drop-shadow — that's the cheap-but-effective trick to make serif italic feel like it was pressed into warm foil. The little "EST. FOREVER" sub-tag and heart row anchor the bottom so it doesn't feel like a floating word.
-- **Honey pots at top-center are clustered and tilted inward** (`-22deg` / `+22deg`) rather than three-in-a-row — a small composition tell that separates "designed" from "dropped in".
+  /* ============ SCATTERED DECORATIONS ============ */
+  .deco { position:absolute; z-index: 5; }
+
+  /* Leaves — hand-drawn */
+  .leaf {
+    position: absolute;
+    width: 26px; height: 14px;
+    background:
+      radial-gradient(ellipse at 30% 30%, #8AAA50 0%, #5A7A30 80%);
+    border-radius: 0 100% 0 100%;
+    box-shadow: inset 0 0 0 1.5px #2C160A;
+  }
+  .leaf::after {
+    content:"";
+    position:absolute;
+    width: 60%;
+    height: 1.5px;
+    background: #2C160A;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%) rotate(-30deg);
+  }
+  .leaf.l1 { top: 11%; right: 38%; transform: rotate(35deg); }
+  .leaf.l2 { top: 22%; right: 4%; transform: rotate(-25deg) scale(.8); }
+  .leaf.l3 { bottom: 16%; right: 36%; transform: rotate(-110deg) scale(.85); }
+  .leaf.l4 { top: 14%; left: 38%; transform: rotate(-160deg); }
+  .leaf.l5 { bottom: 12%; left: 36%; transform: rotate(170deg) scale(.85); }
+
+  /* Acorns */
+  .acorn {
+    position: absolute;
+    width: 16px; height: 20px;
+  }
+  .acorn .cap {
+    position:absolute;
+    top: 0; left: 0;
+    width: 16px; height: 10px;
+    background:
+      repeating-linear-gradient(135deg, #8C5A2C 0 2px, #6B3819 2px 4px);
+    border-radius: 50% 50% 20% 20% / 80% 80% 20% 20%;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+  }
+  .acorn .cap::before {
+    content:"";
+    position:absolute;
+    width: 2px; height: 5px;
+    background: #4A2515;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+  }
+  .acorn .body {
+    position:absolute;
+    bottom: 0; left: 1px;
+    width: 14px; height: 13px;
+    background:
+      linear-gradient(180deg, #D9B97E, #A87B4E);
+    border-radius: 50% 50% 50% 50% / 40% 40% 70% 70%;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+  }
+  .acorn.a1 { top: 8%; left: 42%; transform: rotate(-15deg); }
+  .acorn.a2 { bottom: 8%; right: 30%; transform: rotate(20deg) scale(.9); }
+
+  /* Honey drips on top of frame */
+  .drip {
+    position:absolute;
+    width: 10px;
+    background: linear-gradient(180deg, #FFB400, #E89A12);
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+    top: -8px;
+    z-index: 18;
+  }
+  .drip::after {
+    content:"";
+    position:absolute;
+    width: 14px; height: 14px;
+    background: radial-gradient(ellipse at 30% 30%, #FFD050, #E89A12);
+    bottom: -6px; left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+  }
+  .drip.d1 { height: 18px; left: 28%; }
+  .drip.d2 { height: 12px; left: 50%; }
+  .drip.d3 { height: 22px; left: 64%; }
+
+  /* Flying bee couple */
+  .bee {
+    position: absolute;
+    width: 22px; height: 14px;
+    z-index: 25;
+  }
+  .bee .body {
+    position:absolute;
+    width: 16px; height: 12px;
+    background:
+      repeating-linear-gradient(45deg,
+        #FFB400 0 3px,
+        #2C160A 3px 5px);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px #4A2515;
+    top: 1px; left: 4px;
+  }
+  .bee .wing {
+    position:absolute;
+    width: 9px; height: 6px;
+    background: rgba(255,250,240,.7);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px #4A2515;
+    top: -2px;
+  }
+  .bee .wing.wl { left: 5px; transform: rotate(-25deg); }
+  .bee .wing.wr { right: 5px; transform: rotate(25deg); }
+  .bee.b1 { top: 5%; left: 18%; transform: rotate(-10deg); animation: float1 6s ease-in-out infinite; }
+  .bee.b2 { top: 8%; right: 22%; transform: rotate(8deg) scale(.85); animation: float2 7s ease-in-out infinite; }
+  @keyframes float1 {
+    0%,100% { transform: rotate(-10deg) translate(0,0); }
+    50% { transform: rotate(-5deg) translate(8px,-6px); }
+  }
+  @keyframes float2 {
+    0%,100% { transform: rotate(8deg) scale(.85) translate(0,0); }
+    50% { transform: rotate(14deg) scale(.85) translate(-6px,-8px); }
+  }
+
+  /* Quote in the bottom area */
+  .quote {
+    position:absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    text-align: center;
+    z-index: 15;
+    width: 80%;
+  }
+  .quote em {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(.95rem, 2.3vmin, 1.2rem);
+    color: #4A2515;
+    font-style: normal;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 0 rgba(255,255,255,.5);
+  }
+  .quote em::before, .quote em::after {
+    content:"";
+    display: inline-block;
+    width: 22px;
+    height: 1.5px;
+    background: #4A2515;
+    vertical-align: middle;
+    margin: 0 8px;
+  }
+
+  /* date strip */
+  .date-strip {
+    position:absolute;
+    bottom: 2.5%;
+    right: 5%;
+    font-family: 'Caveat', cursive;
+    color: #6B3819;
+    font-size: .9rem;
+    letter-spacing: 1px;
+    transform: rotate(-2deg);
+    z-index: 15;
+  }
+  .date-strip::before {
+    content:"❦";
+    margin-right: 6px;
+    color: #D04330;
+  }
+
+  /* tiny paw prints scattered */
+  .paw {
+    position:absolute;
+    z-index: 4;
+    width: 18px;
+    height: 22px;
+    opacity: .55;
+  }
+  .paw .pad {
+    position:absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 12px; height: 10px;
+    background: #6B3819;
+    border-radius: 50%;
+  }
+  .paw .toe {
+    position:absolute;
+    width: 5px; height: 6px;
+    background: #6B3819;
+    border-radius: 50%;
+    top: 0;
+  }
+  .paw .t1 { left: 0; }
+  .paw .t2 { left: 6px; }
+  .paw .t3 { right: 0; }
+  .paw.p1 { top: 28%; left: 5%; transform: rotate(-15deg) scale(.7); }
+  .paw.p2 { top: 35%; right: 5%; transform: rotate(20deg) scale(.7); }
+  .paw.p3 { bottom: 38%; left: 4%; transform: rotate(15deg) scale(.6); }
+
+  /* deckled/torn paper edge feel — extra inner outline wiggle */
+  .frame::before {
+    content:"";
+    position:absolute;
+    inset: -2px;
+    border-radius: 7px 9px 8px 10px / 10px 8px 9px 7px;

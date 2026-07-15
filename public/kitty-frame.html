@@ -3,149 +3,912 @@
 <head>
 <meta charset="UTF-8">
 <title>Hello Kitty Photobooth</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root{
+    --pink: #E891A0;
+    --pink-soft: #F5C3CD;
+    --pink-blush: #FCE0E5;
+    --pink-deep: #D66E80;
+    --red: #E8443A;
+    --red-deep: #C8302A;
+    --gold: #FFD700;
+    --gold-soft: #FFE980;
+    --cream: #FFFAF1;
+    --paper: #FFF6EE;
+    --ink: #5A3530;
+  }
+
+  html, body {
+    min-height: 100vh;
+    font-family: 'Fraunces', serif;
+    background:
+      repeating-linear-gradient(0deg, rgba(232,145,160,0.025) 0px, rgba(232,145,160,0.025) 1px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(90deg, rgba(232,145,160,0.018) 0px, rgba(232,145,160,0.018) 1px, transparent 1px, transparent 3px),
+      linear-gradient(135deg, #FBE7EB 0%, #FAE0D8 50%, #F5D5D8 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 20px;
+    overflow-x: hidden;
+  }
+
+  body::before{
+    content:""; position:fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.6) 0%, transparent 1.5%),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.5) 0%, transparent 1%),
+      radial-gradient(circle at 30% 80%, rgba(255,215,0,0.3) 0%, transparent 1.2%),
+      radial-gradient(circle at 70% 30%, rgba(255,215,0,0.25) 0%, transparent 1%);
+    background-size: 250px 250px, 320px 320px, 280px 280px, 350px 350px;
+    pointer-events:none; z-index:0;
+    opacity:0.7;
+  }
+
+  .booth{
+    position: relative;
+    width: 820px;
+    height: 1080px;
+    background: var(--cream);
+    border: 2px solid var(--pink);
+    box-shadow:
+      0 0 0 1px var(--paper),
+      0 0 0 6px var(--pink-blush),
+      0 0 0 7px var(--pink),
+      0 30px 60px -20px rgba(214,110,128,0.45),
+      inset 0 0 100px rgba(252,224,229,0.5);
+    z-index: 1;
+  }
+
+  /* dashed inner stitch line */
+  .booth::before{
+    content:""; position:absolute; inset: 22px;
+    border: 2px dashed var(--pink);
+    pointer-events:none;
+    opacity:0.7;
+  }
+
+  /* ================== TITLE (top center) ================== */
+  .title-wrap{
+    position:absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    text-align:center;
+    z-index: 20;
+    white-space: nowrap;
+  }
+  .title{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 58px;
+    letter-spacing: 0.02em;
+    color: var(--red);
+    text-shadow:
+      2px 2px 0 var(--pink-blush),
+      3px 3px 0 var(--gold-soft),
+      4px 4px 0 rgba(232,145,160,0.4);
+    line-height: 1;
+  }
+  .title-sub{
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--pink-deep);
+    margin-top: 4px;
+    letter-spacing: 0.15em;
+    transform: rotate(1deg);
+    display:inline-block;
+  }
+  .title-sub::before, .title-sub::after{
+    content: "✦";
+    color: var(--gold);
+    margin: 0 10px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  /* ================== KITTY HEAD ================== */
+  .kitty{
+    position:absolute;
+    width: 130px;
+    height: 120px;
+    z-index: 15;
+  }
+  .kitty-top-left{ top: 150px; left: 50px; transform: rotate(-12deg); }
+  .kitty-top-right{ top: 150px; right: 50px; transform: rotate(13deg); }
+
+  /* Kitty face */
+  .kitty .head{
+    position:absolute;
+    top: 18px; left: 12px;
+    width: 106px; height: 92px;
+    background:
+      radial-gradient(ellipse at 35% 35%, #FFFFFF 0%, #FFFFFF 90%, #FBE4E9 100%);
+    border-radius: 48% 52% 50% 50% / 55% 55% 45% 45%;
+    border: 2.5px solid var(--ink);
+    box-shadow:
+      inset -4px -4px 0 rgba(232,145,160,0.08),
+      inset 3px 3px 0 rgba(255,255,255,0.9);
+  }
+  /* Ears */
+  .kitty .ear{
+    position:absolute;
+    width: 34px; height: 36px;
+    background: #FFFFFF;
+    border: 2.5px solid var(--ink);
+    top: -4px;
+  }
+  .kitty .ear.l{
+    left: 14px;
+    border-radius: 60% 30% 50% 50%;
+    transform: rotate(-18deg);
+    box-shadow: inset -2px -2px 0 rgba(232,145,160,0.1);
+  }
+  .kitty .ear.r{
+    right: 14px;
+    border-radius: 30% 60% 50% 50%;
+    transform: rotate(18deg);
+    box-shadow: inset -2px -2px 0 rgba(232,145,160,0.1);
+  }
+
+  /* Eyes */
+  .kitty .eye{
+    position:absolute;
+    width: 11px; height: 16px;
+    background: var(--ink);
+    border-radius: 50%;
+    top: 52px;
+  }
+  .kitty .eye.l{ left: 42px; transform: rotate(-3deg); }
+  .kitty .eye.r{ right: 42px; transform: rotate(3deg); }
+
+  /* Nose */
+  .kitty .nose{
+    position:absolute;
+    width: 14px; height: 9px;
+    background: var(--gold);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    top: 73px; left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Whiskers */
+  .kitty .whisk{
+    position:absolute;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    transform-origin: left center;
+  }
+  .kitty .whisk.w1{ width: 26px; top: 68px; left: 4px; transform: rotate(-8deg); }
+  .kitty .whisk.w2{ width: 28px; top: 76px; left: 2px; transform: rotate(4deg); }
+  .kitty .whisk.w3{ width: 26px; top: 84px; left: 4px; transform: rotate(14deg); }
+
+  .kitty .whisk.w4{ width: 26px; top: 68px; right: 4px; transform: rotate(8deg) scaleX(-1); }
+  .kitty .whisk.w5{ width: 28px; top: 76px; right: 2px; transform: rotate(-4deg) scaleX(-1); }
+  .kitty .whisk.w6{ width: 26px; top: 84px; right: 4px; transform: rotate(-14deg) scaleX(-1); }
+
+  /* Bow on Kitty head */
+  .kitty .bow{
+    position:absolute;
+    top: -2px; right: 2px;
+    width: 50px; height: 32px;
+    z-index: 5;
+  }
+  .kitty .bow-l, .kitty .bow-r{
+    position:absolute;
+    top: 0;
+    width: 24px; height: 28px;
+    background: var(--red);
+    border: 2.5px solid var(--ink);
+  }
+  .kitty .bow-l{
+    left: 0;
+    border-radius: 70% 30% 50% 50% / 60% 40% 60% 40%;
+    transform: rotate(-8deg);
+    box-shadow: inset 3px 3px 0 rgba(255,255,255,0.25);
+  }
+  .kitty .bow-r{
+    right: 0;
+    border-radius: 30% 70% 50% 50% / 40% 60% 40% 60%;
+    transform: rotate(8deg);
+    box-shadow: inset -3px 3px 0 rgba(255,255,255,0.25);
+  }
+  .kitty .bow-c{
+    position:absolute;
+    top: 7px; left: 50%;
+    transform: translateX(-50%);
+    width: 12px; height: 16px;
+    background: var(--red);
+    border: 2.5px solid var(--ink);
+    border-radius: 4px;
+    z-index: 2;
+  }
+
+  /* ================== BOWS scattered ================== */
+  .bow{
+    position:absolute;
+    z-index: 8;
+  }
+  .bow-i{
+    position:relative;
+    width: 60px; height: 40px;
+  }
+  .bow-i .bl, .bow-i .br{
+    position:absolute; top: 0;
+    width: 28px; height: 36px;
+    background: var(--pink);
+    border: 2.5px solid var(--ink);
+  }
+  .bow-i .bl{
+    left: 0;
+    border-radius: 80% 30% 60% 50% / 65% 35% 65% 35%;
+    transform: rotate(-6deg);
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,0.3);
+  }
+  .bow-i .br{
+    right: 0;
+    border-radius: 30% 80% 50% 60% / 35% 65% 35% 65%;
+    transform: rotate(6deg);
+    box-shadow: inset -4px 4px 0 rgba(255,255,255,0.3);
+  }
+  .bow-i .bc{
+    position:absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 14px; height: 22px;
+    background: var(--pink-deep);
+    border: 2.5px solid var(--ink);
+    border-radius: 5px;
+    z-index: 2;
+  }
+
+  .bow.gold .bl, .bow.gold .br{ background: var(--gold); }
+  .bow.gold .bc{ background: #E6B800; }
+  .bow.red .bl, .bow.red .br{ background: var(--red); }
+  .bow.red .bc{ background: var(--red-deep); }
+
+  /* ================== STARS / SPARKLES ================== */
+  .star{
+    position:absolute;
+    z-index: 6;
+  }
+  .star-4{
+    position:relative;
+    width: 30px; height: 30px;
+  }
+  .star-4::before, .star-4::after{
+    content:""; position:absolute;
+    top: 50%; left: 50%;
+    width: 28px; height: 8px;
+    background: var(--gold);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+  }
+  .star-4::after{ transform: translate(-50%,-50%) rotate(90deg); }
+  .star-4 .dot{
+    position:absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 8px; height: 8px;
+    background: #FFFCE0;
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  .star-burst{
+    position:relative;
+    width: 40px; height: 40px;
+  }
+  .star-burst i{
+    position:absolute;
+    top:50%; left:50%;
+    width: 4px; height: 36px;
+    background: var(--gold);
+    border-radius: 4px;
+    transform-origin: center;
+  }
+  .star-burst i:nth-child(1){ transform: translate(-50%,-50%) rotate(0deg); }
+  .star-burst i:nth-child(2){ transform: translate(-50%,-50%) rotate(45deg); }
+  .star-burst i:nth-child(3){ transform: translate(-50%,-50%) rotate(90deg); }
+  .star-burst i:nth-child(4){ transform: translate(-50%,-50%) rotate(135deg); }
+  .star-burst .core{
+    position:absolute;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    width: 14px; height: 14px;
+    background: var(--gold);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  .sparkle{
+    position:absolute;
+    width: 18px; height: 18px;
+    z-index: 5;
+  }
+  .sparkle::before, .sparkle::after{
+    content:""; position:absolute;
+    top:50%; left:50%;
+    background: #FFF;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+  }
+  .sparkle::before{
+    width: 18px; height: 4px;
+    transform: translate(-50%,-50%);
+    clip-path: polygon(0% 50%, 35% 50%, 40% 0%, 50% 50%, 60% 0%, 65% 50%, 100% 50%, 65% 50%, 60% 100%, 50% 50%, 40% 100%, 35% 50%);
+  }
+  .sparkle::after{ display:none; }
+
+  /* tiny sparkle dots */
+  .dot-gold, .dot-pink, .dot-white{
+    position:absolute;
+    border-radius: 50%;
+    z-index: 4;
+  }
+  .dot-gold{ background: var(--gold); box-shadow: 0 0 0 1.5px #E6B800; }
+  .dot-pink{ background: var(--pink); box-shadow: 0 0 0 1.5px var(--pink-deep); }
+  .dot-white{ background: #FFF; box-shadow: 0 0 0 1.5px var(--pink); }
+
+  /* ================== FLOWERS ================== */
+  .flower{
+    position:absolute;
+    width: 50px; height: 50px;
+    z-index: 7;
+  }
+  .flower .petal{
+    position:absolute;
+    width: 20px; height: 24px;
+    background: var(--pink-soft);
+    border: 2px solid var(--ink);
+    border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+    top: 50%; left: 50%;
+    transform-origin: center 24px;
+  }
+  .flower .petal:nth-child(1){ transform: translate(-50%,-100%) rotate(0deg); }
+  .flower .petal:nth-child(2){ transform: translate(-50%,-100%) rotate(72deg); }
+  .flower .petal:nth-child(3){ transform: translate(-50%,-100%) rotate(144deg); }
+  .flower .petal:nth-child(4){ transform: translate(-50%,-100%) rotate(216deg); }
+  .flower .petal:nth-child(5){ transform: translate(-50%,-100%) rotate(288deg); }
+  .flower .center{
+    position:absolute;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    width: 14px; height: 14px;
+    background: var(--gold);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    z-index: 5;
+  }
+
+  .flower.white .petal{ background: #FFF; }
+  .flower.red .petal{ background: var(--red); }
+
+  /* Strawberry */
+  .strawberry{
+    position:absolute;
+    width: 38px; height: 42px;
+    z-index: 6;
+  }
+  .strawberry .body{
+    position:absolute;
+    bottom: 0; left: 0;
+    width: 38px; height: 34px;
+    background: var(--red);
+    border: 2.5px solid var(--ink);
+    border-radius: 50% 50% 50% 50% / 40% 40% 75% 75%;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.1);
+  }
+  .strawberry .leaf{
+    position:absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%) rotate(-10deg);
+    width: 30px; height: 14px;
+    background: #7CB342;
+    border: 2.5px solid var(--ink);
+    border-radius: 50% 50% 50% 50% / 100% 100% 0 0;
+    clip-path: polygon(0 100%, 15% 30%, 30% 80%, 50% 0%, 70% 80%, 85% 30%, 100% 100%);
+  }
+  .strawberry .seed{
+    position:absolute;
+    width: 3px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+  .strawberry .seed:nth-child(3){ top: 18px; left: 12px; }
+  .strawberry .seed:nth-child(4){ top: 14px; left: 22px; }
+  .strawberry .seed:nth-child(5){ top: 22px; left: 8px; }
+  .strawberry .seed:nth-child(6){ top: 26px; left: 20px; }
+  .strawberry .seed:nth-child(7){ top: 18px; left: 28px; }
+
+  /* Heart */
+  .heart{
+    position:absolute;
+    width: 28px; height: 26px;
+    z-index: 6;
+  }
+  .heart::before, .heart::after{
+    content:""; position:absolute;
+    width: 16px; height: 22px;
+    background: var(--red);
+    border: 2px solid var(--ink);
+    border-radius: 50% 50% 0 0;
+    top: 0;
+  }
+  .heart::before{
+    left: 0;
+    transform: rotate(-45deg);
+    transform-origin: bottom right;
+  }
+  .heart::after{
+    right: 0;
+    transform: rotate(45deg);
+    transform-origin: bottom left;
+  }
+
+  /* ================== PHOTO WINDOW ================== */
+  .photo-window{
+    position:absolute;
+    top: 220px;
+    left: 80px;
+    right: 80px;
+    bottom: 240px;
+    background:
+      repeating-linear-gradient(45deg, rgba(232,145,160,0.04) 0, rgba(232,145,160,0.04) 1px, transparent 1px, transparent 8px),
+      linear-gradient(135deg, rgba(255,250,241,0.6), rgba(252,224,229,0.6));
+    border: 2px solid var(--pink);
+    box-shadow:
+      0 0 0 4px var(--cream),
+      0 0 0 5px var(--pink-blush),
+      inset 0 0 30px rgba(232,145,160,0.1);
+    overflow:hidden;
+    z-index: 2;
+  }
+  .photo-window::before{
+    content:""; position:absolute; inset: 0;
+    border: 1.5px dashed var(--pink-soft);
+    pointer-events:none;
+  }
+  .photo-window::after{
+    content: "✿ snap a memory ✿";
+    position:absolute;
+    bottom: 16px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--pink-deep);
+    opacity: 0.5;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  /* tape pieces on corners of photo */
+  .tape{
+    position:absolute;
+    width: 70px; height: 22px;
+    background: rgba(232,145,160,0.35);
+    border: 1px solid rgba(214,110,128,0.4);
+    z-index: 25;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .tape::before{
+    content:""; position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(45deg, transparent 0, transparent 3px, rgba(255,255,255,0.2) 3px, rgba(255,255,255,0.2) 4px);
+  }
+  .tape.tl{ top: 210px; left: 70px; transform: rotate(-32deg); }
+  .tape.tr{ top: 210px; right: 70px; transform: rotate(32deg); }
+  .tape.bl{ bottom: 230px; left: 70px; transform: rotate(32deg); }
+  .tape.br{ bottom: 230px; right: 70px; transform: rotate(-32deg); }
+
+  /* ================== BOTTOM DECORATION ================== */
+  .footer{
+    position:absolute;
+    bottom: 30px;
+    left: 30px; right: 30px;
+    height: 200px;
+    z-index: 10;
+  }
+
+  .date-strip{
+    position:absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    font-family: 'Caveat', cursive;
+    font-size: 24px;
+    color: var(--pink-deep);
+    background: var(--cream);
+    padding: 6px 22px;
+    border: 1.5px dashed var(--pink);
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 0 var(--pink-blush);
+    z-index: 12;
+  }
+  .date-strip span{ color: var(--red); }
+
+  .signature{
+    position:absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--pink-deep);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .signature::before, .signature::after{
+    content: "❀";
+    color: var(--gold);
+    margin: 0 12px;
+  }
+
+  /* Number badge */
+  .num-badge{
+    position:absolute;
+    top: 200px;
+    left: 60px;
+    width: 56px; height: 56px;
+    background: var(--red);
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 26px;
+    color: #FFF;
+    z-index: 18;
+    transform: rotate(-15deg);
+    box-shadow: 3px 3px 0 var(--pink-blush), 4px 4px 0 var(--ink);
+  }
+  .num-badge::before{
+    content:"✦"; position:absolute;
+    top: -8px; right: -8px;
+    font-size: 18px;
+    color: var(--gold);
+    text-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .num-badge-2{
+    position:absolute;
+    top: 200px;
+    right: 60px;
+    width: 50px; height: 50px;
+    background: var(--gold);
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family: 'Caveat', cursive;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    z-index: 18;
+    transform: rotate(12deg);
+    box-shadow: -3px 3px 0 var(--pink-blush), -4px 4px 0 var(--ink);
+    text-align:center;
+    line-height: 1;
+    padding: 4px;
+  }
+
+  /* Side labels (vertical text) */
+  .side-label{
+    position:absolute;
+    font-family: 'Caveat', cursive;
+    font-size: 14px;
+    color: var(--pink-deep);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    z-index: 5;
+  }
+  .side-label.left{
+    left: 40px;
+    top: 50%;
+    transform: rotate(-90deg) translateX(50%);
+    transform-origin: left top;
+  }
+  .side-label.right{
+    right: 40px;
+    top: 50%;
+    transform: rotate(90deg) translateX(-50%);
+    transform-origin: right top;
+  }
+
+  /* corner floral flourishes */
+  .corner-flourish{
+    position:absolute;
+    width: 100px; height: 100px;
+    z-index: 3;
+  }
+  .corner-flourish.tl{ top: 25px; left: 25px; }
+  .corner-flourish.tr{ top: 25px; right: 25px; transform: scaleX(-1); }
+  .corner-flourish.bl{ bottom: 25px; left: 25px; transform: scaleY(-1); }
+  .corner-flourish.br{ bottom: 25px; right: 25px; transform: scale(-1,-1); }
+
+  .corner-flourish::before{
+    content:""; position:absolute;
+    top: 0; left: 0;
+    width: 80px; height: 80px;
+    border-top: 2px solid var(--pink);
+    border-left: 2px solid var(--pink);
+    border-radius: 30px 0 0 0;
+    opacity: 0.6;
+  }
+
+  /* Floating small kitties on sides */
+  .mini-kitty{
+    position:absolute;
+    width: 70px; height: 65px;
+    z-index: 11;
+  }
+  .mini-kitty .h{
+    position:absolute;
+    top: 10px; left: 6px;
+    width: 58px; height: 50px;
+    background: #FFF;
+    border: 2px solid var(--ink);
+    border-radius: 48% 52% 50% 50% / 55% 55% 45% 45%;
+  }
+  .mini-kitty .ear{
+    position:absolute;
+    width: 18px; height: 20px;
+    background: #FFF;
+    border: 2px solid var(--ink);
+    top: -2px;
+  }
+  .mini-kitty .ear.l{ left: 8px; border-radius: 60% 30% 50% 50%; transform: rotate(-18deg); }
+  .mini-kitty .ear.r{ right: 8px; border-radius: 30% 60% 50% 50%; transform: rotate(18deg); }
+  .mini-kitty .eye{
+    position:absolute;
+    width: 6px; height: 9px;
+    background: var(--ink);
+    border-radius: 50%;
+    top: 28px;
+  }
+  .mini-kitty .eye.l{ left: 22px; }
+  .mini-kitty .eye.r{ right: 22px; }
+  .mini-kitty .nose{
+    position:absolute;
+    width: 8px; height: 5px;
+    background: var(--gold);
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    top: 40px; left: 50%;
+    transform: translateX(-50%);
+  }
+  .mini-kitty .bk{
+    position:absolute;
+    top: -3px; right: -2px;
+    width: 26px; height: 16px;
+  }
+  .mini-kitty .bk::before, .mini-kitty .bk::after{
+    content:""; position:absolute; top:0;
+    width: 12px; height: 15px;
+    background: var(--red);
+    border: 2px solid var(--ink);
+  }
+  .mini-kitty .bk::before{ left: 0; border-radius: 70% 30% 50% 50%; transform: rotate(-8deg); }
+  .mini-kitty .bk::after{ right: 0; border-radius: 30% 70% 50% 50%; transform: rotate(8deg); }
+
+  /* tiny dots scattered */
+  .sc{ position:absolute; border-radius:50%; }
+
+  /* Positioning decorations */
+  .dec{ position:absolute; z-index: 9; }
+
+</style>
 </head>
-<body style="margin:0; min-height:100vh; background:linear-gradient(135deg,#FFEDF1,#FFD7DF); font-family:Georgia,'Times New Roman',serif; display:flex; align-items:center; justify-content:center; padding:20px;">
+<body>
 
-<div style="
-  position:relative;
-  width:1200px;
-  height:1600px;
-  background:#FFF5F7;
-  border:10px solid #E891A0;
-  border-radius:60px;
-  box-sizing:border-box;
-  box-shadow:0 30px 80px rgba(232,68,58,0.35), inset 0 0 0 4px #FFF, inset 0 0 0 12px #E891A0, inset 0 0 0 16px #FFF;
-  overflow:hidden;
-">
+<div class="booth">
 
-  <!-- ============ HELLO KITTY FACE (TOP-LEFT) ============ -->
-  <div style="position:absolute; top:60px; left:60px; width:240px; height:210px; z-index:10;">
-    <!-- Left ear -->
-    <div style="position:absolute; top:0; left:30px; width:90px; height:80px; background:#FFFFFF; border:4px solid #000; border-radius:50%; transform:rotate(-22deg); z-index:1;"></div>
-    <!-- Right ear -->
-    <div style="position:absolute; top:0; right:30px; width:90px; height:80px; background:#FFFFFF; border:4px solid #000; border-radius:50%; transform:rotate(22deg); z-index:1;"></div>
-    <!-- Head -->
-    <div style="position:absolute; top:18px; left:0; width:240px; height:185px; background:#FFFFFF; border:4px solid #000; border-radius:50%; z-index:2;"></div>
-    <!-- Left whiskers -->
-    <div style="position:absolute; top:108px; left:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
-    <div style="position:absolute; top:128px; left:0; width:48px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
-    <div style="position:absolute; top:148px; left:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
-    <!-- Right whiskers -->
-    <div style="position:absolute; top:108px; right:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
-    <div style="position:absolute; top:128px; right:0; width:48px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
-    <div style="position:absolute; top:148px; right:6px; width:42px; height:4px; background:#000; border-radius:2px; z-index:3;"></div>
-    <!-- Left eye -->
-    <div style="position:absolute; top:88px; left:70px; width:20px; height:26px; background:#000; border-radius:50%; z-index:3;"></div>
-    <!-- Right eye -->
-    <div style="position:absolute; top:88px; right:70px; width:20px; height:26px; background:#000; border-radius:50%; z-index:3;"></div>
-    <!-- Nose -->
-    <div style="position:absolute; top:118px; left:50%; transform:translateX(-50%); width:30px; height:22px; background:#FFD700; border:3px solid #000; border-radius:50%; z-index:3;"></div>
-    <!-- BOW -->
-    <div style="position:absolute; top:0; right:-30px; z-index:6;">
-      <!-- Left bow loop -->
-      <div style="position:absolute; left:0; top:4px; width:55px; height:60px; background:#E8443A; border:3px solid #000; border-radius:50% 8px 50% 8px; transform:rotate(-12deg);"></div>
-      <!-- Right bow loop -->
-      <div style="position:absolute; left:55px; top:4px; width:55px; height:60px; background:#E8443A; border:3px solid #000; border-radius:8px 50% 8px 50%; transform:rotate(12deg);"></div>
-      <!-- Bow center knot -->
-      <div style="position:absolute; left:36px; top:14px; width:38px; height:42px; background:#E8443A; border:3px solid #000; border-radius:8px; z-index:2;"></div>
-      <!-- Bow highlight -->
-      <div style="position:absolute; left:8px; top:14px; width:14px; height:18px; background:rgba(255,255,255,0.5); border-radius:50%; transform:rotate(-12deg);"></div>
-      <div style="position:absolute; left:88px; top:14px; width:14px; height:18px; background:rgba(255,255,255,0.5); border-radius:50%; transform:rotate(12deg);"></div>
+  <!-- Corner flourish borders -->
+  <div class="corner-flourish tl"></div>
+  <div class="corner-flourish tr"></div>
+  <div class="corner-flourish bl"></div>
+  <div class="corner-flourish br"></div>
+
+  <!-- TITLE -->
+  <div class="title-wrap">
+    <div class="title">Hello Kitty</div>
+    <div class="title-sub">sweet little memories</div>
+  </div>
+
+  <!-- Number badges -->
+  <div class="num-badge">01</div>
+  <div class="num-badge-2">♡<br>2024</div>
+
+  <!-- SIDE LABELS -->
+  <div class="side-label left">press · smile · keep forever</div>
+  <div class="side-label right">made with love &amp; sugar</div>
+
+  <!-- TAPE -->
+  <div class="tape tl"></div>
+  <div class="tape tr"></div>
+  <div class="tape bl"></div>
+  <div class="tape br"></div>
+
+  <!-- PHOTO WINDOW -->
+  <div class="photo-window"></div>
+
+  <!-- KITTY HEAD TOP LEFT -->
+  <div class="kitty kitty-top-left">
+    <div class="ear l"></div>
+    <div class="ear r"></div>
+    <div class="head">
+      <div class="eye l"></div>
+      <div class="eye r"></div>
+      <div class="nose"></div>
+      <div class="whisk w1"></div>
+      <div class="whisk w2"></div>
+      <div class="whisk w3"></div>
+      <div class="whisk w4"></div>
+      <div class="whisk w5"></div>
+      <div class="whisk w6"></div>
+    </div>
+    <div class="bow">
+      <div class="bow-l"></div>
+      <div class="bow-r"></div>
+      <div class="bow-c"></div>
     </div>
   </div>
 
-  <!-- ============ LARGE PINK BOW (TOP-RIGHT) ============ -->
-  <div style="position:absolute; top:80px; right:60px; width:260px; height:180px; z-index:10;">
-    <!-- Left bow loop -->
-    <div style="position:absolute; left:0; top:30px; width:120px; height:130px; background:#E891A0; border:4px solid #C5616F; border-radius:50% 8px 50% 8px; transform:rotate(-10deg); box-shadow:inset -8px 8px 0 rgba(255,255,255,0.25);"></div>
-    <!-- Right bow loop -->
-    <div style="position:absolute; left:140px; top:30px; width:120px; height:130px; background:#E891A0; border:4px solid #C5616F; border-radius:8px 50% 8px 50%; transform:rotate(10deg); box-shadow:inset 8px 8px 0 rgba(255,255,255,0.25);"></div>
-    <!-- Center knot -->
-    <div style="position:absolute; left:95px; top:48px; width:70px; height:90px; background:#E8443A; border:4px solid #B8281F; border-radius:14px; z-index:2; box-shadow:inset -4px 0 0 rgba(0,0,0,0.12);"></div>
-    <!-- Center knot shine -->
-    <div style="position:absolute; left:106px; top:58px; width:14px; height:30px; background:rgba(255,255,255,0.45); border-radius:50%; z-index:3;"></div>
-    <!-- Ribbon tails -->
-    <div style="position:absolute; left:30px; top:140px; width:36px; height:90px; background:#E891A0; border:4px solid #C5616F; border-radius:8px 8px 50% 8px; transform:rotate(18deg);"></div>
-    <div style="position:absolute; right:30px; top:140px; width:36px; height:90px; background:#E891A0; border:4px solid #C5616F; border-radius:8px 8px 8px 50%; transform:rotate(-18deg);"></div>
-    <!-- Sparkle highlights on bow -->
-    <div style="position:absolute; left:22px; top:50px; width:18px; height:18px; background:rgba(255,255,255,0.7); border-radius:50%; transform:rotate(-10deg);"></div>
-    <div style="position:absolute; right:22px; top:50px; width:18px; height:18px; background:rgba(255,255,255,0.7); border-radius:50%; transform:rotate(10deg);"></div>
+  <!-- KITTY HEAD TOP RIGHT -->
+  <div class="kitty kitty-top-right">
+    <div class="ear l"></div>
+    <div class="ear r"></div>
+    <div class="head">
+      <div class="eye l"></div>
+      <div class="eye r"></div>
+      <div class="nose"></div>
+      <div class="whisk w1"></div>
+      <div class="whisk w2"></div>
+      <div class="whisk w3"></div>
+      <div class="whisk w4"></div>
+      <div class="whisk w5"></div>
+      <div class="whisk w6"></div>
+    </div>
+    <div class="bow">
+      <div class="bow-l"></div>
+      <div class="bow-r"></div>
+      <div class="bow-c"></div>
+    </div>
   </div>
 
-  <!-- ============ FLOATING SPARKLE STARS ============ -->
-  <!-- Yellow 4-point star -->
-  <div style="position:absolute; top:90px; left:380px; width:34px; height:34px; z-index:6;">
-    <div style="position:absolute; top:0; left:14px; width:6px; height:34px; background:#FFD700; border-radius:3px;"></div>
-    <div style="position:absolute; top:14px; left:0; width:34px; height:6px; background:#FFD700; border-radius:3px;"></div>
-    <div style="position:absolute; top:7px; left:7px; width:20px; height:20px; background:#FFE066; border-radius:50%;"></div>
-  </div>
-  <!-- Pink 4-point star -->
-  <div style="position:absolute; top:180px; left:540px; width:44px; height:44px; z-index:6;">
-    <div style="position:absolute; top:0; left:19px; width:6px; height:44px; background:#E8443A; border-radius:3px;"></div>
-    <div style="position:absolute; top:19px; left:0; width:44px; height:6px; background:#E8443A; border-radius:3px;"></div>
-    <div style="position:absolute; top:11px; left:11px; width:22px; height:22px; background:#E891A0; border-radius:50%;"></div>
-  </div>
-  <!-- Tiny pink star -->
-  <div style="position:absolute; top:60px; left:680px; width:22px; height:22px; z-index:6;">
-    <div style="position:absolute; top:0; left:9px; width:4px; height:22px; background:#E891A0; border-radius:2px;"></div>
-    <div style="position:absolute; top:9px; left:0; width:22px; height:4px; background:#E891A0; border-radius:2px;"></div>
-  </div>
-  <!-- Yellow star -->
-  <div style="position:absolute; top:230px; left:760px; width:26px; height:26px; z-index:6;">
-    <div style="position:absolute; top:0; left:11px; width:4px; height:26px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:11px; left:0; width:26px; height:4px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:7px; left:7px; width:12px; height:12px; background:#FFE066; border-radius:50%;"></div>
-  </div>
-  <!-- Left mid sparkles -->
-  <div style="position:absolute; top:340px; left:40px; width:24px; height:24px; z-index:6;">
-    <div style="position:absolute; top:0; left:10px; width:4px; height:24px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:10px; left:0; width:24px; height:4px; background:#FFD700; border-radius:2px;"></div>
-  </div>
-  <div style="position:absolute; top:420px; left:90px; width:18px; height:18px; z-index:6;">
-    <div style="position:absolute; top:0; left:8px; width:3px; height:18px; background:#E8443A; border-radius:2px;"></div>
-    <div style="position:absolute; top:8px; left:0; width:18px; height:3px; background:#E8443A; border-radius:2px;"></div>
-  </div>
-  <!-- Right mid sparkles -->
-  <div style="position:absolute; top:340px; right:40px; width:24px; height:24px; z-index:6;">
-    <div style="position:absolute; top:0; left:10px; width:4px; height:24px; background:#E8443A; border-radius:2px;"></div>
-    <div style="position:absolute; top:10px; left:0; width:24px; height:4px; background:#E8443A; border-radius:2px;"></div>
-  </div>
-  <div style="position:absolute; top:440px; right:80px; width:20px; height:20px; z-index:6;">
-    <div style="position:absolute; top:0; left:8px; width:4px; height:20px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:8px; left:0; width:20px; height:4px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:6px; left:6px; width:8px; height:8px; background:#FFE066; border-radius:50%;"></div>
-  </div>
-  <!-- Lower sparkles -->
-  <div style="position:absolute; bottom:280px; left:50px; width:22px; height:22px; z-index:6;">
-    <div style="position:absolute; top:0; left:9px; width:4px; height:22px; background:#E891A0; border-radius:2px;"></div>
-    <div style="position:absolute; top:9px; left:0; width:22px; height:4px; background:#E891A0; border-radius:2px;"></div>
-  </div>
-  <div style="position:absolute; bottom:280px; right:50px; width:22px; height:22px; z-index:6;">
-    <div style="position:absolute; top:0; left:9px; width:4px; height:22px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:9px; left:0; width:22px; height:4px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:6px; left:6px; width:10px; height:10px; background:#FFE066; border-radius:50%;"></div>
-  </div>
-  <div style="position:absolute; bottom:200px; left:120px; width:16px; height:16px; z-index:6;">
-    <div style="position:absolute; top:0; left:7px; width:3px; height:16px; background:#E8443A; border-radius:2px;"></div>
-    <div style="position:absolute; top:7px; left:0; width:16px; height:3px; background:#E8443A; border-radius:2px;"></div>
-  </div>
-  <div style="position:absolute; bottom:200px; right:120px; width:16px; height:16px; z-index:6;">
-    <div style="position:absolute; top:0; left:7px; width:3px; height:16px; background:#E891A0; border-radius:2px;"></div>
-    <div style="position:absolute; top:7px; left:0; width:16px; height:3px; background:#E891A0; border-radius:2px;"></div>
-  </div>
-  <!-- Bottom corners sparkles -->
-  <div style="position:absolute; bottom:120px; left:380px; width:24px; height:24px; z-index:6;">
-    <div style="position:absolute; top:0; left:10px; width:4px; height:24px; background:#FFD700; border-radius:2px;"></div>
-    <div style="position:absolute; top:10px; left:0; width:24px; height:4px; background:#FFD700; border-radius:2px;"></div>
-  </div>
-  <div style="position:absolute; bottom:100px; right:360px; width:26px; height:26px; z-index:6;">
-    <div style="position:absolute; top:0; left:11px; width:4px; height:26px; background:#E8443A; border-radius:2px;"></div>
-    <div style="position:absolute; top:11px; left:0; width:26px; height:4px; background:#E8443A; border-radius:2px;"></div>
-    <div style="position:absolute; top:8px; left:8px; width:10px; height:10px; background:#E891A0; border-radius:50%;"></div>
+  <!-- MINI KITTY LEFT SIDE -->
+  <div class="mini-kitty" style="top: 420px; left: 30px; transform: rotate(-8deg);">
+    <div class="ear l"></div>
+    <div class="ear r"></div>
+    <div class="h">
+      <div class="eye l"></div>
+      <div class="eye r"></div>
+      <div class="nose"></div>
+    </div>
+    <div class="bk"></div>
   </div>
 
-  <!-- ============ CENTER PHOTO AREA ============ -->
-  <div style="
-    position:absolute;
-    top:340px; left:140px;
-    width:920
+  <!-- MINI KITTY RIGHT SIDE -->
+  <div class="mini-kitty" style="top: 480px; right: 30px; transform: rotate(10deg) scaleX(-1);">
+    <div class="ear l"></div>
+    <div class="ear r"></div>
+    <div class="h">
+      <div class="eye l"></div>
+      <div class="eye r"></div>
+      <div class="nose"></div>
+    </div>
+    <div class="bk"></div>
+  </div>
+
+  <!-- BOWS scattered -->
+  <div class="dec bow pink" style="top: 180px; left: 230px; transform: rotate(-15deg) scale(0.65);">
+    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
+  </div>
+  <div class="dec bow gold" style="top: 195px; right: 240px; transform: rotate(20deg) scale(0.6);">
+    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
+  </div>
+  <div class="dec bow red" style="bottom: 280px; left: 220px; transform: rotate(-25deg) scale(0.7);">
+    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
+  </div>
+  <div class="dec bow pink" style="bottom: 290px; right: 230px; transform: rotate(15deg) scale(0.65);">
+    <div class="bow-i"><div class="bl"></div><div class="br"></div><div class="bc"></div></div>
+  </div>
+
+  <!-- STARS -->
+  <div class="dec star" style="top: 300px; left: 100px; transform: rotate(15deg);">
+    <div class="star-4"><div class="dot"></div></div>
+  </div>
+  <div class="dec star" style="top: 340px; right: 100px; transform: rotate(-20deg) scale(0.8);">
+    <div class="star-4"><div class="dot"></div></div>
+  </div>
+  <div class="dec star" style="bottom: 360px; left: 110px; transform: rotate(-10deg) scale(0.7);">
+    <div class="star-4"><div class="dot"></div></div>
+  </div>
+  <div class="dec star" style="bottom: 380px; right: 110px; transform: rotate(25deg) scale(0.85);">
+    <div class="star-4"><div class="dot"></div></div>
+  </div>
+
+  <div class="dec" style="top: 380px; left: 50px; transform: scale(0.7);">
+    <div class="star-burst"><i></i><i></i><i></i><i></i><div class="core"></div></div>
+  </div>
+  <div class="dec" style="bottom: 320px; right: 50px; transform: scale(0.6) rotate(20deg);">
+    <div class="star-burst"><i></i><i></i><i></i><i></i><div class="core"></div></div>
+  </div>
+
+  <!-- FLOWERS -->
+  <div class="dec flower" style="top: 270px; left: 200px; transform: scale(0.7) rotate(10deg);">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <div class="dec flower white" style="top: 285px; right: 200px; transform: scale(0.6) rotate(-15deg);">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <div class="dec flower red" style="bottom: 330px; left: 180px; transform: scale(0.65) rotate(-20deg);">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <div class="dec flower white" style="bottom: 350px; right: 170px; transform: scale(0.7) rotate(15deg);">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+
+  <!-- HEARTS -->
+  <div class="dec heart" style="top: 250px; left: 350px; transform: scale(0.8) rotate(-10deg);"></div>
+  <div class="dec heart" style="top: 240px; right: 350px; transform: scale(0.7) rotate(15deg);"></div>
+  <div class="dec heart" style="bottom: 300px; left: 360px; transform: scale(0.85) rotate(8deg);"></div>
+  <div class="dec heart" style="bottom: 310px; right: 360px; transform: scale(0.75) rotate(-12deg);"></div>
+
+  <!-- STRAWBERRIES -->
+  <div class="dec strawberry" style="top: 320px; left: 60px; transform: rotate(-15deg);">
+    <div class="leaf"></div>
+    <div class="body"></div>
+    <div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div>
+  </div>
+  <div class="dec strawberry" style="bottom: 300px; right: 60px; transform: rotate(20deg) scale(0.85);">
+    <div class="leaf"></div>
+    <div class="body"></div>
+    <div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div><div class="seed"></div>
+  </div>
+
+  <!-- Small dots scattered -->
+  <div class="sc dot-gold" style="top: 230px; left: 320px; width:5px; height:5px;"></div>
+  <div class="sc dot-pink" style="top: 215px; left: 380px; width:4px; height:4px;"></div>
+  <div class="sc dot-white" style="top: 260px; left: 440px; width:6px; height:6px;"></div>
+  <div class="sc dot-gold" style="top: 230px; right: 320px; width:5px; height:5px;"></div>
+  <div class="sc dot-pink" style="top: 215px; right: 380px; width:4px; height:4px;"></div>
+  <div class="sc dot-white" style="top: 260px; right: 440px; width:6px; height:6px;"></div>
+  <div class="sc dot-gold" style="bottom: 260px; left: 320px; width:5px; height:5px;"></div>
+  <div class="sc dot-pink" style="bottom: 275px; left: 380px; width:4px; height:4px;"></div>
+  <div class="sc dot-gold" style="bottom: 260px; right: 320px; width:5px; height:5px;"></div>
+  <div class="sc dot-pink" style="bottom: 275px; right: 380px; width:4px; height:4px;"></div>
+  <div class="sc dot-white" style="bottom: 240px; left: 420px; width:5px; height:5px;"></div>
+  <div class="sc dot-white" style="bottom: 240px; right: 420px; width:5px; height:5px;"></div>
+
+  <!-- DATE / SIGNATURE -->
+  <div class="date-strip">♡ taken on <span>november · 01</span> ♡</div>
+  <div class="signature">a little piece of joy</div>
+
+  <!-- Corner mini flowers -->
+  <div class="dec flower" style="top: 130px; left: 160px; transform: scale(0.5) rotate(20deg);">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <div class="dec flower" style="top: 130px; right: 160px; transform: scale(0.5) rotate(-20deg);">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="center"></div>
+  </div>
+
+</div>
+
+</body>
+</html>
