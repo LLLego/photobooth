@@ -62,15 +62,33 @@ export async function renderSettings(mount) {
   const saveBtn = Button({ label: 'Save name', variant: 'primary' });
   saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = true;
+    const labelSpan = saveBtn.querySelector('span');
+    const originalLabel = labelSpan?.textContent;
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      saveBtn.disabled = false;
+      if (labelSpan && originalLabel != null) labelSpan.textContent = originalLabel;
+      pushToast({ message: 'Save timed out. Check your connection and try again.', type: 'error' });
+    }, 15000);
     try {
+      if (labelSpan) labelSpan.textContent = 'Saving…';
       const updated = await updateProfile(user.id, { display_name: nameInput.value.trim() });
+      if (timedOut) return;
+      clearTimeout(timeoutId);
       set({ profile: updated ? { ...profile, ...updated } : { ...profile, display_name: nameInput.value.trim() } });
       set({ preferences: { ...getState().preferences, displayName: nameInput.value.trim() } });
       pushToast({ message: 'Display name saved.', type: 'success' });
     } catch (err) {
+      if (timedOut) return;
+      clearTimeout(timeoutId);
       pushToast({ message: err.message || 'Could not save name.', type: 'error' });
     } finally {
-      saveBtn.disabled = false;
+      if (!timedOut) {
+        clearTimeout(timeoutId);
+        saveBtn.disabled = false;
+        if (labelSpan && originalLabel != null) labelSpan.textContent = originalLabel;
+      }
     }
   });
   nameActions.append(saveBtn);
@@ -172,15 +190,29 @@ export async function renderSettings(mount) {
     const original = refreshBtn.querySelector('span')?.textContent;
     const labelSpan = refreshBtn.querySelector('span');
     if (labelSpan) labelSpan.textContent = 'Refreshing…';
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      refreshBtn.disabled = false;
+      if (labelSpan && original) labelSpan.textContent = original;
+      pushToast({ message: 'Refresh timed out. Check your connection and try again.', type: 'error' });
+    }, 15000);
     try {
       const fresh = await fetchProfile(user.id);
+      if (timedOut) return;
+      clearTimeout(timeoutId);
       if (fresh) set({ profile: fresh });
       pushToast({ message: 'Profile refreshed.', type: 'success' });
     } catch (err) {
+      if (timedOut) return;
+      clearTimeout(timeoutId);
       pushToast({ message: err.message, type: 'error' });
     } finally {
-      refreshBtn.disabled = false;
-      if (labelSpan && original) labelSpan.textContent = original;
+      if (!timedOut) {
+        clearTimeout(timeoutId);
+        refreshBtn.disabled = false;
+        if (labelSpan && original) labelSpan.textContent = original;
+      }
     }
   });
   const reloadGalleryBtn = Button({ label: 'Reload gallery', variant: 'ghost' });

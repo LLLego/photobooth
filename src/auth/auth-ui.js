@@ -160,24 +160,40 @@ export async function renderAuthUI(mount) {
     submit.disabled = true;
     const previousText = submit.textContent;
     submit.textContent = mode === 'signup' ? 'Creating account…' : 'Signing in…';
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      submit.disabled = false;
+      submit.textContent = previousText;
+      showError('Taking longer than expected. Check your connection and try again.', emailInput);
+    }, 20000);
     try {
       if (mode === 'signup') {
         await signUp({ email, password, displayName: nameInput.value });
+        if (timedOut) return;
+        clearTimeout(timeoutId);
         pushToast({ message: 'Account created. You are signed in.', type: 'success' });
         navigate('home', {}, { replace: true });
       } else {
         await signIn({ email, password });
+        if (timedOut) return;
+        clearTimeout(timeoutId);
         pushToast({ message: 'Welcome back.', type: 'success' });
         navigate('home', {}, { replace: true });
       }
     } catch (err) {
+      if (timedOut) return;
+      clearTimeout(timeoutId);
       const msg = err?.message || 'Authentication failed.';
       error.textContent = msg;
       error.classList.remove('hidden');
-      (mode === 'signup' ? emailInput : emailInput).focus();
+      emailInput.focus();
     } finally {
-      submit.disabled = false;
-      submit.textContent = previousText;
+      if (!timedOut) {
+        clearTimeout(timeoutId);
+        submit.disabled = false;
+        submit.textContent = previousText;
+      }
     }
   });
 
