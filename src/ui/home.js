@@ -9,6 +9,7 @@ export async function renderHome(mount) {
   const firstName = displayName.split(' ')[0];
 
   mount.innerHTML = '';
+  mount.textContent = '⏳ loading...';
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md md:max-w-lg mx-auto px-6 pt-12 md:pt-16 pb-40';
   wrap.setAttribute('role', 'main');
