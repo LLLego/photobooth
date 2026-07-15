@@ -47,6 +47,8 @@ class DualSession {
     this.hostPhotos = [];
     this.guestPhotos = [];
     this.listeners = new Set();
+    this.videoEl = null;
+    this.countdownHost = null;
     this.capturing = false;
   }
 
@@ -135,7 +137,11 @@ class DualSession {
         }
         case 'countdown': {
           if (this.role !== ROLE.GUEST) return;
-          await this.startCaptureSequence({ fromBroadcast: true });
+          await this.startCaptureSequence({
+            fromBroadcast: true,
+            videoEl: this.videoEl,
+            countdownHost: this.countdownHost,
+          });
           break;
         }
         case 'photo-ready': {
@@ -227,6 +233,8 @@ class DualSession {
 
   async startCaptureSequence({ fromBroadcast = false, videoEl, onProgress, countdownHost = null } = {}) {
     if (this.capturing) return;
+    if (videoEl) this.videoEl = videoEl;
+    if (countdownHost) this.countdownHost = countdownHost;
     this.capturing = true;
     try {
       if (this.role === ROLE.HOST) {
@@ -349,6 +357,8 @@ class DualSession {
     this.remoteStream = null;
     this.hostPhotos = [];
     this.guestPhotos = [];
+    this.videoEl = null;
+    this.countdownHost = null;
     this.listeners.clear();
     if (this.channel) {
       try { this.channel.unsubscribe(); } catch {}

@@ -99,17 +99,43 @@ function drawBackground(ctx, theme, width, height) {
 }
 
 function drawBranding(ctx, theme, width, height) {
-  if (!theme?.branding?.showOnStrip) return;
-  const { text, fontSize = 24, color = '#2D1B11', position = 'bottom' } = theme.branding;
-  if (!text || !Number.isFinite(fontSize) || fontSize <= 0) return;
-  const font = theme.fonts?.branding || "'Georgia', serif";
+  const branding = theme?.branding || {};
+  const textColor = branding.color || theme?.palette?.text || '#2D1B11';
+  const fontSize = Number.isFinite(branding.fontSize) && branding.fontSize > 0 ? branding.fontSize : 28;
+  const font = theme?.fonts?.branding || "'Georgia', serif";
+  const footerText = 'our photobooth';
+  const emoji = '📷';
+  const footerY = height - Math.max(20, fontSize);
+
   ctx.save();
-  ctx.fillStyle = color;
+  ctx.fillStyle = textColor;
   ctx.font = `${fontSize}px ${font}`;
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const y = position === 'top' ? fontSize + 12 : height - fontSize - 12;
-  ctx.fillText(text, width / 2, y);
+  ctx.textBaseline = 'alphabetic';
+
+  // Measure combined glyphs so emoji + text sit naturally together.
+  ctx.font = `${fontSize}px ${font}`;
+  const textWidth = ctx.measureText(footerText).width;
+  ctx.font = `${Math.round(fontSize * 0.95)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif`;
+  const emojiWidth = ctx.measureText(emoji).width;
+  const gap = Math.round(fontSize * 0.4);
+  const total = emojiWidth + gap + textWidth;
+  const startX = (width - total) / 2;
+
+  ctx.font = `${Math.round(fontSize * 0.95)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(emoji, startX + emojiWidth / 2, footerY);
+
+  ctx.font = `${fontSize}px ${font}`;
+  ctx.fillText(footerText, startX + emojiWidth + gap + textWidth / 2, footerY);
+
+  // Optional theme-supplied branding still drawn (smaller, above the footer).
+  if (branding.showOnStrip && branding.text && Number.isFinite(fontSize) && fontSize > 0) {
+    ctx.font = `${Math.max(14, Math.round(fontSize * 0.55))}px ${font}`;
+    ctx.fillStyle = textColor;
+    ctx.fillText(branding.text, width / 2, footerY - Math.round(fontSize * 1.1));
+  }
+
   ctx.restore();
 }
 

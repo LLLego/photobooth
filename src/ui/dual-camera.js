@@ -5,6 +5,7 @@ import { startDualSession, joinDualSession, getDualSession } from '../webrtc/dua
 import { attachStreamToVideo, describeCameraError } from '../camera/camera.js';
 import { setPreviewFrame } from '../camera/preview.js';
 import { navigate } from '../router.js';
+import { downloadStrip, shareStrip } from '../strips/export.js';
 
 let hostStage = null;
 let remoteVideo = null;
@@ -94,6 +95,16 @@ export async function renderDualCamera(mount) {
   status.textContent = 'Ready when you are.';
   wrap.append(status);
 
+  const progress = document.createElement('p');
+  progress.className = 'text-center text-xs text-warmth-500 dark:text-warmth-400 mt-1';
+  progress.textContent = '';
+  wrap.append(progress);
+
+  const resultWrap = document.createElement('div');
+  resultWrap.className = 'mt-6 space-y-3 hidden';
+  resultWrap.setAttribute('data-result', 'true');
+  wrap.append(resultWrap);
+
   const codeCard = document.createElement('div');
   codeCard.className = 'card p-5 mt-4 hidden text-center';
   const codeLabel = document.createElement('p');
@@ -138,14 +149,15 @@ export async function renderDualCamera(mount) {
         status.textContent = 'Connected! Tap to capture.';
         session.attachLocalPreview(localVideo);
         session.attachRemotePreview(remoteVideo);
+        captureBtn.disabled = false;
       });
       session.on('connection-state', (state) => {
         status.textContent = `Connection: ${state}`;
       });
       session.on('finished', ({ blob }) => {
         if (blob) {
+          renderResult(blob);
           pushToast({ message: 'Strip saved to gallery.', type: 'success' });
-          navigate('gallery');
         }
       });
     } catch (err) {
@@ -198,12 +210,67 @@ export async function renderDualCamera(mount) {
     if (!activeSession) return;
     try {
       captureBtn.disabled = true;
-      await activeSession.startCaptureSequence({ videoEl: localVideo, countdownHost: hostStage });
+      await activeSession.startCaptureSequence({
+        videoEl: localVideo,
+        countdownHost: hostStage,
+        onProgress: updateProgress,
+      });
     } catch (err) {
       pushToast({ message: err.message, type: 'error' });
+      status.textContent = 'Capture failed. Try again.';
     } finally {
       captureBtn.disabled = false;
     }
+  }
+
+  function updateProgress({ role, position }) {
+    const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
+    progress.textContent = `You: ${position} photo${position === 1 ? '' : 's'}`;
+  }
+
+  function renderResult(blob) {
+    resultWrap.innerHTML = '';
+    const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
+    const suggestedName = `photobooth-${Date.now()}.webp`;
+    const preview = document.createElement('div');
+    preview.className = 'strip-preview';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(blob);
+    img.alt = 'Composed strip';
+    preview.append(img);
+    resultWrap.append(preview);
+
+    const bar = document.createElement('div');
+    bar.className = 'flex flex-wrap gap-2';
+    const dl = Button({ label: 'Download', variant: 'primary', icon: Icon({ name: 'download' }) });
+    const share = Button({ label: 'Share', variant: 'ghost', icon: Icon({ name: 'share' }) });
+    const again = Button({ label: 'New strip', variant: 'honey', icon: Icon({ name: 'camera' }) });
+    const gallery = Button({ label: 'View gallery', variant: 'ghost', icon: Icon({ name: 'image' }) });
+    bar.append(dl, share, again, gallery);
+    resultWrap.append(bar);
+
+    resultWrap.classList.remove('hidden');
+    resultWrap.classList.add('block');
+    captureBtn.disabled = true;
+    status.textContent = 'Strip ready!';
+
+    dl.onclick = () => downloadStrip(blob, suggestedName);
+    share.onclick = async () => {
+      try {
+        const r = await shareStrip(blob, { filename: suggestedName });
+        if (!r.shared && !r.cancelled) pushToast({ message: 'Saved a copy locally.', type: 'info' });
+      } catch (err) { pushToast({ message: err.message, type: 'error' }); }
+    };
+    again.onclick = () => {
+      resultWrap.innerHTML = '';
+      resultWrap.classList.add('hidden');
+      resultWrap.classList.remove('block');
+      captureBtn.disabled = false;
+      status.textContent = 'Ready when you are.';
+      activeSession?.dispose();
+      activeSession = null;
+    };
+    gallery.onclick = () => navigate('gallery', {}, { replace: true, force: true });
   }
 
   return () => {

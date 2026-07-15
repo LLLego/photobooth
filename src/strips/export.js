@@ -56,3 +56,94 @@ export function filenameWithExt(name, mime) {
   if (mime.includes('webp')) return `${base}.webp`;
   return base;
 }
+
+const PRINT_STYLE_ID = 'photobooth-print-styles';
+
+function ensurePrintStyles() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(PRINT_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = PRINT_STYLE_ID;
+  style.textContent = `
+    @media print {
+      body * { visibility: hidden !important; }
+      #photobooth-print-frame, #photobooth-print-frame * { visibility: visible !important; }
+      #photobooth-print-frame {
+        position: absolute !important;
+        left: 0; top: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+      }
+      #photobooth-print-frame img,
+      #photobooth-print-frame canvas {
+        display: block !important;
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      @page { margin: 12mm; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+export async function printStrip(blob, { filename = 'photobooth-strip', title = 'our photobooth' } = {}) {
+  if (!blob) throw new Error('A blob is required to print.');
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    throw new Error('Printing is only available in a browser.');
+  }
+  ensurePrintStyles();
+
+  let existing = document.getElementById('photobooth-print-frame');
+  if (existing) existing.remove();
+  existing = null;
+
+  const isImage = blob.type.startsWith('image/');
+  const objectUrl = URL.createObjectURL(blob);
+
+  const frame = document.createElement('div');
+  frame.id = 'photobooth-print-frame';
+  frame.style.position = 'fixed';
+  frame.style.left = '-10000px';
+  frame.style.top = '0';
+  frame.style.padding = '24px';
+  frame.style.background = '#fff';
+
+  if (isImage) {
+    const img = document.createElement('img');
+    img.src = objectUrl;
+    img.alt = title;
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    frame.append(img);
+  } else {
+    const note = document.createElement('p');
+    note.textContent = 'Print preview unavailable for this format.';
+    frame.append(note);
+  }
+
+  document.body.append(frame);
+
+  const cleanup = () => {
+    const node = document.getElementById('photobooth-print-frame');
+    if (node) node.remove();
+    setTimeout(() => {
+      try { URL.revokeObjectURL(objectUrl); } catch {}
+    }, 5000);
+  };
+
+  try {
+    if (document.title && title) document.title = `${title} – print`;
+    window.print();
+    return { printed: true, filename: filenameWithExt(filename, blob.type) };
+  } catch (err) {
+    cleanup();
+    throw err;
+  } finally {
+    setTimeout(cleanup, 1000);
+  }
+}

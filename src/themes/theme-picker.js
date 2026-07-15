@@ -51,8 +51,10 @@ export async function renderThemePicker(mount) {
       card.setAttribute('aria-pressed', 'false');
 
       const previewWrap = document.createElement('span');
+      const accent = t.palette?.accent || t.previewColor || '#FFFFFF';
+      const fallbackBg = t.previewColor || t.palette?.background || '#FFFFFF';
       previewWrap.className = 'theme-thumb relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100 transition-transform duration-150 ease-out';
-      previewWrap.style.background = t.previewColor || t.palette?.background || '#FFFFFF';
+      previewWrap.style.background = fallbackBg;
 
       if (t.id !== 'none') {
         const img = document.createElement('img');
@@ -61,20 +63,41 @@ export async function renderThemePicker(mount) {
         img.loading = 'lazy';
         img.decoding = 'async';
         const baseUrl = `${import.meta.env.BASE_URL}themes/${t.id}`;
-        img.src = `${baseUrl}/${v.preview || 'preview.png'}`;
-        img.onerror = () => {
-          img.onerror = null;
-          // Try base theme preview first (helps when the variant preview is missing).
-          if (v.preview && v.preview !== 'preview.png') {
-            img.src = `${baseUrl}/preview.png`;
-            img.onerror = () => {
-              img.onerror = null;
-              img.src = `${baseUrl}/frame.webp`;
-            };
+        const candidates = [];
+        if (v.preview) candidates.push(`${baseUrl}/${v.preview}`);
+        candidates.push(`${baseUrl}/preview.png`);
+        candidates.push(`${baseUrl}/frame-preview.png`);
+        candidates.push(`${baseUrl}/frame.webp`);
+        const seen = new Set();
+        const fallbacks = candidates.filter((p) => {
+          if (seen.has(p)) return false;
+          seen.add(p);
+          return true;
+        });
+
+        let fallbackIdx = 0;
+
+        const showAccentFallback = () => {
+          if (img.parentNode) img.remove();
+          previewWrap.style.background = accent;
+          previewWrap.classList.add('flex', 'items-center', 'justify-center');
+          const fallbackLabel = document.createElement('span');
+          fallbackLabel.className = 'text-[10px] font-semibold text-warmth-900 dark:text-warmth-50 text-center px-1 leading-tight';
+          fallbackLabel.textContent = v.name;
+          previewWrap.append(fallbackLabel);
+        };
+
+        const tryNext = () => {
+          fallbackIdx += 1;
+          if (fallbackIdx < fallbacks.length) {
+            img.src = fallbacks[fallbackIdx];
           } else {
-            img.src = `${baseUrl}/frame.webp`;
+            showAccentFallback();
           }
         };
+
+        img.onerror = tryNext;
+        img.src = fallbacks[0];
         previewWrap.append(img);
       } else {
         const noneIcon = document.createElement('span');
