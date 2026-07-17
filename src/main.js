@@ -98,9 +98,6 @@ async function boot() {
   startRouter(mount);
   mountToaster();
   mountNavigationHost();
-
-  // Router handles all rendering — clear boot content
-  mount.innerHTML = '';
 }
 
 function mountLoading(mount) {
