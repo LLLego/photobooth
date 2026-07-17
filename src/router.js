@@ -133,8 +133,9 @@ async function handleHashChange() {
     return;
   }
   const currentRoute = getState().route;
-  if (currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) return;
-  set({ route: { name, params } });
+  // Skip re-render for same route — but only if we've already rendered once
+  if (currentRoute?.rendered && currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) return;
+  set({ route: { name, params, rendered: true } });
   await renderRoute(name, params);
 }
 
