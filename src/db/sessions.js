@@ -2,7 +2,8 @@ import { requireSupabase } from './supabase.js';
 
 export async function createSession({ mode = 'single', themeId, layout = 'strip_4', partnerId = null, roomCode = null } = {}) {
   const c = requireSupabase();
-  const { data: userData } = await c.auth.getUser();
+  const { data: userData, error: userError } = await c.auth.getUser();
+  if (userError) throw userError;
   const createdBy = userData?.user?.id;
   if (!createdBy) throw new Error('Cannot create a session while signed out.');
   const insert = {
@@ -13,9 +14,16 @@ export async function createSession({ mode = 'single', themeId, layout = 'strip_
     room_code: roomCode,
     status: 'active',
   };
-  if (themeId) {
-    const { data: themeRow } = await c.from('themes').select('id').eq('slug', themeId).maybeSingle();
-    if (themeRow?.id) insert.theme_id = themeRow.id;
+  if (themeId && themeId !== 'none') {
+    const { data: themeRow, error: themeError } = await c
+      .from('themes')
+      .select('id')
+      .eq('slug', themeId)
+      .eq('is_active', true)
+      .maybeSingle();
+    if (themeError) throw themeError;
+    if (!themeRow) throw new Error('The selected theme is unavailable.');
+    insert.theme_id = themeRow.id;
   }
   const { data, error } = await c.from('sessions').insert(insert).select('*').single();
   if (error) throw error;
@@ -26,10 +34,7 @@ export async function getSession(sessionId) {
   if (!sessionId) return null;
   const c = requireSupabase();
   const { data, error } = await c.from('sessions').select('*').eq('id', sessionId).maybeSingle();
-  if (error) {
-    console.warn('[db.sessions] getSession error', error);
-    return null;
-  }
+  if (error) throw error;
   return data;
 }
 
@@ -52,9 +57,6 @@ export async function listSessions({ limit = 20, mode } = {}) {
     .limit(limit);
   if (mode) query = query.eq('mode', mode);
   const { data, error } = await query;
-  if (error) {
-    console.warn('[db.sessions] listSessions error', error);
-    return [];
-  }
+  if (error) throw error;
   return data || [];
 }

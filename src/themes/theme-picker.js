@@ -78,6 +78,7 @@ export async function renderThemePicker(mount) {
         img.alt = '';
         img.loading = 'lazy';
         img.decoding = 'async';
+        img.dataset.src = '';
         const baseUrl = `${import.meta.env.BASE_URL}themes/${t.id}`;
         const candidates = [];
         // Character PNG FIRST — real transparent character art wins over SVGs.
@@ -143,7 +144,23 @@ export async function renderThemePicker(mount) {
         };
 
         img.onerror = tryNext;
-        img.src = fallbacks[0];
+        // Defer the initial src assignment until the preview enters the
+        // viewport so we never download frames the user never sees.
+        const startLoad = () => { img.src = fallbacks[0]; };
+        if ('IntersectionObserver' in window && previewWrap.isConnected) {
+          const io = new IntersectionObserver((entries, observer) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                startLoad();
+                observer.disconnect();
+                break;
+              }
+            }
+          }, { rootMargin: '200px' });
+          io.observe(previewWrap);
+        } else {
+          startLoad();
+        }
         previewWrap.append(img);
       } else {
         const noneIcon = document.createElement('span');

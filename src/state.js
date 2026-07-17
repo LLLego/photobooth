@@ -52,11 +52,6 @@ export function getState() {
   return state;
 }
 
-export function get(path) {
-  if (!path) return state;
-  return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), state);
-}
-
 export function set(patch) {
   if (!patch || typeof patch !== 'object') return;
   let changed = false;
@@ -89,14 +84,6 @@ function applyPath(root, key, value) {
   return true;
 }
 
-export function update(name, updater) {
-  const section = state[name];
-  if (!section || typeof section !== 'object') return;
-  const next = updater({ ...section });
-  state[name] = { ...section, ...next };
-  emit();
-}
-
 export function subscribe(fn) {
   listeners.add(fn);
   return () => listeners.delete(fn);
@@ -106,11 +93,6 @@ function emit() {
   for (const fn of listeners) {
     try { fn(state); } catch (err) { console.error('[state] listener failed', err); }
   }
-}
-
-export function resetCaptureSession() {
-  state.capture = { ...initial.capture };
-  emit();
 }
 
 export function pushToast(toast) {
@@ -124,7 +106,7 @@ export function pushToast(toast) {
   return id;
 }
 
-export function dismissToast(id) {
+function dismissToast(id) {
   const before = state.toasts.length;
   state.toasts = state.toasts.filter((t) => t.id !== id);
   if (state.toasts.length !== before) emit();

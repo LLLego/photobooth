@@ -8,9 +8,6 @@ export async function fetchThemes() {
     .select('id, slug, display_name, manifest_url, is_active, sort_order')
     .eq('is_active', true)
     .order('sort_order', { ascending: true });
-  if (error) {
-    console.warn('[db.themes] fetchThemes error', error);
-    return [];
-  }
+  if (error) throw error;
   return data || [];
 }

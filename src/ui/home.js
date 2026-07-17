@@ -1,5 +1,6 @@
 import { getState, set } from '../state.js';
 import { navigate } from '../router.js';
+import { fetchStrips } from '../gallery/gallery.js';
 
 // Best-character PNG per theme for chip previews (transparent character art).
 const CHARACTER_PNG = {
@@ -201,7 +202,6 @@ export async function renderHome(mount) {
   // Load gallery count after the route renders so we don't block first paint.
   async function updateGalleryBadge() {
     try {
-      const { fetchStrips } = await import('../gallery/gallery.js');
       await fetchStrips({ limit: 1, reset: true });
       const total = getState().gallery?.total ?? 0;
       const meta = frameMeta.querySelector('strong');

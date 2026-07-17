@@ -11,13 +11,16 @@ const ITEMS = [
 export function mountNavigation(root) {
   if (!root) return () => {};
   root.innerHTML = '';
+  const cleanups = [];
+  const listen = (target, type, handler, options) => {
+    target.addEventListener(type, handler, options);
+    cleanups.push(() => target.removeEventListener(type, handler, options));
+  };
 
-  // Brand mark on the left.
   const mark = document.createElement('div');
   mark.className = 'nav-mark';
   mark.textContent = 'our photobooth';
 
-  // Center nav links.
   const links = document.createElement('ul');
   links.className = 'nav-links';
   for (const item of ITEMS) {
@@ -27,35 +30,37 @@ export function mountNavigation(root) {
     a.textContent = item.label;
     a.dataset.route = item.name;
     a.setAttribute('aria-label', item.label);
-    a.addEventListener('click', (ev) => {
+    const onClick = (ev) => {
       ev.preventDefault();
       navigate(item.name);
-    });
+    };
+    listen(a, 'click', onClick);
     li.append(a);
     links.append(li);
   }
 
-  // Settings gear on the right.
   const settings = document.createElement('button');
   settings.className = 'nav-settings';
   settings.type = 'button';
   settings.setAttribute('aria-label', 'settings');
   settings.append(Icon({ name: 'settings', size: 16 }));
-  settings.addEventListener('click', () => navigate('settings'));
+  listen(settings, 'click', () => navigate('settings'));
 
   root.append(mark, links, settings);
 
   const setActive = () => {
     const current = currentRouteName();
     for (const a of root.querySelectorAll('a[data-route]')) {
-      const isActive = a.getAttribute('data-route') === current;
-      a.setAttribute('aria-current', isActive ? 'page' : 'false');
+      const isActive = a.dataset.route === current;
+      if (isActive) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
     }
   };
   setActive();
-  window.addEventListener('hashchange', setActive);
+  listen(window, 'hashchange', setActive);
+
   return () => {
-    window.removeEventListener('hashchange', setActive);
-    try { root.innerHTML = ''; } catch {}
+    for (const dispose of cleanups.splice(0)) dispose();
+    root.innerHTML = '';
   };
 }

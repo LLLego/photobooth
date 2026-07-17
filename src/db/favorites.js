@@ -1,18 +1,28 @@
 import { requireSupabase } from './supabase.js';
 
-export async function toggleFavorite(stripId) {
-  if (!stripId) throw new Error('stripId required');
+const favoriteMutations = new Map();
+
+export function toggleFavorite(stripId) {
+  if (!stripId) return Promise.reject(new Error('stripId required'));
+  if (favoriteMutations.has(stripId)) return favoriteMutations.get(stripId);
+  const mutation = performToggle(stripId).finally(() => favoriteMutations.delete(stripId));
+  favoriteMutations.set(stripId, mutation);
+  return mutation;
+}
+
+async function performToggle(stripId) {
   const c = requireSupabase();
-  const { data: userData } = await c.auth.getUser();
+  const { data: userData, error: userError } = await c.auth.getUser();
+  if (userError) throw userError;
   const profileId = userData?.user?.id;
   if (!profileId) throw new Error('Not signed in.');
-  const { data: existing, error: selErr } = await c
+  const { data: existing, error: selectError } = await c
     .from('favorites')
     .select('strip_id')
     .eq('profile_id', profileId)
     .eq('strip_id', stripId)
     .maybeSingle();
-  if (selErr) throw selErr;
+  if (selectError) throw selectError;
   if (existing) {
     const { error } = await c
       .from('favorites')
@@ -24,14 +34,15 @@ export async function toggleFavorite(stripId) {
   }
   const { error } = await c
     .from('favorites')
-    .insert({ profile_id: profileId, strip_id: stripId });
+    .upsert({ profile_id: profileId, strip_id: stripId }, { onConflict: 'profile_id,strip_id', ignoreDuplicates: true });
   if (error) throw error;
   return true;
 }
 
 export async function getFavorites() {
   const c = requireSupabase();
-  const { data: userData } = await c.auth.getUser();
+  const { data: userData, error: userError } = await c.auth.getUser();
+  if (userError) throw userError;
   const profileId = userData?.user?.id;
   if (!profileId) return new Set();
   const { data, error } = await c
@@ -39,16 +50,14 @@ export async function getFavorites() {
     .select('strip_id, created_at')
     .eq('profile_id', profileId)
     .order('created_at', { ascending: false });
-  if (error) {
-    console.warn('[db.favorites] getFavorites error', error);
-    return new Set();
-  }
-  return new Set((data || []).map((f) => f.strip_id));
+  if (error) throw error;
+  return new Set((data || []).map((favorite) => favorite.strip_id));
 }
 
 export async function isFavorited(stripId) {
   const c = requireSupabase();
-  const { data: userData } = await c.auth.getUser();
+  const { data: userData, error: userError } = await c.auth.getUser();
+  if (userError) throw userError;
   const profileId = userData?.user?.id;
   if (!profileId) return false;
   const { data, error } = await c
@@ -57,6 +66,6 @@ export async function isFavorited(stripId) {
     .eq('profile_id', profileId)
     .eq('strip_id', stripId)
     .maybeSingle();
-  if (error) return false;
-  return !!data;
+  if (error) throw error;
+  return Boolean(data);
 }

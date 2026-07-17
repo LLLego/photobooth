@@ -1,6 +1,6 @@
 import './styles/main.css';
-import { isSupabaseConfigured, renderSupabaseMissing } from './db/supabase.js';
-import { defineRoute, startRouter, navigate, setSkipFirstRender } from './router.js';
+import { isSupabaseConfigured } from './db/supabase.js';
+import { defineRoute, startRouter, navigate, currentRouteName } from './router.js';
 import { renderAuthUI } from './auth/auth-ui.js';
 import { renderHome } from './ui/home.js';
 import { renderSingleCamera } from './ui/single-camera.js';
@@ -15,12 +15,6 @@ import { preloadPopularThemes } from './themes/theme-loader.js';
 import { fetchThemes } from './db/themes.js';
 import { mountNavigation } from './ui/navigation.js';
 import { Toast, Spinner } from './ui/components.js';
-
-const app = {
-  name: 'our photobooth',
-  startedAt: new Date().toISOString(),
-  state: getState(),
-};
 
 async function boot() {
   const mount = document.getElementById('app');
@@ -63,23 +57,23 @@ async function boot() {
   let initial = null;
   if (isSupabaseConfigured) {
     onAuthStateChange(async (event, session) => {
-      set({ user: session?.user || null, initialized: true });
-      if (session?.user) {
+      const authUser = session?.user || null;
+      if (!authUser) {
+        set({ user: null, profile: null, initialized: true });
+      } else {
+        set({ user: authUser, initialized: true });
         try {
-          const profile = await fetchProfile(session.user.id);
-          set({ profile });
+          const profile = await fetchProfile(authUser.id);
+          if (getState().user?.id === authUser.id) set({ profile });
         } catch (err) {
           console.warn('[auth] profile fetch failed', err);
         }
-      } else {
-        set({ profile: null });
       }
-      // Only redirect to home on auth state changes that happen AFTER boot.
-      // Initial session restoration (event === 'INITIAL_SESSION') preserves
-      // any deep-link the user landed on (#/single, #/gallery, etc.).
       if (event === 'INITIAL_SESSION') return;
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_IN') {
         navigate('home', {}, { replace: true });
+      } else if (event === 'SIGNED_OUT' && currentRouteName() !== 'login') {
+        navigate('login', {}, { replace: true });
       }
     });
 
@@ -163,23 +157,38 @@ function renderToasts() {
 
 let navHost = null;
 let navUpdateHash = null;
+let navCleanup = null;
+let navStateUnsubscribe = null;
+let navUpdateHandler = null;
 function mountNavigationHost() {
   if (navHost) return;
   navHost = document.createElement('div');
   navHost.id = 'nav-host';
   document.body.append(navHost);
-  const update = () => {
+  navUpdateHandler = () => {
     const route = getState().route?.name;
     const show = ['home', 'gallery', 'single', 'dual'].includes(route);
     const nextHash = show && getState().user ? `nav:${route}` : 'nav:none';
     if (navUpdateHash === nextHash) return;
     navUpdateHash = nextHash;
-    navHost.innerHTML = '';
-    if (nextHash !== 'nav:none') mountNavigation(navHost);
+    if (typeof navCleanup === 'function') navCleanup();
+    navCleanup = nextHash === 'nav:none' ? null : mountNavigation(navHost);
   };
-  window.addEventListener('hashchange', update);
-  subscribe((s) => update());
-  update();
+  window.addEventListener('hashchange', navUpdateHandler);
+  navStateUnsubscribe = subscribe(navUpdateHandler);
+  navUpdateHandler();
+}
+
+function disposeNavigationHost() {
+  if (navUpdateHandler) window.removeEventListener('hashchange', navUpdateHandler);
+  if (typeof navStateUnsubscribe === 'function') navStateUnsubscribe();
+  if (typeof navCleanup === 'function') navCleanup();
+  navUpdateHandler = null;
+  navStateUnsubscribe = null;
+  navCleanup = null;
+  navHost?.remove();
+  navHost = null;
+  navUpdateHash = null;
 }
 
 async function renderLoginRoute(mount) {
@@ -192,6 +201,3 @@ boot().catch((err) => {
   console.error('[boot] failed', err);
   pushToast({ message: err.message || 'Failed to start app.', type: 'error' });
 });
-
-export default app;
-export { app };

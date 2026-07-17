@@ -185,11 +185,12 @@ export function Icon({ name, size = 20 }) {
     heart: 'heart', heartFilled: 'heart-filled', switch: 'switch',
     download: 'download', share: 'share', close: 'close',
     back: 'back', check: 'check', add: 'close', user: 'home',
-    sparkle: 'star', home: 'home', refresh: 'refresh',
+    home: 'home', refresh: 'refresh',
     filter: 'filter', grid: 'grid', strip: 'strip',
     polaroid: 'polaroid', photo: 'single-photo',
     'dual-camera': 'dual-camera', star: 'star',
-    'star-filled': 'star-filled', print: 'print', trash: 'trash',
+    sparkle: 'star', 'star-filled': 'star-filled',
+    print: 'print', trash: 'trash',
   };
   const svgName = svgMap[name];
   if (svgName) {

@@ -7,7 +7,7 @@ let activeModal = null;
 
 export function openStripViewer(strip) {
   if (activeModal) activeModal.close();
-  const state = { strip, scale: 1, tx: 0, ty: 0, url: null };
+  const state = { strip, scale: 1 };
 
   const loader = document.createElement('div');
   loader.className = 'flex flex-col items-center justify-center py-10 gap-3';

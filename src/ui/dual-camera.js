@@ -1,5 +1,5 @@
 import { getState, set, pushToast } from '../state.js';
-import { Button, Icon } from './components.js';
+import { Button, Icon, Modal } from './components.js';
 import { renderThemePicker } from '../themes/theme-picker.js';
 import { startDualSession, joinDualSession } from '../webrtc/dual-session.js';
 import { setPreviewFrame } from '../camera/preview.js';
@@ -212,7 +212,7 @@ export async function renderDualCamera(mount) {
       }
     });
     const cancel = Button({ label: 'Cancel', variant: 'ghost' });
-    const modal = (await import('./components.js')).Modal({ title: 'Join a room', content, actions: [cancel, submit] });
+    const modal = Modal({ title: 'Join a room', content, actions: [cancel, submit] });
     cancel.addEventListener('click', () => modal.close());
     document.body.append(modal.element);
   });

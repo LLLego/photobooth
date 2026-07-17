@@ -154,9 +154,13 @@ function renderGrid(gallery, mount) {
     return;
   }
   if (!gallery.items.length) {
-    const take = Button({ label: 'Take a photo', variant: 'primary' });
-    take.addEventListener('click', () => navigate('home'));
-    const empty = EmptyState({ title: 'No photos yet ✨ Take your first one!', message: 'Your gallery is empty — capture a strip and it will appear here.', action: take });
+    const take = Button({ label: 'Take your first photo', variant: 'primary', icon: Icon({ name: 'camera' }) });
+    take.addEventListener('click', () => navigate('single'));
+    const empty = EmptyState({
+      title: 'No photos yet',
+      message: 'Your gallery is empty — capture a strip and it will appear here.',
+      action: take,
+    });
     empty.classList.add('col-span-full');
     mount.append(empty);
     return;

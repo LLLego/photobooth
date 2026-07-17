@@ -1,10 +1,11 @@
 import { getState, set } from './state.js';
-import { getSession } from './auth/auth.js';
 
 const routes = new Map();
 let appMount = null;
 let currentCleanup = null;
-let currentRender = null;
+let routerStarted = false;
+let isRendering = false;
+let pendingHashChange = false;
 
 export function defineRoute(name, render) {
   if (typeof render !== 'function') throw new Error('Route render must be a function');
@@ -13,9 +14,25 @@ export function defineRoute(name, render) {
 
 export function startRouter(mount) {
   appMount = mount;
-  window.addEventListener('hashchange', handleHashChange);
-  window.addEventListener('popstate', handleHashChange);
+  if (!routerStarted) {
+    routerStarted = true;
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+  }
   handleHashChange();
+  return stopRouter;
+}
+
+export function stopRouter() {
+  if (!routerStarted) return;
+  routerStarted = false;
+  window.removeEventListener('hashchange', handleHashChange);
+  window.removeEventListener('popstate', handleHashChange);
+  if (typeof currentCleanup === 'function') {
+    try { currentCleanup(); } catch (err) { console.error('[router] cleanup failed', err); }
+  }
+  currentCleanup = null;
+  appMount = null;
 }
 
 export function currentRouteName() {
@@ -28,31 +45,18 @@ export function navigate(name, params = {}, opts = {}) {
     : '';
   const hash = `#/${name}${qs}`;
   if (opts.force) {
-    // Update route state and re-render directly. Avoids hash-flash + race where
-    // a stale `__force__` sentinel leaks into the route name.
     set({ route: { name, params } });
     if (location.hash !== hash) {
       if (opts.replace) location.replace(hash);
       else location.hash = hash;
     } else {
-      // Same hash — render directly since handleHashChange would early-return.
       renderRoute(name, params);
     }
     return;
   }
   if (location.hash === hash) return;
-  if (opts.replace) {
-    location.replace(hash);
-  } else {
-    location.hash = hash;
-  }
-}
-
-let isRendering = false;
-let skipFirstRender = false;
-
-export function setSkipFirstRender(value) {
-  skipFirstRender = Boolean(value);
+  if (opts.replace) location.replace(hash);
+  else location.hash = hash;
 }
 
 async function renderRoute(name, params) {
@@ -60,19 +64,20 @@ async function renderRoute(name, params) {
     navigate('home', {}, { replace: true });
     return;
   }
-  if (isRendering) return;
+  if (isRendering) {
+    pendingHashChange = true;
+    return;
+  }
   isRendering = true;
   try {
-    const render = routes.get(name);
     if (typeof currentCleanup === 'function') {
       try { currentCleanup(); } catch (err) { console.error('[router] cleanup failed', err); }
       currentCleanup = null;
     }
     if (!appMount) return;
     appMount.innerHTML = '';
-    currentRender = render;
     try {
-      const cleanup = await render(appMount, params);
+      const cleanup = await routes.get(name)(appMount, params);
       if (typeof cleanup === 'function') currentCleanup = cleanup;
     } catch (err) {
       console.error(`[router] render failed for ${name}`, err);
@@ -97,10 +102,12 @@ async function renderRoute(name, params) {
     }
   } finally {
     isRendering = false;
+    if (pendingHashChange) {
+      pendingHashChange = false;
+      queueMicrotask(handleHashChange);
+    }
   }
 }
-
-
 
 function parseHash() {
   const raw = (location.hash || '').replace(/^#\/?/, '');
@@ -116,19 +123,17 @@ function parseHash() {
 }
 
 async function handleHashChange() {
-  if (isRendering) return;
-  if (skipFirstRender) {
-    skipFirstRender = false;
-    const { name, params } = parseHash();
-    set({ route: { name, params } });
+  if (isRendering) {
+    pendingHashChange = true;
     return;
   }
   const { name, params } = parseHash();
-
-  const currentRoute = getState().route;
-  if (currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) {
+  if (!routes.has(name)) {
+    navigate('home', {}, { replace: true });
     return;
   }
+  const currentRoute = getState().route;
+  if (currentRoute?.name === name && shallowEqualParams(currentRoute?.params, params)) return;
   set({ route: { name, params } });
   await renderRoute(name, params);
 }
@@ -141,8 +146,3 @@ function shallowEqualParams(a, b) {
   for (const k of ak) if (a[k] !== b[k]) return false;
   return true;
 }
-
-export function goHome() { navigate('home'); }
-export function goGallery() { navigate('gallery'); }
-export function goSettings() { navigate('settings'); }
-export function goLogin() { navigate('login'); }
