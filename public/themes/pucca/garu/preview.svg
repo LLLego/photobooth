@@ -1,1 +1,101 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#ECEFF1" width="200" height="200" rx="30"/><circle cx="100" cy="75" r="35" fill="#212121"/><circle cx="100" cy="65" r="16" fill="#424242"/><circle cx="88" cy="60" r="4" fill="#FFF"/><circle cx="112" cy="60" r="4" fill="#FFF"/><rect x="92" y="75" width="16" height="3" fill="#FFF"/><rect x="88" y="110" width="24" height="30" rx="12" fill="#212121"/><text x="100" y="170" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#37474F">Garu</text></svg>
+xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <!-- Polygon Clip Paths for that angular anime/ninja feel -->
+        <clipPath id="clip-head">
+            <polygon points="60,30 140,30 160,80 140,170 60,170 40,80" />
+        </clipPath>
+        <clipPath id="clip-hair">
+            <polygon points="30,40 60,10 140,10 170,40 150,100 120,80 100,110 80,80 50,100" />
+        </clipPath>
+        <clipPath id="clip-vest">
+            <polygon points="40,160 80,130 120,130 160,160 160,200 40,200" />
+        </clipPath>
+        <clipPath id="clip-collar">
+            <polygon points="70,130 100,150 130,130 140,200 60,200" />
+        </clipPath>
+        <!-- Diagonal stripe pattern for the ninja gi -->
+        <pattern id="gi-stripes" width="20" height="20" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill="#0a0a0a" />
+            <line x1="0" y1="0" x2="0" y2="20" stroke="#1f1f1f" stroke-width="5" />
+        </pattern>
+    </defs>
+
+    <!-- Deep Crimson Background for maximum contrast -->
+    <rect width="100%" height="100%" fill="#8a0303" />
+    
+    <!-- Faint geometric rays in the background -->
+    <polygon points="0,0 70,0 0,70" fill="#ad0404" />
+    <polygon points="200,200 130,200 200,130" fill="#ad0404" />
+    <polygon points="200,0 150,0 200,50" fill="#6b0202" />
+
+    <!-- BACK HAIR VOLUME -->
+    <polygon points="30,50 100,10 170,50 140,120 60,120" fill="#080808" />
+
+    <!-- NECK -->
+    <polygon points="85,110 115,110 125,150 75,150" fill="#1c1c1c" />
+
+    <!-- GI / VEST -->
+    <g clip-path="url(#clip-vest)">
+        <!-- Base dark vest -->
+        <rect x="0" y="0" width="200" height="200" fill="#0f0f0f" />
+        <!-- Diagonal stripes masked by the vest shape -->
+        <rect x="0" y="0" width="200" height="200" fill="url(#gi-stripes)" />
+        <!-- Red under-shirt peeking through the collar area -->
+        <rect x="0" y="0" width="200" height="135" fill="#8a0303" />
+    </g>
+
+    <!-- INNER COLLAR (V-Shape) -->
+    <polygon points="70,130 100,150 130,130 120,145 100,160 80,145" fill="#000000" />
+
+    <!-- FACE BASE -->
+    <polygon points="60,30 140,30 160,80 140,170 60,170 40,80" fill="#1c1c1c" />
+    
+    <!-- FACE CLIPPED DETAILS -->
+    <g clip-path="url(#clip-head)">
+        <!-- Facial shadow for a sharp, sculpted look -->
+        <polygon points="40,80 160,80 160,170 40,170" fill="#000000" />
+        <!-- Crimson rim light catching the jaw/cheeks -->
+        <polygon points="40,80 0,140 40,170" fill="#b80505" opacity="0.6" />
+        <polygon points="160,80 200,140 160,170" fill="#b80505" opacity="0.6" />
+        <!-- Sharp, furrowed eyebrows -->
+        <polygon points="45,75 85,75 85,65 45,65" fill="#050505" />
+        <polygon points="115,75 155,75 155,65 115,65" fill="#050505" />
+        <!-- The Eyes (sharp, intense slant) -->
+        <polygon points="50,90 80,85 80,95 50,100" fill="#ffffff" />
+        <polygon points="120,85 150,90 150,100 120,95" fill="#ffffff" />
+        <!-- Crimson Irises -->
+        <polygon points="60,90 70,90 70,95 60,95" fill="#ff0000" />
+        <polygon points="130,90 140,90 140,95 130,95" fill="#ff0000" />
+        <!-- Tiny, serious mouth -->
+        <polygon points="95,130 105,130 105,135 95,135" fill="#000000" />
+    </g>
+
+    <!-- TOP SPIKY HAIR -->
+    <polygon points="30,40 60,10 140,10 170,40 150,100 120,80 100,110 80,80 50,100" fill="#000000" />
+    
+    <!-- HAIR CLIPPED DETAILS (Red highlights in the spikes) -->
+    <g clip-path="url(#clip-hair)">
+        <!-- Red glowing energy/highlights radiating from the center -->
+        <polygon points="100,50 160,-20 200,20 120,100" fill="#b80505" />
+        <polygon points="100,50 40,-20 0,20 80,100" fill="#b80505" />
+        <polygon points="100,50 180,60 150,110 100,90" fill="#8a0303" />
+        <polygon points="100,50 20,60 50,110 100,90" fill="#8a0303" />
+        
+        <!-- Forehead hair cover (solid black to ground the hairline) -->
+        <polygon points="30,40 170,40 170,75 30,75" fill="#000000" />
+        <!-- Sharp Widow's Peak -->
+        <polygon points="80,40 120,40 100,75" fill="#000000" />
+    </g>
+
+    <!-- FOREHEAD PROTECTOR (Ninja Headband) -->
+    <polygon points="30,55 170,55 170,75 30,75" fill="#111111" />
+    <!-- Headband Tail fluttering in the wind -->
+    <polygon points="165,60 200,30 195,55 220,80 180,75" fill="#000000" />
+    <polygon points="165,60 200,40 190,55 180,65" fill="#b80505" opacity="0.8"/>
+    <!-- Angular metallic plate -->
+    <polygon points="85,58 115,58 115,72 85,72" fill="#333333" />
+    <!-- Ninja Symbol (Abstract/Shuriken shape) -->
+    <polygon points="100,61 104,67 100,69 96,67" fill="#cc0000" />
+
+</svg>

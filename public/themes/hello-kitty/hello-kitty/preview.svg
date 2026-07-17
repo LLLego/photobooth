@@ -1,1 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#FCE4EC" width="200" height="200" rx="30"/><ellipse cx="100" cy="90" rx="45" ry="40" fill="#FFF"/><ellipse cx="100" cy="85" rx="25" ry="18" fill="#FCE4EC"/><circle cx="88" cy="80" r="4" fill="#333"/><circle cx="112" cy="80" r="4" fill="#333"/><ellipse cx="100" cy="90" rx="4" ry="3" fill="#E91E63"/><line x1="75" y1="100" x2="65" y2="115" stroke="#FFF" stroke-width="3"/><line x1="80" y1="100" x2="70" y2="117" stroke="#FFF" stroke-width="3"/><line x1="125" y1="100" x2="135" y2="115" stroke="#FFF" stroke-width="3"/><line x1="120" y1="100" x2="130" y2="117" stroke="#FFF" stroke-width="3"/><path d="M 70 50 Q 80 40 100 45 Q 120 40 130 50 L 120 65 Q 100 60 80 65 Z" fill="#E91E63"/><circle cx="100" cy="48" r="5" fill="#F06292"/><text x="100" y="175" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#C2185B">Hello Kitty</text></svg>
+xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <g id="background">
+    <!-- Soft warm background to make the pure white face pop -->
+    <rect width="200" height="200" fill="#FFF9FA" />
+  </g>
+
+  <g id="hello-kitty">
+    <!-- Cat Ears (Behind Head) -->
+    <path d="M 70 65 Q 80 25 110 25 Q 95 55 115 85 Z" fill="#FFFFFF" stroke="#231F20" stroke-width="3.5" stroke-linejoin="round" />
+    <path d="M 130 65 Q 120 25 90 25 Q 105 55 85 85 Z" fill="#FFFFFF" stroke="#231F20" stroke-width="3.5" stroke-linejoin="round" />
+    
+    <!-- Bow (Right Ear) -->
+    <g id="bow">
+      <!-- Left Loop -->
+      <path d="M 130 45 C 150 25 180 35 170 60 C 180 85 150 95 130 75 Z" fill="#E62828" stroke="#231F20" stroke-width="3" stroke-linejoin="round" />
+      <!-- Right Loop -->
+      <path d="M 170 45 C 190 25 220 35 210 60 C 220 85 190 95 170 75 Z" fill="#E62828" stroke="#231F20" stroke-width="3" stroke-linejoin="round" />
+      <!-- Center Knot -->
+      <path d="M 140 35 L 160 35 L 165 85 L 135 85 Z" fill="#E62828" stroke="#231F20" stroke-width="3" stroke-linejoin="round" />
+      <!-- Bow Outline Fix to blend knot and loops cleanly -->
+      <path d="M 140 35 C 150 25 160 25 160 35 M 135 85 C 145 95 155 95 165 85" fill="none" stroke="#231F20" stroke-width="3" stroke-linecap="round" />
+    </g>
+
+    <!-- Head -->
+    <path d="M 100 45 C 135 45 170 85 170 120 C 170 165 140 185 100 185 C 60 185 30 165 30 120 C 30 85 65 45 100 45 Z" fill="#FFFFFF" stroke="#231F20" stroke-width="4" stroke-linejoin="round" />
+    
+    <!-- Left Whiskers -->
+    <path d="M 45 115 C 20 108 20 118 10 115 M 45 130 C 20 130 20 145 10 145" fill="none" stroke="#231F20" stroke-width="3" stroke-linecap="round" />
+    
+    <!-- Right Whiskers -->
+    <path d="M 155 115 C 180 108 180 118 190 115 M 155 130 C 180 130 180 145 190 145" fill="none" stroke="#231F20" stroke-width="3" stroke-linecap="round" />
+    
+    <!-- Left Eye -->
+    <ellipse cx="70" cy="105" rx="8" ry="11" fill="#231F20" />
+    
+    <!-- Right Eye -->
+    <ellipse cx="130" cy="105" rx="8" ry="11" fill="#231F20" />
+    
+    <!-- Yellow Nose -->
+    <ellipse cx="100" cy="120" rx="7" ry="5" fill="#FFD900" />
+  </g>
+</svg>
