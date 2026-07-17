@@ -19,19 +19,21 @@ function fitInto(ctx, source, dx, dy, dw, dh, { mirror = false } = {}) {
   if (!source || !ctx) return;
   const sw = source.naturalWidth || source.width || source.videoWidth;
   const sh = source.naturalHeight || source.height || source.videoHeight;
-  if (!sw || !sh || !dw || !dh) {
-    try { ctx.drawImage(source, dx, dy, dw, dh); } catch (err) { console.warn('[compositor] drawImage fallback failed', err); }
-    return;
-  }
+  if (!sw || !sh || !dw || !dh) return;
   const sRatio = sw / sh;
   const dRatio = dw / dh;
   let cropW = sw;
   let cropH = sh;
   if (sRatio > dRatio) {
+    // Source is wider than destination → crop sides
     cropW = sh * dRatio;
-  } else {
+  } else if (sRatio < dRatio) {
+    // Source is taller than destination → crop top/bottom
     cropH = sw / dRatio;
   }
+  // Guard against sub-pixel rounding collapsing the crop to 0
+  if (!Number.isFinite(cropW) || cropW <= 0) cropW = sw;
+  if (!Number.isFinite(cropH) || cropH <= 0) cropH = sh;
   const cropX = (sw - cropW) / 2;
   const cropY = (sh - cropH) / 2;
   ctx.save();
@@ -149,7 +151,10 @@ export async function compositeStrip(photos = [], theme, layoutId, opts = {}) {
 
   drawBackground(ctx, theme || {}, width, height);
 
-  const slots = layout.slots || [];
+  // Prefer theme-supplied slot positions when present so frames align with
+  // the theme's design. Fall back to the layout's default slots otherwise.
+  const themeSlots = theme && theme.photoSlots && theme.photoSlots[layoutId];
+  const slots = (Array.isArray(themeSlots) && themeSlots.length > 0) ? themeSlots : (layout.slots || []);
   const limited = Math.min(photos.length, slots.length);
   for (let i = 0; i < limited; i++) {
     const slot = slots[i];
@@ -162,7 +167,7 @@ export async function compositeStrip(photos = [], theme, layoutId, opts = {}) {
     fitInto(ctx, photo, dx, dy, dw, dh, { mirror: Boolean(opts.mirror && i % 2 === 1) });
   }
 
-  if (theme?.frame?.url && theme.id !== 'none') {
+  if (opts.frame !== false && theme?.frame?.url && theme.id !== 'none') {
     const frame = await loadImage(theme.frame.url).catch((err) => {
       console.warn('[compositor] frame load failed', err);
       return null;
@@ -179,7 +184,7 @@ export async function compositeStrip(photos = [], theme, layoutId, opts = {}) {
   return canvas;
 }
 
-export async function canvasToBlob(canvas, { type = 'image/png' } = {}) {
+export async function canvasToBlob(canvas, { type = 'image/png', quality = 0.92 } = {}) {
   const opts = type.includes('png') ? { type } : { type, quality };
   if (canvas instanceof HTMLCanvasElement) {
     return new Promise((resolve, reject) => {

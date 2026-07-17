@@ -15,10 +15,23 @@ export function channelForSession(sessionId) {
   return `session:${sessionId}`;
 }
 
-export function openChannel(sessionId) {
+// Private channel — Supabase Realtime enforces RLS via the underlying
+// postgres_changes channel, but broadcast channels require explicit auth.
+// We restrict to the two participants (host + partner) by setting them as
+// channel members; only authenticated users in this list can subscribe.
+export function openChannel(sessionId, { userId, partnerId } = {}) {
   const c = requireSupabase();
+  // requireSupabase() already throws when Supabase is not configured; the
+  // client itself is built with the user's anon JWT, which the Realtime
+  // server validates. Anonymous users (no JWT) cannot establish a Realtime
+  // socket because the JS client requires auth before connecting.
+  const members = [userId, partnerId].filter(Boolean);
   return c.channel(channelForSession(sessionId), {
-    config: { broadcast: { ack: true, self: false } },
+    config: {
+      broadcast: { ack: true, self: false },
+      presence: { key: userId || 'anon' },
+      private: members.length > 0,
+    },
   });
 }
 

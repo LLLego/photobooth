@@ -74,9 +74,11 @@ async function boot() {
       } else {
         set({ profile: null });
       }
-      if (event === 'SIGNED_IN') {
-        navigate('home', {}, { replace: true });
-      } else if (event === 'SIGNED_OUT') {
+      // Only redirect to home on auth state changes that happen AFTER boot.
+      // Initial session restoration (event === 'INITIAL_SESSION') preserves
+      // any deep-link the user landed on (#/single, #/gallery, etc.).
+      if (event === 'INITIAL_SESSION') return;
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         navigate('home', {}, { replace: true });
       }
     });

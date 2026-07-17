@@ -90,6 +90,7 @@ export async function renderDualCamera(mount) {
   controls.className = 'camera-controls dual-controls';
   const captureBtn = document.createElement('button');
   captureBtn.className = 'capture-button';
+  captureBtn.disabled = true;
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
   captureBtn.addEventListener('click', () => triggerCapture());
   controls.append(document.createElement('span'), captureBtn, document.createElement('span'));

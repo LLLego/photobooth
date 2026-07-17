@@ -88,9 +88,15 @@ export async function fetchProfile(userId) {
 export async function updateProfile(userId, patch) {
   if (!userId) throw new Error('userId is required');
   const c = client();
+  // Prevent self-escalation: strip out any attempt to set role directly.
+  // Role changes must go through a server-side RPC / admin path.
+  const { role: _stripped, ...safePatch } = patch || {};
+  if ('role' in (patch || {})) {
+    console.warn('[auth] ignored role change attempt on profile update');
+  }
   const { data, error } = await c
     .from('profiles')
-    .update({ ...patch, updated_at: new Date().toISOString() })
+    .update({ ...safePatch, updated_at: new Date().toISOString() })
     .eq('id', userId)
     .select('id, display_name, role')
     .maybeSingle();

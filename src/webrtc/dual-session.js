@@ -6,7 +6,7 @@ import {
   onConnectionStateChange, createOffer, createAnswer,
   applyRemoteDescription, applyRemoteCandidate, closePeer, isWebRTCSupported,
 } from './webrtc.js';
-import { requireSupabase } from '../db/supabase.js';
+import { requireSupabase, isSupabaseConfigured } from '../db/supabase.js';
 import { getState, set, pushToast } from '../state.js';
 import {
   startCamera, stopCamera, attachStreamToVideo, switchCamera, describeCameraError,
@@ -32,6 +32,34 @@ function blobToBase64(blob) {
     reader.onerror = () => reject(new Error('Could not read blob.'));
     reader.readAsDataURL(blob);
   });
+}
+
+function assertSignedIn() {
+  const user = getState().user;
+  if (!user || !user.id) {
+    throw new Error('Sign in to start a dual camera session.');
+  }
+  return user;
+}
+
+// Validate that a guest photo URL is served from a trusted origin (Supabase
+// storage for our project). Without this, a malicious peer could embed any
+// URL and we'd fetch + display arbitrary external content.
+function isAllowedGuestPhotoUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return false;
+  let url;
+  try { url = new URL(rawUrl); } catch { return false; }
+  if (!/^https?:$/.test(url.protocol)) return false;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const allowed = [];
+  if (supabaseUrl) {
+    try { allowed.push(new URL(supabaseUrl).host); } catch {}
+  }
+  // Same-origin (self) is allowed when running locally.
+  if (typeof window !== 'undefined' && window.location?.host) {
+    allowed.push(window.location.host);
+  }
+  return allowed.includes(url.host);
 }
 
 class DualSession {
@@ -67,12 +95,16 @@ class DualSession {
     if (!isWebRTCSupported()) {
       throw new Error('WebRTC is not supported in this browser. Dual camera requires WebRTC.');
     }
+    if (!isSupabaseConfigured) {
+      throw new Error('Dual camera requires Supabase. Configure VITE_SUPABASE_URL.');
+    }
+    const user = assertSignedIn();
     this.role = ROLE.HOST;
     const session = await createSession({ mode: 'dual', themeId, layout, roomCode: generateRoomCode() });
     this.sessionId = session.id;
     this.roomCode = session.room_code;
     set({ capture: { ...getState().capture, mode: 'dual', roomCode: this.roomCode, sessionId: this.sessionId, status: 'waiting', themeId, layout } });
-    await this.openChannelAndSubscribe();
+    await this.openChannelAndSubscribe({ userId: user.id });
     return { roomCode: this.roomCode, sessionId: this.sessionId };
   }
 
@@ -80,18 +112,23 @@ class DualSession {
     if (!isWebRTCSupported()) {
       throw new Error('WebRTC is not supported in this browser. Dual camera requires WebRTC.');
     }
+    if (!isSupabaseConfigured) {
+      throw new Error('Dual camera requires Supabase. Configure VITE_SUPABASE_URL.');
+    }
+    const user = assertSignedIn();
     this.role = ROLE.GUEST;
     const session = await findSessionByRoomCode((roomCode || '').toUpperCase());
     if (!session) throw new Error('Room not found. Check the code with your partner.');
     this.sessionId = session.id;
     this.roomCode = session.room_code;
+    this.partnerId = session.created_by || null;
     set({ capture: { ...getState().capture, mode: 'dual', roomCode: this.roomCode, sessionId: this.sessionId, status: 'connecting' } });
-    await this.openChannelAndSubscribe();
-    await broadcast(this.channel, 'join', { code: this.roomCode, guestId: getState().user?.id });
+    await this.openChannelAndSubscribe({ userId: user.id, partnerId: this.partnerId });
+    await broadcast(this.channel, 'join', { code: this.roomCode, guestId: user.id });
   }
 
-  async openChannelAndSubscribe() {
-    const channel = openChannel(this.sessionId);
+  async openChannelAndSubscribe({ userId, partnerId } = {}) {
+    const channel = openChannel(this.sessionId, { userId, partnerId });
     this.channel = channel;
     onMessage(channel, async (msg) => this.handleMessage(msg));
     await new Promise((resolve) => {
@@ -274,7 +311,8 @@ class DualSession {
       if (isHost) {
         const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
         const required = getLayout(layout).requires;
-        if (this.hostPhotos.length >= required && this.guestPhotos.length >= required) {
+        const half = Math.ceil(required / 2);
+        if (this.hostPhotos.length >= half && this.guestPhotos.length >= half) {
           await this.finalizeHost(layout);
         }
       }
@@ -297,10 +335,19 @@ class DualSession {
 
   async handleGuestPhoto(payload) {
     if (!payload?.url) return;
+    if (!isAllowedGuestPhotoUrl(payload.url)) {
+      console.warn('[dual] rejected guest photo URL (untrusted origin)', payload.url);
+      pushToast({ message: 'Guest photo rejected: untrusted source.', type: 'error' });
+      return;
+    }
     let blob;
     try {
       const res = await fetch(payload.url);
       if (!res.ok) throw new Error(`Guest photo fetch failed: ${res.status}`);
+      const ctype = res.headers.get('content-type') || '';
+      if (!ctype.startsWith('image/')) {
+        throw new Error(`Guest photo non-image content-type: ${ctype}`);
+      }
       blob = await res.blob();
     } catch (err) {
       console.warn('[dual] handleGuestPhoto fetch failed', err);
@@ -309,7 +356,8 @@ class DualSession {
     this.guestPhotos.push(blob);
     const layout = getState().capture?.layout || 'strip_4';
     const required = getLayout(layout).requires;
-    if (this.hostPhotos.length >= required && this.guestPhotos.length >= required) {
+    const half = Math.ceil(required / 2);
+    if (this.hostPhotos.length >= half && this.guestPhotos.length >= half) {
       try { await this.finalizeHost(layout); }
       catch (err) { console.warn('[dual] finalize after guest photo failed', err); }
     }

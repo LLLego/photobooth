@@ -42,7 +42,7 @@ function normalize(manifest, id, manifestUrl) {
 
 export async function loadTheme(id = DEFAULT_THEME_ID) {
   if (!id || id === 'none') return NO_FRAME_THEME;
-  
+
   // Handle variant keys like "hundred-acre-gang/pooh"
   if (id.includes('/')) {
     const [baseId, variantId] = id.split('/');
@@ -54,7 +54,10 @@ export async function loadTheme(id = DEFAULT_THEME_ID) {
         if (!base || base.id === 'none') return FALLBACK_THEME;
         const variant = (base.variants || []).find(v => v.id === variantId);
         if (variant && variant.frame) {
-          const themed = { ...base, id, frame: { ...base.frame, url: variant.frame } };
+          // Resolve the variant's frame URL against the manifest URL so
+          // relative paths like "./pooh.svg" become absolute.
+          const variantFrameUrl = resolveAssetUrl(base.manifestUrl || resolveUrl(baseId), variant.frame);
+          const themed = { ...base, id, frame: { ...base.frame, url: variantFrameUrl } };
           cache.set(id, themed);
           return themed;
         }
@@ -63,6 +66,8 @@ export async function loadTheme(id = DEFAULT_THEME_ID) {
       } catch (err) {
         cache.set(id, FALLBACK_THEME);
         return FALLBACK_THEME;
+      } finally {
+        inflight.delete(id);
       }
     })();
     inflight.set(id, promise);
@@ -76,6 +81,7 @@ export async function loadTheme(id = DEFAULT_THEME_ID) {
       const manifestUrl = resolveUrl(id);
       const manifest = await fetchJson(manifestUrl);
       const normalized = normalize(manifest, id, manifestUrl);
+      if (normalized) normalized.manifestUrl = manifestUrl;
       cache.set(id, normalized || FALLBACK_THEME);
       return cache.get(id);
     } catch (err) {

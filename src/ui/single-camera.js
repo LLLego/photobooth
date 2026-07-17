@@ -101,6 +101,9 @@ export async function renderSingleCamera(mount) {
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
   captureBtn.setAttribute('aria-label', 'Capture photo');
   controls.append(flipBtn, captureBtn, document.createElement('span'));
+  // Wire the click handler BEFORE camera init so any enabled state later
+  // (initial success or post-retry) responds to taps.
+  captureBtn.addEventListener('click', onCapture);
 
   stage.append(videoEl, previewCanvas, frameEl, overlay, controls);
   wrap.append(stage);
@@ -249,6 +252,7 @@ export async function renderSingleCamera(mount) {
     resultUrl = null;
   }
   updateCount();
+  renderReview();
 
   function getOptions() {
     const p = getState().preferences || {};
@@ -317,7 +321,6 @@ export async function renderSingleCamera(mount) {
     captureBtn.disabled = true;
     flipBtn.disabled = true;
   }
-  captureBtn.addEventListener('click', onCapture);
 
   // Spin up the canvas-based preview loop after the camera is ready.
   if (previewCanvas && videoEl) {
@@ -442,12 +445,14 @@ export async function renderSingleCamera(mount) {
     const layoutId = getState().capture.layout || layout;
     const theme = await loadTheme(themeIdFinal);
     try {
-      const canvas = await compositeStrip(localPhotos, theme, layoutId);
+      const canvas = await compositeStrip(localPhotos, theme, layoutId, { frame: false });
       const { blob, suggestedName } = await exportStrip(canvas, { format: 'image/png' });
       const preview = document.createElement('div');
       preview.className = 'strip-preview mt-4';
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(blob);
+      clearResultUrl();
+      resultUrl = URL.createObjectURL(blob);
+      img.src = resultUrl;
       img.alt = 'Composed strip';
       preview.append(img);
       review.append(preview);
@@ -472,11 +477,13 @@ export async function renderSingleCamera(mount) {
       };
       retakeBtn.onclick = () => {
         localPhotos = [];
+        clearResultUrl();
         finalBar.classList.add('hidden');
         finalBar.classList.remove('flex');
         captureBtn.disabled = !cameraReady;
         flipBtn.disabled = !cameraReady;
         status.textContent = 'Ready';
+        updateCaptureState('idle');
         renderReview();
         updateCount();
       };
@@ -522,6 +529,8 @@ export async function renderSingleCamera(mount) {
     if (videoEl) {
       try { stopLivePreview(videoEl); } catch {}
     }
+    clearThumbnailUrls();
+    clearResultUrl();
     activeStream = null;
     videoEl = null;
     frameEl = null;
