@@ -35,7 +35,7 @@ export async function renderGallery(mount) {
   FILTERS.forEach((f) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'px-4 py-2 rounded-2xl text-sm border border-warmth-200 dark:border-warmth-300 dark:text-warmth-200 whitespace-nowrap';
+    b.className = 'px-4 py-2 rounded-2xl text-sm border border-warmth-200 whitespace-nowrap';
     b.textContent = f.label;
     b.dataset.filter = f.id;
     b.setAttribute('role', 'tab');
@@ -62,7 +62,7 @@ export async function renderGallery(mount) {
   wrap.append(grid);
 
   const sentinel = document.createElement('div');
-  sentinel.className = 'h-12 flex items-center justify-center text-sm text-warmth-500 dark:text-warmth-400';
+  sentinel.className = 'h-12 flex items-center justify-center text-sm text-warmth-500';
   sentinel.setAttribute('data-sentinel', 'true');
   wrap.append(sentinel);
 
@@ -117,8 +117,6 @@ function applyActiveFilterState() {
     const isActive = b.dataset.filter === active;
     b.classList.toggle('bg-warmth-900', isActive);
     b.classList.toggle('text-warmth-50', isActive);
-    b.classList.toggle('dark:bg-warmth-100', isActive);
-    b.classList.toggle('dark:text-warmth-900', isActive);
     b.setAttribute('aria-selected', isActive ? 'true' : 'false');
     b.tabIndex = isActive ? 0 : -1;
   });
@@ -170,7 +168,7 @@ function renderGrid(gallery, mount) {
     card.className = 'card overflow-hidden flex flex-col fade-up cursor-pointer';
     card.style.animationDelay = `${Math.min(idx, 12) * 60}ms`;
     const media = document.createElement('div');
-    media.className = 'gallery-card-media bg-warmth-100 dark:bg-warmth-800 relative';
+    media.className = 'gallery-card-media bg-warmth-100 relative';
     media.style.background = strip.previewColor || '#F5F5F5';
     const img = document.createElement('img');
     let signedUrlRefreshAttempted = false;
@@ -201,15 +199,15 @@ function renderGrid(gallery, mount) {
     const meta = document.createElement('div');
     meta.className = 'min-w-0';
     const themeName = document.createElement('p');
-    themeName.className = 'text-sm font-medium truncate text-warmth-900 dark:text-warmth-100';
+    themeName.className = 'text-sm font-medium truncate text-warmth-900';
     themeName.textContent = strip.themeName || 'Strip';
     const sub = document.createElement('p');
-    sub.className = 'text-xs text-warmth-500 dark:text-warmth-400';
+    sub.className = 'text-xs text-warmth-500';
     sub.textContent = `${strip.mode === 'dual' ? 'Dual' : 'Single'} · ${formatDate(strip.createdAt)}`;
     meta.append(themeName, sub);
     const fav = document.createElement('button');
     fav.type = 'button';
-    fav.className = 'shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-lg hover:bg-warmth-100 dark:hover:bg-warmth-200 transition';
+    fav.className = 'shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-lg hover:bg-warmth-100 transition';
     fav.setAttribute('aria-label', strip.favorited ? 'Remove from favorites' : 'Add to favorites');
     fav.append(Icon({ name: strip.favorited ? 'heartFilled' : 'heart' }));
     fav.addEventListener('click', async (ev) => {
@@ -244,7 +242,7 @@ function renderGrid(gallery, mount) {
   }
   if (!gallery.hasMore && gallery.items.length) {
     const done = document.createElement('p');
-    done.className = 'col-span-full text-center text-xs text-warmth-500 dark:text-warmth-400 py-4';
+    done.className = 'col-span-full text-center text-xs text-warmth-500 py-4';
     done.textContent = 'You have reached the end of your gallery.';
     mount.append(done);
   }

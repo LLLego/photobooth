@@ -36,7 +36,7 @@ function ctxOf(canvas) {
   return null;
 }
 
-function drawCover(ctx, source, dx, dy, dw, dh) {
+function drawCover(ctx, source, dx, dy, dw, dh, { zoom = 1, mirror = false } = {}) {
   if (!source || !ctx) return;
   const sw = source.videoWidth || source.naturalWidth || source.width;
   const sh = source.videoHeight || source.naturalHeight || source.height;
@@ -53,9 +53,20 @@ function drawCover(ctx, source, dx, dy, dw, dh) {
   } else {
     cropH = sw / dRatio;
   }
+  const scale = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  cropW /= scale;
+  cropH /= scale;
   const cropX = (sw - cropW) / 2;
   const cropY = (sh - cropH) / 2;
-  ctx.drawImage(source, cropX, cropY, cropW, cropH, dx, dy, dw, dh);
+  ctx.save();
+  if (mirror) {
+    ctx.translate(dx + dw, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(source, cropX, cropY, cropW, cropH, 0, dy, dw, dh);
+  } else {
+    ctx.drawImage(source, cropX, cropY, cropW, cropH, dx, dy, dw, dh);
+  }
+  ctx.restore();
 }
 
 function drawFromBlob(blob) {
@@ -98,7 +109,16 @@ async function loadImage(src) {
 
 export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {}) {
   if (!videoEl) throw new Error('Video element required for capture.');
-  const { width = DEFAULTS.width, height = DEFAULTS.height, quality = DEFAULTS.quality, type = DEFAULTS.type, slots, filter } = opts;
+  const {
+    width = DEFAULTS.width,
+    height = DEFAULTS.height,
+    quality = DEFAULTS.quality,
+    type = DEFAULTS.type,
+    slots,
+    filter,
+    zoom = 1,
+    mirror = false,
+  } = opts;
 
   const canvas = createCanvas(width, height);
   const ctx = ctxOf(canvas);
@@ -128,11 +148,12 @@ export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {
       ctx.beginPath();
       ctx.rect(dx, dy, dw, dh);
       ctx.clip();
-      try { drawCover(ctx, videoEl, dx, dy, dw, dh); }
+      try { drawCover(ctx, videoEl, dx, dy, dw, dh, { zoom, mirror }); }
       catch (err) { console.warn('[capture] drawCover failed', err); }
       ctx.restore();
     }
 
+    ctx.filter = previousFilter || 'none';
     if (frameSource) {
       const frameImg = await loadImage(frameSource).catch((err) => {
         console.warn('[capture] frame load failed', err);

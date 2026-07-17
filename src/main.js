@@ -43,6 +43,7 @@ async function boot() {
   set({ themes: { ...getState().themes, cache: Array.isArray(themeCache) ? themeCache : [] } });
 
   mountLoading(mount);
+
   // Don't block boot on theme loading — render UI immediately
   Promise.allSettled([
     preloadPopularThemes(),
@@ -51,9 +52,6 @@ async function boot() {
     }),
     registerSW(),
   ]);
-
-  // Remove loading spinner and show routes immediately
-  mount.innerHTML = '';
 
   defineRoute('login', renderLoginRoute);
   defineRoute('home', renderHome);
@@ -95,13 +93,16 @@ async function boot() {
   } else {
     set({ user: null, initialized: true });
   }
-  // Show home immediately, then let the router take over without re-rendering.
-  await renderHome(mount);
-  setSkipFirstRender(true);
-  startRouter(mount);
-  mountToaster();
 
+  // Wire the router first, BEFORE mounting nav host. The router's first
+  // handleHashChange() call will render the current route directly into
+  // mount, removing the loading spinner as part of its normal render cycle.
+  startRouter(mount);
+
+  // Now that the router has rendered, mount the navigation host so it
+  // subscribes to state changes that have already settled.
   mountNavigationHost();
+  mountToaster();
 }
 
 function mountLoading(mount) {

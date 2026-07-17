@@ -1,37 +1,43 @@
 import { getState, set, pushToast } from '../state.js';
-import { Button, Icon, Spinner, Modal } from './components.js';
+import { Button, Icon } from './components.js';
 import { renderThemePicker } from '../themes/theme-picker.js';
-import { startDualSession, joinDualSession, getDualSession } from '../webrtc/dual-session.js';
-import { attachStreamToVideo, describeCameraError } from '../camera/camera.js';
+import { startDualSession, joinDualSession } from '../webrtc/dual-session.js';
 import { setPreviewFrame } from '../camera/preview.js';
 import { navigate } from '../router.js';
 import { downloadStrip, shareStrip } from '../strips/export.js';
 
-let hostStage = null;
-let remoteVideo = null;
-let localVideo = null;
-let activeSession = null;
-let frameEl = null;
-
 export async function renderDualCamera(mount) {
   mount.innerHTML = '';
+
+  // Local state — released by the returned teardown.
+  let activeSession = null;
+  let frameEl = null;
+  let hostStage = null;
+  let localVideo = null;
+  let remoteVideo = null;
+  let handleThemeChanged = null;
+
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md mx-auto px-4 pt-6 pb-40 fade-in';
 
   const header = document.createElement('div');
   header.className = 'flex items-center justify-between mb-4';
-  const back = Button({ label: 'Home', variant: 'ghost', onClick: () => cleanupAndExit(mount) });
+  const back = Button({ label: 'Home', variant: 'ghost', onClick: () => cleanupAndExit() });
   header.append(back, document.createElement('span'));
   wrap.append(header);
 
   const intro = document.createElement('div');
   intro.className = 'card p-5 mb-4';
-  intro.innerHTML = `
-    <h1 class="heading-display text-2xl mb-1">Dual camera</h1>
-    <p class="text-warmth-600 text-sm">Take photos together. One of you hosts a room, the other joins with a 6-character code.</p>
-  `;
+  const title = document.createElement('h1');
+  title.className = 'heading-display text-2xl mb-1';
+  title.textContent = 'Dual camera';
+  const desc = document.createElement('p');
+  desc.className = 'text-warmth-600 text-sm';
+  desc.textContent = 'Take photos together. One of you hosts a room, the other joins with a 6-character code.';
+  intro.append(title, desc);
   const actions = document.createElement('div');
-  actions.className = 'grid grid-cols-2 gap-2 mt-4';
+  actions.className = 'grid gap-2 mt-4';
+  actions.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
   const startBtn = Button({ label: 'Start a room', variant: 'primary' });
   const joinBtn = Button({ label: 'Join a room', variant: 'accent' });
   actions.append(startBtn, joinBtn);
@@ -75,13 +81,13 @@ export async function renderDualCamera(mount) {
   dualOverlay.className = 'camera-overlay-grid';
   dualOverlay.style.position = 'absolute';
   dualOverlay.style.inset = '0';
-  dualOverlay.style.zIndex = '3';
+  dualOverlay.style.zIndex = '2';
   frameEl = document.createElement('img');
   frameEl.className = 'camera-frame';
   frameEl.alt = '';
   frameEl.style.display = 'none';
   const controls = document.createElement('div');
-  controls.className = 'camera-controls';
+  controls.className = 'camera-controls dual-controls';
   const captureBtn = document.createElement('button');
   captureBtn.className = 'capture-button';
   captureBtn.append(Icon({ name: 'camera', size: 28 }));
@@ -91,12 +97,12 @@ export async function renderDualCamera(mount) {
   wrap.append(hostStage);
 
   const status = document.createElement('p');
-  status.className = 'text-center text-sm text-warmth-500 dark:text-warmth-400 mt-3';
+  status.className = 'text-center text-sm text-warmth-500 mt-3';
   status.textContent = 'Ready when you are.';
   wrap.append(status);
 
   const progress = document.createElement('p');
-  progress.className = 'text-center text-xs text-warmth-500 dark:text-warmth-400 mt-1';
+  progress.className = 'text-center text-xs text-warmth-500 mt-1';
   progress.textContent = '';
   wrap.append(progress);
 
@@ -108,28 +114,31 @@ export async function renderDualCamera(mount) {
   const codeCard = document.createElement('div');
   codeCard.className = 'card p-5 mt-4 hidden text-center';
   const codeLabel = document.createElement('p');
-  codeLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400 mb-1';
+  codeLabel.className = 'text-xs uppercase tracking-widest text-warmth-500 mb-1';
   codeLabel.textContent = 'Room code';
   const codeValue = document.createElement('p');
-  codeValue.className = 'heading-display text-4xl tracking-widest font-mono text-warmth-900 dark:text-warmth-100';
+  codeValue.className = 'heading-display text-4xl tracking-widest font-mono text-warmth-900';
   codeCard.append(codeLabel, codeValue);
-  const shareBtn = Button({ label: 'Copy code', variant: 'primary' });
-  shareBtn.classList.add('mt-4', 'w-full');
-  shareBtn.addEventListener('click', () => {
+  const copyBtn = Button({ label: 'Copy code', variant: 'primary' });
+  copyBtn.classList.add('mt-4', 'w-full');
+  copyBtn.addEventListener('click', () => {
     if (!codeValue.textContent) return;
     navigator.clipboard?.writeText(codeValue.textContent);
     pushToast({ message: 'Code copied.', type: 'success' });
   });
-  codeCard.append(shareBtn);
+  codeCard.append(copyBtn);
   wrap.append(codeCard);
 
   mount.append(wrap);
 
-  // Live theme switching — update frame overlay when user picks a new theme
-  const handleThemeChanged = async (ev) => {
+  handleThemeChanged = async (ev) => {
     const newThemeId = ev.detail?.themeId;
     if (newThemeId && frameEl) {
-      await setPreviewFrame(frameEl, newThemeId);
+      try {
+        await setPreviewFrame(frameEl, newThemeId);
+      } catch (err) {
+        console.warn('[dual] frame swap failed', err);
+      }
     }
   };
   window.addEventListener('theme-changed', handleThemeChanged);
@@ -147,8 +156,8 @@ export async function renderDualCamera(mount) {
       session.on('peer-joined', () => {
         hostStage.classList.remove('hidden');
         status.textContent = 'Connected! Tap to capture.';
-        session.attachLocalPreview(localVideo);
-        session.attachRemotePreview(remoteVideo);
+        if (localVideo) session.attachLocalPreview(localVideo);
+        if (remoteVideo) session.attachRemotePreview(remoteVideo);
         captureBtn.disabled = false;
       });
       session.on('connection-state', (state) => {
@@ -167,14 +176,14 @@ export async function renderDualCamera(mount) {
     }
   });
 
-  joinBtn.addEventListener('click', () => {
+  joinBtn.addEventListener('click', async () => {
     const input = document.createElement('input');
     input.type = 'text';
     input.maxLength = 6;
     input.className = 'input uppercase tracking-widest text-center font-mono text-xl';
     input.placeholder = 'ABC123';
     const label = document.createElement('p');
-    label.className = 'text-sm text-warmth-600 dark:text-warmth-300 mb-2';
+    label.className = 'text-sm text-warmth-600 mb-2';
     label.textContent = 'Enter the 6-character code shared by your partner.';
     const content = document.createElement('div');
     content.append(label, input);
@@ -201,7 +210,7 @@ export async function renderDualCamera(mount) {
       }
     });
     const cancel = Button({ label: 'Cancel', variant: 'ghost' });
-    const modal = Modal({ title: 'Join a room', content, actions: [cancel, submit] });
+    const modal = (await import('./components.js')).Modal({ title: 'Join a room', content, actions: [cancel, submit] });
     cancel.addEventListener('click', () => modal.close());
     document.body.append(modal.element);
   });
@@ -224,13 +233,11 @@ export async function renderDualCamera(mount) {
   }
 
   function updateProgress({ role, position }) {
-    const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
     progress.textContent = `You: ${position} photo${position === 1 ? '' : 's'}`;
   }
 
   function renderResult(blob) {
     resultWrap.innerHTML = '';
-    const layout = getState().capture?.layout || getState().preferences?.layout || 'strip_4';
     const suggestedName = `photobooth-${Date.now()}.webp`;
     const preview = document.createElement('div');
     preview.className = 'strip-preview';
@@ -259,7 +266,9 @@ export async function renderDualCamera(mount) {
       try {
         const r = await shareStrip(blob, { filename: suggestedName });
         if (!r.shared && !r.cancelled) pushToast({ message: 'Saved a copy locally.', type: 'info' });
-      } catch (err) { pushToast({ message: err.message, type: 'error' }); }
+      } catch (err) {
+        pushToast({ message: err.message, type: 'error' });
+      }
     };
     again.onclick = () => {
       resultWrap.innerHTML = '';
@@ -267,26 +276,23 @@ export async function renderDualCamera(mount) {
       resultWrap.classList.remove('block');
       captureBtn.disabled = false;
       status.textContent = 'Ready when you are.';
-      activeSession?.dispose();
+      try { activeSession?.dispose(); } catch {}
       activeSession = null;
     };
     gallery.onclick = () => navigate('gallery', {}, { replace: true, force: true });
   }
 
-  return () => {
-    window.removeEventListener('theme-changed', handleThemeChanged);
+  function cleanupAndExit() {
     try { activeSession?.dispose(); } catch {}
     activeSession = null;
-  };
-}
+    navigate('home');
+  }
 
-function cleanupAndExit(mount) {
-  try { activeSession?.dispose(); } catch {}
-  activeSession = null;
-  navigate('home');
-}
+  function teardown() {
+    if (handleThemeChanged) window.removeEventListener('theme-changed', handleThemeChanged);
+    try { activeSession?.dispose(); } catch {}
+    activeSession = null;
+  }
 
-export function disposeDualCamera() {
-  try { activeSession?.dispose(); } catch {}
-  activeSession = null;
+  return teardown;
 }

@@ -1,77 +1,56 @@
 import { getState, set, pushToast } from '../state.js';
-import { startLivePreview, stopLivePreview, flipCamera, setPreviewFrame } from '../camera/preview.js';
+import { startLivePreview, stopLivePreview, flipCamera, setPreviewFrame, startCanvasPreview } from '../camera/preview.js';
 import { describeCameraError } from '../camera/camera.js';
 import { takePhoto } from '../camera/capture.js';
 import { startCountdown } from './countdown.js';
-import { Button, Icon, Spinner } from './components.js';
+import { Button, Icon } from './components.js';
 import { FILTER_PRESETS, getFilterCSS } from '../camera/filters.js';
 import { renderThemePicker } from '../themes/theme-picker.js';
 import { loadTheme } from '../themes/theme-loader.js';
 import { compositeStrip } from '../strips/compositor.js';
 import { exportStrip, downloadStrip, shareStrip } from '../strips/export.js';
-import { requiredPhotoCount, getLayout } from '../strips/layouts.js';
+import { requiredPhotoCount } from '../strips/layouts.js';
 import { createSession, completeSession } from '../db/sessions.js';
 import { uploadStrip } from '../db/strips.js';
 import { navigate } from '../router.js';
-import { storageSet } from '../utils/storage.js';
 
-let activeStream = null;
-let stage = null;
-let videoEl = null;
-let frameEl = null;
-let currentSessionId = null;
-let handleThemeChanged = null;
-let cameraReady = false;
-let activeFlashEnabled = true;
-
-function computeTransform({ zoom, mirror }) {
-  const z = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-  const m = mirror ? ' scaleX(-1)' : '';
-  return `scale(${z})${m}`;
-}
-
-function applyTransform(el, { zoom, mirror }) {
-  if (!el) return;
-  el.style.transform = computeTransform({ zoom, mirror });
-}
-
-function defaultMirrorForFacing(facing) {
-  return facing === 'user' || facing == null;
-}
-
-function showFlash(host) {
-  if (!activeFlashEnabled) return Promise.resolve();
-  return new Promise((resolve) => {
-    const f = document.createElement('div');
-    f.className = 'flash-overlay';
-    host.append(f);
-    requestAnimationFrame(() => f.classList.add('active'));
-    setTimeout(() => {
-      try { f.remove(); } catch {}
-      resolve();
-    }, 200);
-  });
-}
+const RATIO_MAP = { '1:1': '1 / 1', '3:4': '3 / 4', '4:3': '4 / 3', '16:9': '16 / 9' };
 
 export async function renderSingleCamera(mount) {
-  const RATIO_MAP = { '1:1': '1 / 1', '3:4': '3 / 4', '4:3': '4 / 3', '16:9': '16 / 9' };
   const prefs = getState().preferences;
   const layout = prefs.layout || 'strip_4';
   const themeId = prefs.themeId || 'minimal';
   const initialZoom = typeof prefs.zoom === 'number' && prefs.zoom >= 1 && prefs.zoom <= 4 ? prefs.zoom : 1;
   const initialMirror = typeof prefs.mirror === 'boolean' ? prefs.mirror : true;
-  activeFlashEnabled = typeof prefs.flashEnabled === 'boolean' ? prefs.flashEnabled : true;
+  const flashEnabled = typeof prefs.flashEnabled === 'boolean' ? prefs.flashEnabled : true;
   set({ capture: { ...getState().capture, mode: 'single', layout, themeId, photos: [], status: 'idle' } });
 
   mount.innerHTML = '';
+
+  // All DOM refs and listeners live in this closure — released by the
+  // returned teardown function when the router unmounts this route.
+  let videoEl = null;
+  let previewCanvas = null;
+  let frameEl = null;
+  let stage = null;
+  let activeStream = null;
+  let stopCanvasPreview = null;
+  let handleThemeChanged = null;
+  let handleRatioChanged = null;
+  let cameraReady = false;
+  let captureSequenceActive = false;
+  let localPhotos = [];
+  let thumbnailUrls = [];
+  let resultUrl = null;
+
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md md:max-w-lg mx-auto px-4 pt-6 pb-40 fade-in';
 
   const header = document.createElement('div');
   header.className = 'flex items-center justify-between mb-4';
-  const back = Button({ label: 'Home', variant: 'ghost', onClick: () => cleanupAndExit(mount) });
+  const back = Button({ label: 'Home', variant: 'ghost', onClick: () => cleanupAndExit() });
   const captureCount = document.createElement('span');
-  captureCount.className = 'text-sm text-warmth-500 dark:text-warmth-400';
+  captureCount.className = 'text-sm text-warmth-500';
   header.append(back, captureCount);
   wrap.append(header);
 
@@ -80,17 +59,25 @@ export async function renderSingleCamera(mount) {
   stage.className = 'camera-stage w-full mx-auto';
   stage.style.aspectRatio = RATIO_MAP[aspectRatio] || '3 / 4';
   stage.setAttribute('data-ratio', aspectRatio);
+
   videoEl = document.createElement('video');
-  videoEl.className = 'camera-video';
+  videoEl.className = 'camera-source-video';
   videoEl.muted = true;
   videoEl.playsInline = true;
   videoEl.autoplay = true;
+
+  previewCanvas = document.createElement('canvas');
+  previewCanvas.className = 'camera-live-canvas';
+  previewCanvas.setAttribute('aria-label', 'Camera preview');
+
   frameEl = document.createElement('img');
-  frameEl.className = 'camera-frame';
+  frameEl.className = 'camera-frame-source';
   frameEl.alt = '';
   frameEl.style.display = 'none';
+
   const overlay = document.createElement('div');
   overlay.className = 'camera-overlay-grid';
+
   const controls = document.createElement('div');
   controls.className = 'camera-controls';
   const flipBtn = document.createElement('button');
@@ -102,11 +89,12 @@ export async function renderSingleCamera(mount) {
     try {
       activeStream = await flipCamera(videoEl);
     } catch (err) {
-      showCameraFallback(err);
+      pushToast({ message: describeCameraError(err), type: 'error' });
     } finally {
       if (cameraReady) flipBtn.disabled = false;
     }
   });
+
   const captureBtn = document.createElement('button');
   captureBtn.className = 'capture-button';
   captureBtn.disabled = true;
@@ -114,25 +102,11 @@ export async function renderSingleCamera(mount) {
   captureBtn.setAttribute('aria-label', 'Capture photo');
   controls.append(flipBtn, captureBtn, document.createElement('span'));
 
-  const cameraFallback = document.createElement('div');
-  cameraFallback.className = 'camera-fallback hidden';
-  cameraFallback.setAttribute('role', 'alert');
-  const fallbackTitle = document.createElement('h2');
-  fallbackTitle.className = 'heading-display text-2xl';
-  const fallbackMessage = document.createElement('p');
-  fallbackMessage.className = 'mt-2 max-w-xs text-sm leading-relaxed text-warmth-200';
-  const retryCameraBtn = Button({
-    label: 'Try camera again',
-    variant: 'honey',
-    icon: Icon({ name: 'refresh' }),
-    className: 'mt-5',
-  });
-  cameraFallback.append(fallbackTitle, fallbackMessage, retryCameraBtn);
-  stage.append(videoEl, frameEl, overlay, cameraFallback, controls);
+  stage.append(videoEl, previewCanvas, frameEl, overlay, controls);
   wrap.append(stage);
 
   const status = document.createElement('p');
-  status.className = 'text-center text-sm text-warmth-500 dark:text-warmth-400 mt-3';
+  status.className = 'text-center text-sm text-warmth-500 mt-3';
   status.textContent = 'Starting camera…';
   wrap.append(status);
 
@@ -144,37 +118,32 @@ export async function renderSingleCamera(mount) {
   // Filter bar
   const filterBar = document.createElement('div');
   filterBar.className = 'mt-4';
-  filterBar.innerHTML = '<p class="text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400 mb-2">Filter</p>';
+  filterBar.innerHTML = '<p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Filter</p>';
   const filterScroller = document.createElement('div');
   filterScroller.className = 'flex gap-2 overflow-x-auto no-scrollbar pb-1';
+  const filterButtons = new Map();
   for (const f of FILTER_PRESETS) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'shrink-0 px-3 py-1.5 rounded-2xl text-xs font-medium border border-warmth-200 dark:border-warmth-300 text-warmth-700 dark:text-warmth-200 whitespace-nowrap transition';
+    btn.className = 'shrink-0 px-3 py-1.5 rounded-2xl text-xs font-medium border border-warmth-200 text-warmth-700 whitespace-nowrap transition';
     btn.textContent = f.name;
     btn.dataset.filter = f.id;
-    btn.addEventListener('click', () => {
-      applyFilter(f.id);
-    });
-    if (f.id === (prefs.filterId || 'original')) {
-      btn.classList.add('bg-warmth-900', 'text-warmth-50', 'dark:bg-warmth-100', 'dark:text-warmth-900');
-    }
+    btn.addEventListener('click', () => applyFilter(f.id));
     filterScroller.append(btn);
+    filterButtons.set(f.id, btn);
   }
-  // Apply saved filter to the video element up front
   const savedFilterId = prefs.filterId || 'original';
-  const savedFilterCss = getFilterCSS(savedFilterId);
-  if (videoEl) {
-    videoEl.style.filter = savedFilterCss === 'none' ? '' : savedFilterCss;
+  if (filterButtons.has(savedFilterId)) {
+    const btn = filterButtons.get(savedFilterId);
+    btn.classList.add('bg-warmth-900', 'text-warmth-50');
   }
   filterBar.append(filterScroller);
   wrap.append(filterBar);
 
   // Camera controls: zoom + mirror + flash
   const cameraBar = document.createElement('div');
-  cameraBar.className = 'mt-4 flex items-center gap-3 text-xs text-warmth-600 dark:text-warmth-400';
-  
-  // Zoom slider
+  cameraBar.className = 'mt-4 flex items-center gap-3 text-xs text-warmth-600';
+
   const zoomLabel = document.createElement('span');
   zoomLabel.textContent = '🔍';
   zoomLabel.className = 'shrink-0';
@@ -184,51 +153,43 @@ export async function renderSingleCamera(mount) {
   zoomSlider.max = '4';
   zoomSlider.step = '0.1';
   zoomSlider.value = String(initialZoom);
-  zoomSlider.className = 'flex-1 accent-warmth-800 dark:accent-warmth-200 h-1';
+  zoomSlider.className = 'flex-1 accent-warmth-800 h-1';
   const zoomValue = document.createElement('span');
   zoomValue.className = 'w-10 text-right font-mono shrink-0';
   zoomValue.textContent = `${initialZoom.toFixed(1)}x`;
-  
+
   zoomSlider.addEventListener('input', () => {
     const z = parseFloat(zoomSlider.value);
     zoomValue.textContent = `${z.toFixed(1)}x`;
-    applyTransform(videoEl, { zoom: z, mirror: getState().preferences.mirror });
     set({ preferences: { ...getState().preferences, zoom: z } });
   });
-  
-  // Mirror toggle
+
   const mirrorBtn = document.createElement('button');
-  mirrorBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 dark:border-warmth-300 text-xs';
+  mirrorBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 text-xs';
   mirrorBtn.textContent = initialMirror ? '🪞' : '📷';
   mirrorBtn.title = 'Toggle mirror';
   mirrorBtn.addEventListener('click', () => {
     const m = !getState().preferences.mirror;
     mirrorBtn.textContent = m ? '🪞' : '📷';
-    applyTransform(videoEl, { zoom: getState().preferences.zoom || 1, mirror: m });
     set({ preferences: { ...getState().preferences, mirror: m } });
   });
-  
-  // Flash toggle
+
   const flashBtn = document.createElement('button');
-  flashBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 dark:border-warmth-300 text-xs';
-  flashBtn.textContent = activeFlashEnabled ? '⚡' : '🌑';
+  flashBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 text-xs';
+  flashBtn.textContent = flashEnabled ? '⚡' : '🌑';
   flashBtn.title = 'Toggle flash';
   flashBtn.addEventListener('click', () => {
-    activeFlashEnabled = !activeFlashEnabled;
-    flashBtn.textContent = activeFlashEnabled ? '⚡' : '🌑';
-    set({ preferences: { ...getState().preferences, flashEnabled: activeFlashEnabled } });
+    const next = !getState().preferences.flashEnabled;
+    flashBtn.textContent = next ? '⚡' : '🌑';
+    set({ preferences: { ...getState().preferences, flashEnabled: next } });
   });
-  
+
   cameraBar.append(zoomLabel, zoomSlider, zoomValue, mirrorBtn, flashBtn);
   wrap.append(cameraBar);
 
-  // Show flash on capture
-  const originalOnCapture = null; // Will be set below
-  // Double-tap to reset zoom
   stage.addEventListener('dblclick', () => {
     zoomSlider.value = '1';
     zoomValue.textContent = '1.0x';
-    applyTransform(videoEl, { zoom: 1, mirror: getState().preferences.mirror });
     set({ preferences: { ...getState().preferences, zoom: 1 } });
   });
 
@@ -248,8 +209,55 @@ export async function renderSingleCamera(mount) {
   wrap.append(finalBar);
 
   mount.append(wrap);
-  const reviewList = review;
-  let localPhotos = [];
+
+  // ============ Lifecycle management ============
+
+  function applyFilter(id) {
+    for (const [fid, btn] of filterButtons.entries()) {
+      const active = fid === id;
+      btn.classList.toggle('bg-warmth-900', active);
+      btn.classList.toggle('text-warmth-50', active);
+    }
+    set({ preferences: { ...getState().preferences, filterId: id } });
+  }
+
+  function updateCount() {
+    const req = requiredPhotoCount(getState().capture.layout || layout);
+    const next = Math.min(localPhotos.length + 1, req);
+    captureCount.textContent = localPhotos.length >= req
+      ? `${req} of ${req} photos`
+      : `Photo ${next} of ${req}`;
+  }
+
+  function updateCaptureState(statusValue) {
+    set({
+      capture: {
+        ...getState().capture,
+        photos: [...localPhotos],
+        status: statusValue,
+      },
+    });
+  }
+
+  function clearThumbnailUrls() {
+    for (const url of thumbnailUrls) URL.revokeObjectURL(url);
+    thumbnailUrls = [];
+  }
+
+  function clearResultUrl() {
+    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    resultUrl = null;
+  }
+  updateCount();
+
+  function getOptions() {
+    const p = getState().preferences || {};
+    return {
+      zoom: p.zoom || 1,
+      mirror: p.mirror !== false,
+      filter: getFilterCSS(p.filterId || 'original'),
+    };
+  }
 
   // Load frame overlay immediately — independent of camera permission
   try {
@@ -260,25 +268,38 @@ export async function renderSingleCamera(mount) {
   }
 
   try {
-    activeStream = await startLivePreview({ videoEl, frameEl, themeId, onError: (msg) => pushToast({ message: msg, type: 'error' }) });
+    activeStream = await startLivePreview({
+      videoEl,
+      frameEl,
+      themeId,
+      onError: (msg) => pushToast({ message: msg, type: 'error' }),
+    });
+    cameraReady = true;
     status.textContent = 'Ready';
+    captureBtn.disabled = false;
+    flipBtn.disabled = false;
   } catch (err) {
     const isBlocked = err.name === 'NotAllowedError' || err.message?.includes('Permission');
     status.textContent = '';
     status.innerHTML = isBlocked
-      ? '<span class="text-amber-600 dark:text-amber-400">🔒 Camera access needed — tap the lock/camera icon in your browser address bar, then try again.</span>'
-      : '<span class="text-rose-600 dark:text-rose-400">⚠️ Camera unavailable — check your device connection.</span>';
-    
-    // Add retry button
-    const retryBtn = Button({ 
-      label: 'Try again', 
-      variant: 'primary', 
+      ? '<span class="text-amber-600">🔒 Camera access needed — tap the lock/camera icon in your browser address bar, then try again.</span>'
+      : '<span class="text-rose-600">⚠️ Camera unavailable — check your device connection.</span>';
+
+    const retryBtn = Button({
+      label: 'Try again',
+      variant: 'primary',
       icon: Icon({ name: 'camera' }),
       onClick: async () => {
         retryBtn.disabled = true;
         retryBtn.textContent = 'Connecting…';
         try {
-          activeStream = await startLivePreview({ videoEl, frameEl, themeId, onError: (msg) => pushToast({ message: msg, type: 'error' }) });
+          activeStream = await startLivePreview({
+            videoEl,
+            frameEl,
+            themeId,
+            onError: (msg) => pushToast({ message: msg, type: 'error' }),
+          });
+          cameraReady = true;
           status.textContent = 'Ready';
           status.innerHTML = '';
           captureBtn.disabled = false;
@@ -289,117 +310,137 @@ export async function renderSingleCamera(mount) {
           retryBtn.disabled = false;
           status.textContent = 'Still unavailable — check browser settings.';
         }
-      }
+      },
     });
     status.append(document.createElement('br'), retryBtn);
-    
-    // Disable capture but keep theme picker + filter bar working
+
     captureBtn.disabled = true;
     flipBtn.disabled = true;
   }
   captureBtn.addEventListener('click', onCapture);
 
-  // Live theme switching — update frame overlay when user picks a new theme
-  function applyFilter(id) {
-    filterScroller.querySelectorAll('button').forEach(b => {
-      const active = b.dataset.filter === id;
-      b.classList.toggle('bg-warmth-900', active);
-      b.classList.toggle('text-warmth-50', active);
-      b.classList.toggle('dark:bg-warmth-100', active);
-      b.classList.toggle('dark:text-warmth-900', active);
+  // Spin up the canvas-based preview loop after the camera is ready.
+  if (previewCanvas && videoEl) {
+    stopCanvasPreview = startCanvasPreview({
+      videoEl,
+      canvasEl: previewCanvas,
+      frameEl,
+      getOptions,
     });
-    const css = getFilterCSS(id);
-    if (videoEl) {
-      videoEl.style.filter = css === 'none' ? '' : css;
-    }
-    set({ preferences: { ...getState().preferences, filterId: id } });
   }
 
   handleThemeChanged = async (ev) => {
     const newThemeId = ev.detail?.themeId;
     if (newThemeId && frameEl) {
-      await setPreviewFrame(frameEl, newThemeId);
-      status.textContent = 'Ready';
+      try {
+        await setPreviewFrame(frameEl, newThemeId);
+        status.textContent = 'Ready';
+      } catch (err) {
+        console.warn('[single] frame swap failed', err);
+      }
     }
   };
   window.addEventListener('theme-changed', handleThemeChanged);
 
-  window.addEventListener('ratio-changed', (ev) => {
+  handleRatioChanged = (ev) => {
     const newRatio = ev.detail?.aspectRatio;
     if (newRatio && stage) {
       stage.style.aspectRatio = RATIO_MAP[newRatio] || '3 / 4';
       stage.setAttribute('data-ratio', newRatio);
-      // Also resize video
-      if (videoEl) {
-        videoEl.style.width = '100%';
-        videoEl.style.height = '100%';
-      }
     }
-  });
-
-  function updateCount() {
-    const req = requiredPhotoCount(getState().capture.layout || layout);
-    captureCount.textContent = `${localPhotos.length} / ${req}`;
-  }
-  updateCount();
+  };
+  window.addEventListener('ratio-changed', handleRatioChanged);
 
   async function onCapture() {
+    if (captureSequenceActive) return;
     if (!videoEl || videoEl.readyState < 2) {
       pushToast({ message: 'Camera not ready yet.', type: 'warn' });
       return;
     }
+
+    captureSequenceActive = true;
     captureBtn.disabled = true;
-    status.textContent = 'Get ready…';
+    flipBtn.disabled = true;
+    const req = requiredPhotoCount(getState().capture.layout || layout);
     try {
-      await startCountdown(stage, { duration: getState().preferences.countdownDuration });
-      await showFlash(stage);
-      const theme = await loadTheme(getState().preferences.themeId || 'minimal');
-      const { blob } = await takePhoto(videoEl, null, theme, { filter: getFilterCSS(getState().preferences.filterId || 'original') });
-      localPhotos.push(blob);
-      renderReview();
-      updateCount();
-      const req = requiredPhotoCount(getState().capture.layout || layout);
-      if (localPhotos.length >= req) {
-        await finalize();
+      while (localPhotos.length < req) {
+        const position = localPhotos.length + 1;
+        status.textContent = `Photo ${position} of ${req} — get ready…`;
+        updateCaptureState('countdown');
+        const theme = await loadTheme(getState().preferences.themeId || 'minimal');
+        const { blob } = await startCountdown(stage, {
+          duration: getState().preferences.countdownDuration,
+          flashEnabled: getState().preferences.flashEnabled !== false,
+          onSnap: () => takePhoto(videoEl, frameEl, theme, {
+            filter: getFilterCSS(getState().preferences.filterId || 'original'),
+            zoom: getState().preferences.zoom || 1,
+            mirror: getState().preferences.mirror !== false,
+          }),
+        });
+        localPhotos.push(blob);
+        updateCaptureState('captured');
+        renderReview();
+        updateCount();
+        if (localPhotos.length < req) {
+          status.textContent = `Photo ${localPhotos.length} captured — next up: ${localPhotos.length + 1} of ${req}`;
+        }
       }
+      await finalize();
     } catch (err) {
+      updateCaptureState('error');
       pushToast({ message: err.message || 'Capture failed.', type: 'error' });
+      status.textContent = `Capture paused at photo ${localPhotos.length + 1} of ${req}`;
     } finally {
-      captureBtn.disabled = false;
+      captureSequenceActive = false;
+      if (localPhotos.length < req) {
+        captureBtn.disabled = !cameraReady;
+        flipBtn.disabled = !cameraReady;
+      }
     }
   }
 
   function renderReview() {
-    reviewList.innerHTML = '';
+    clearThumbnailUrls();
+    review.innerHTML = '';
     const layoutId = getState().capture.layout || layout;
     const req = requiredPhotoCount(layoutId);
-    if (!localPhotos.length) {
-      const tip = document.createElement('p');
-      tip.className = 'text-sm text-warmth-500 dark:text-warmth-400 text-center';
-      tip.textContent = `Take ${req} ${req === 1 ? 'photo' : 'photos'} to compose your strip.`;
-      reviewList.append(tip);
-      return;
-    }
+    const label = document.createElement('p');
+    label.className = 'capture-thumbnails-label';
+    label.textContent = localPhotos.length
+      ? `${localPhotos.length} of ${req} captured`
+      : `Your ${req === 1 ? 'photo' : 'photos'} will appear here`;
+
     const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-4 gap-2';
-    for (const blob of localPhotos) {
+    grid.className = 'capture-thumbnails';
+    grid.style.gridTemplateColumns = `repeat(${req}, minmax(0, 1fr))`;
+    for (let i = 0; i < req; i++) {
       const card = document.createElement('div');
-      card.className = 'aspect-[3/4] rounded-2xl overflow-hidden bg-warmth-100 dark:bg-warmth-200';
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(blob);
-      img.className = 'w-full h-full object-cover';
-      img.alt = 'Captured';
-      card.append(img);
+      card.className = 'capture-thumbnail';
+      if (localPhotos[i]) {
+        const img = document.createElement('img');
+        const url = URL.createObjectURL(localPhotos[i]);
+        thumbnailUrls.push(url);
+        img.src = url;
+        img.alt = `Photo ${i + 1}`;
+        card.append(img);
+        card.classList.add('is-filled');
+        if (i === localPhotos.length - 1) card.classList.add('is-new');
+      } else {
+        const slot = document.createElement('span');
+        slot.textContent = String(i + 1);
+        slot.setAttribute('aria-label', `Empty photo slot ${i + 1}`);
+        card.append(slot);
+      }
       grid.append(card);
     }
-    reviewList.append(grid);
+    review.append(label, grid);
   }
 
   async function finalize() {
     status.textContent = 'Composing strip…';
-    const themeId = getState().preferences.themeId || 'minimal';
+    const themeIdFinal = getState().preferences.themeId || 'minimal';
     const layoutId = getState().capture.layout || layout;
-    const theme = await loadTheme(themeId);
+    const theme = await loadTheme(themeIdFinal);
     try {
       const canvas = await compositeStrip(localPhotos, theme, layoutId);
       const { blob, suggestedName } = await exportStrip(canvas, { format: 'image/png' });
@@ -409,7 +450,7 @@ export async function renderSingleCamera(mount) {
       img.src = URL.createObjectURL(blob);
       img.alt = 'Composed strip';
       preview.append(img);
-      reviewList.append(preview);
+      review.append(preview);
 
       finalBar.classList.remove('hidden');
       finalBar.classList.add('flex');
@@ -417,22 +458,24 @@ export async function renderSingleCamera(mount) {
       flipBtn.disabled = true;
       status.textContent = 'Ready to save or share';
 
-      const prefs = getState().preferences;
-      if (prefs.autoDownload) downloadStrip(blob, suggestedName);
+      const prefsNow = getState().preferences;
+      if (prefsNow.autoDownload) downloadStrip(blob, suggestedName);
 
       downloadBtn.onclick = () => downloadStrip(blob, suggestedName);
       shareBtn.onclick = async () => {
         try {
           const r = await shareStrip(blob, { filename: suggestedName });
           if (!r.shared && !r.cancelled) pushToast({ message: 'Saved a copy locally.', type: 'info' });
-        } catch (err) { pushToast({ message: err.message, type: 'error' }); }
+        } catch (err) {
+          pushToast({ message: err.message, type: 'error' });
+        }
       };
       retakeBtn.onclick = () => {
         localPhotos = [];
         finalBar.classList.add('hidden');
         finalBar.classList.remove('flex');
-        captureBtn.disabled = false;
-        flipBtn.disabled = false;
+        captureBtn.disabled = !cameraReady;
+        flipBtn.disabled = !cameraReady;
         status.textContent = 'Ready';
         renderReview();
         updateCount();
@@ -443,15 +486,13 @@ export async function renderSingleCamera(mount) {
           status.textContent = 'Saving…';
           const user = getState().user;
           if (user) {
-            const baseThemeId = themeId.includes('/') ? themeId.split('/')[0] : themeId;
+            const baseThemeId = themeIdFinal.includes('/') ? themeIdFinal.split('/')[0] : themeIdFinal;
             const session = await createSession({ mode: 'single', themeId: baseThemeId, layout: layoutId });
-            currentSessionId = session.id;
             await uploadStrip({ sessionId: session.id, blob, layout: layoutId, themeId: baseThemeId, isPrivate: false });
             await completeSession(session.id);
             pushToast({ message: 'Saved to gallery.', type: 'success' });
             navigate('gallery');
           } else {
-            // No auth — save locally
             downloadStrip(blob, suggestedName);
             pushToast({ message: 'Downloaded! Sign in to save to gallery.', type: 'success' });
             status.textContent = 'Ready';
@@ -469,24 +510,29 @@ export async function renderSingleCamera(mount) {
     }
   }
 
-  return () => {
-    window.removeEventListener('theme-changed', handleThemeChanged);
-    try { stopLivePreview(videoEl); } catch {}
+  // ============ Cleanup — release everything on unmount ============
+
+  function teardown() {
+    if (handleThemeChanged) window.removeEventListener('theme-changed', handleThemeChanged);
+    if (handleRatioChanged) window.removeEventListener('ratio-changed', handleRatioChanged);
+    if (typeof stopCanvasPreview === 'function') {
+      try { stopCanvasPreview(); } catch {}
+      stopCanvasPreview = null;
+    }
+    if (videoEl) {
+      try { stopLivePreview(videoEl); } catch {}
+    }
     activeStream = null;
-  };
-}
-
-function cleanupAndExit(mount) {
-  try { stopLivePreview(videoEl); } catch {}
-  activeStream = null;
-  if (handleThemeChanged) {
-    window.removeEventListener('theme-changed', handleThemeChanged);
-    handleThemeChanged = null;
+    videoEl = null;
+    frameEl = null;
+    previewCanvas = null;
+    stage = null;
   }
-  navigate('home');
-}
 
-export function disposeSingleCamera() {
-  try { stopLivePreview(videoEl); } catch {}
-  activeStream = null;
+  function cleanupAndExit() {
+    teardown();
+    navigate('home');
+  }
+
+  return teardown;
 }

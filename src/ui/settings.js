@@ -44,11 +44,11 @@ export async function renderSettings(mount) {
   nameCard.className = 'card p-5 mb-5 md:mb-0';
   nameCard.innerHTML = `
     <label class="block">
-      <span class="text-xs uppercase tracking-widest text-warmth-500 dark:text-warmth-400">Display name</span>
+      <span class="text-xs uppercase tracking-widest text-warmth-500">Display name</span>
       <input class="input mt-2" type="text" data-field="displayName" maxlength="48" />
     </label>
-    <p class="text-xs text-warmth-500 dark:text-warmth-400 mt-3">Role: <span class="font-mono" data-field="role">…</span></p>
-    <p class="text-xs text-warmth-500 dark:text-warmth-400 mt-1">Email: <span class="font-mono" data-field="email">…</span></p>
+    <p class="text-xs text-warmth-500 mt-3">Role: <span class="font-mono" data-field="role">…</span></p>
+    <p class="text-xs text-warmth-500 mt-1">Email: <span class="font-mono" data-field="email">…</span></p>
   `;
   const nameInput = nameCard.querySelector('[data-field="displayName"]');
   const roleEl = nameCard.querySelector('[data-field="role"]');
@@ -97,36 +97,36 @@ export async function renderSettings(mount) {
   const prefsCard = document.createElement('section');
   prefsCard.className = 'card p-5 mb-5 md:mb-0';
   prefsCard.innerHTML = `
-    <h2 class="heading-display text-lg mb-3 text-warmth-900 dark:text-warmth-100">Capture preferences</h2>
+    <h2 class="heading-display text-lg mb-3">Capture preferences</h2>
     <div class="flex items-center justify-between py-2">
       <div>
-        <p class="font-medium text-warmth-900 dark:text-warmth-100">Auto-download after capture</p>
-        <p class="text-xs text-warmth-500 dark:text-warmth-400">Save a local copy automatically.</p>
+        <p class="font-medium">Auto-download after capture</p>
+        <p class="text-xs text-warmth-500">Save a local copy automatically.</p>
       </div>
       <label class="inline-flex items-center cursor-pointer">
         <input type="checkbox" class="sr-only peer" data-pref="autoDownload" />
-        <span class="toggle-track w-11 h-6 bg-warmth-200 dark:bg-warmth-700 rounded-full peer-checked:bg-warmth-900 dark:peer-checked:bg-warmth-100 relative transition">
-          <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 dark:bg-warmth-200 rounded-full transition peer-checked:translate-x-5"></span>
+        <span class="toggle-track w-11 h-6 bg-warmth-200 rounded-full peer-checked:bg-warmth-900 relative transition">
+          <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 rounded-full transition peer-checked:translate-x-5"></span>
         </span>
       </label>
     </div>
     <div class="flex items-center justify-between py-2">
       <div>
-        <p class="font-medium text-warmth-900 dark:text-warmth-100">Dark mode</p>
-        <p class="text-xs text-warmth-500 dark:text-warmth-400">Easier on the eyes at night.</p>
+        <p class="font-medium">Dark mode</p>
+        <p class="text-xs text-warmth-500">Easier on the eyes at night.</p>
       </div>
       <label class="inline-flex items-center cursor-pointer">
         <input type="checkbox" class="sr-only peer" data-pref="darkMode" />
-        <span class="toggle-track w-11 h-6 bg-warmth-200 dark:bg-warmth-700 rounded-full peer-checked:bg-warmth-900 dark:peer-checked:bg-warmth-100 relative transition">
-          <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 dark:bg-warmth-200 rounded-full transition peer-checked:translate-x-5"></span>
+        <span class="toggle-track w-11 h-6 bg-warmth-200 rounded-full peer-checked:bg-warmth-900 relative transition">
+          <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 rounded-full transition peer-checked:translate-x-5"></span>
         </span>
       </label>
     </div>
     <div class="py-2">
-      <p class="font-medium mb-1 text-warmth-900 dark:text-warmth-100">Countdown duration</p>
-      <p class="text-xs text-warmth-500 dark:text-warmth-400 mb-2">Time between capture and shutter.</p>
-      <div class="grid grid-cols-3 gap-2" data-pref-group="countdownDuration">
-        ${[3, 5, 0].map((v) => `<button class="px-3 py-2 rounded-2xl text-sm border border-warmth-200 dark:border-warmth-300 text-warmth-900 dark:text-warmth-100" data-value="${v}">${v === 0 ? 'Off' : `${v}s`}</button>`).join('')}
+      <p class="font-medium mb-1">Countdown duration</p>
+      <p class="text-xs text-warmth-500 mb-2">Time between capture and shutter.</p>
+      <div class="grid gap-2" data-pref-group="countdownDuration" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        ${[3, 5, 0].map((v) => `<button class="px-3 py-2 rounded-2xl text-sm border border-warmth-200" data-value="${v}">${v === 0 ? 'Off' : `${v}s`}</button>`).join('')}
       </div>
     </div>
   `;
@@ -141,23 +141,22 @@ export async function renderSettings(mount) {
     darkModeToggle.checked = !!prefs.darkMode;
     const target = Number(prefs.countdownDuration);
     countdownGroup.querySelectorAll('button').forEach((b) => {
-      // Reset ALL state classes first
       b.classList.remove(
-        'bg-warmth-900', 'dark:bg-warmth-100',
-        'text-warmth-50', 'dark:text-warmth-900',
-        'border-warmth-900', 'dark:border-warmth-100',
-        'border-warmth-200', 'dark:border-warmth-300'
+        'bg-warmth-900',
+        'text-warmth-50',
+        'border-warmth-900',
+        'border-warmth-200'
       );
       const isActive = Number(b.dataset.value) === target;
       if (isActive) {
         b.classList.add(
-          'bg-warmth-900', 'dark:bg-warmth-100',
-          'text-warmth-50', 'dark:text-warmth-900',
-          'border-warmth-900', 'dark:border-warmth-100'
+          'bg-warmth-900',
+          'text-warmth-50',
+          'border-warmth-900'
         );
       } else {
         b.classList.add(
-          'border-warmth-200', 'dark:border-warmth-300'
+          'border-warmth-200'
         );
       }
     });

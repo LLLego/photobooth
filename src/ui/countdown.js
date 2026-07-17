@@ -25,21 +25,22 @@ function prefersReducedMotion() {
   catch { return false; }
 }
 
-function tick(num, label, fast) {
-  return new Promise((resolve) => {
-    num.textContent = label;
-    if (!fast) {
-      num.style.animation = 'none';
-      void num.offsetWidth;
-      num.style.animation = '';
-      setTimeout(resolve, 900);
-    } else {
-      setTimeout(resolve, 300);
-    }
-  });
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function flash(host) {
+async function tick(num, label, fast) {
+  num.textContent = label;
+  num.classList.toggle('is-snap', label === 'SNAP!');
+  if (!fast) {
+    num.style.animation = 'none';
+    void num.offsetWidth;
+    num.style.animation = '';
+  }
+  await wait(fast ? 180 : 800);
+}
+
+export function showFlash(host) {
   return new Promise((resolve) => {
     const f = document.createElement('div');
     f.className = 'flash-overlay';
@@ -48,24 +49,34 @@ function flash(host) {
     setTimeout(() => {
       f.remove();
       resolve();
-    }, 280);
+    }, 360);
   });
 }
 
-export async function startCountdown(host, { duration = resolveDuration() } = {}) {
+export async function startCountdown(host, {
+  duration = resolveDuration(),
+  flashEnabled = true,
+  onSnap,
+} = {}) {
   if (!host) throw new Error('Countdown host element is required.');
   const fast = prefersReducedMotion();
-  if (duration <= 0) {
-    await flash(host);
-    return;
-  }
   const { overlay, num } = createOverlay(host);
   try {
     for (let i = duration; i >= 1; i--) {
       await tick(num, String(i), fast);
     }
+
+    num.textContent = 'SNAP!';
+    num.classList.add('is-snap');
+    num.style.animation = 'none';
+    void num.offsetWidth;
+    num.style.animation = '';
+    const capture = Promise.resolve().then(() => onSnap?.());
+    const flash = flashEnabled ? showFlash(host) : Promise.resolve();
+    await wait(fast ? 100 : 320);
     overlay.remove();
-    await flash(host);
+    await flash;
+    return await capture;
   } catch (err) {
     try { overlay.remove(); } catch {}
     throw err;

@@ -14,7 +14,7 @@ export function openStripViewer(strip) {
   loader.append(Spinner({ size: 28, label: 'Loading strip…' }));
 
   const errorBox = document.createElement('div');
-  errorBox.className = 'text-center text-sm text-rose-600 dark:text-rose-300 py-6 hidden';
+  errorBox.className = 'text-center text-sm text-rose-600 py-6 hidden';
   errorBox.setAttribute('role', 'alert');
   const errorMsg = document.createElement('p');
   errorMsg.className = 'mb-3';
@@ -92,7 +92,7 @@ export function openStripViewer(strip) {
   wrap.append(loader, errorBox, img);
 
   const meta = document.createElement('div');
-  meta.className = 'text-sm text-warmth-500 dark:text-warmth-400 text-center mt-3';
+  meta.className = 'text-sm text-warmth-500 text-center mt-3';
   meta.textContent = `${strip.mode === 'dual' ? 'Dual camera' : 'Single camera'} · ${strip.layout} · ${formatDate(strip.createdAt)}`;
   wrap.append(meta);
 
@@ -205,7 +205,7 @@ export function openStripViewer(strip) {
     titleEl.textContent = 'Delete this strip?';
     bodyEl.innerHTML = '';
     const warn = document.createElement('p');
-    warn.className = 'text-warmth-700 dark:text-warmth-400 leading-relaxed';
+    warn.className = 'text-warmth-700 leading-relaxed';
     warn.textContent = 'This removes the strip from your gallery. The original photos remain on the device only.';
     bodyEl.append(warn);
     rowEl.innerHTML = '';

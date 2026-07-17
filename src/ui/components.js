@@ -32,14 +32,14 @@ export function Modal({ title, content, actions, onClose, dismissible = true, ar
   backdrop.className = 'modal-backdrop fade-in';
 
   const dialog = document.createElement('div');
-  dialog.className = 'card max-w-md w-full p-6 fade-up dark:bg-warmth-100 dark:border-warmth-300';
+  dialog.className = 'card max-w-md w-full p-6 fade-up';
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
   dialog.tabIndex = -1;
 
   if (title) {
     const h = document.createElement('h2');
-    h.className = 'heading-display text-2xl mb-3 text-warmth-900 dark:text-warmth-100';
+    h.className = 'heading-display text-2xl mb-3';
     h.textContent = title;
     if (!ariaLabelledBy) ariaLabelledBy = `modal-title-${Math.random().toString(36).slice(2, 9)}`;
     h.id = ariaLabelledBy;
@@ -52,7 +52,7 @@ export function Modal({ title, content, actions, onClose, dismissible = true, ar
     if (content instanceof HTMLElement) body.append(content);
     else if (typeof content === 'string') body.innerHTML = content;
     else body.append(...content);
-    body.className = 'text-warmth-700 dark:text-warmth-200 leading-relaxed';
+    body.className = 'text-warmth-700 leading-relaxed';
     dialog.append(body);
   }
   if (actions && actions.length) {
@@ -115,7 +115,6 @@ export function Modal({ title, content, actions, onClose, dismissible = true, ar
     if (typeof onClose === 'function') onClose();
   }
 
-  // Defer focus so the modal is mounted before we move focus
   queueMicrotask(() => {
     if (removed) return;
     const focusables = getFocusable();
@@ -129,7 +128,7 @@ export function Modal({ title, content, actions, onClose, dismissible = true, ar
 export function Toast({ message, type = 'info' }) {
   const root = document.createElement('div');
   const palette = {
-    info: 'bg-warmth-900 text-warmth-50 dark:bg-warmth-100 dark:text-warmth-900',
+    info: 'bg-warmth-900 text-warmth-50',
     success: 'bg-sage-500 text-warmth-50',
     error: 'bg-rose-500 text-warmth-50',
     warn: 'bg-honey-500 text-warmth-900',
@@ -142,10 +141,10 @@ export function Toast({ message, type = 'info' }) {
 
 export function Spinner({ size = 24, label } = {}) {
   const wrap = document.createElement('div');
-  wrap.className = 'inline-flex items-center gap-2 text-warmth-600 dark:text-warmth-300';
+  wrap.className = 'inline-flex items-center gap-2 text-warmth-600';
   wrap.setAttribute('aria-live', 'polite');
   const ring = document.createElement('span');
-  ring.className = 'inline-block rounded-full border-2 border-warmth-200 border-t-warmth-900 dark:border-warmth-700 dark:border-t-warmth-100 animate-spin';
+  ring.className = 'inline-block rounded-full border-2 border-warmth-200 border-t-warmth-900 animate-spin';
   ring.style.width = `${size}px`;
   ring.style.height = `${size}px`;
   ring.setAttribute('aria-hidden', 'true');
@@ -164,10 +163,10 @@ export function EmptyState({ title, message, action }) {
   root.className = 'card p-8 text-center fade-up';
   root.setAttribute('role', 'status');
   const h = document.createElement('h3');
-  h.className = 'heading-display text-xl mb-2 text-warmth-900 dark:text-warmth-100';
+  h.className = 'heading-display text-xl mb-2';
   h.textContent = title;
   const p = document.createElement('p');
-  p.className = 'text-warmth-600 dark:text-warmth-400 mb-4';
+  p.className = 'text-warmth-600 mb-4';
   p.textContent = message;
   root.append(h, p);
   if (action) root.append(action);
@@ -180,8 +179,7 @@ export function Icon({ name, size = 20 }) {
   el.style.width = `${size}px`;
   el.style.height = `${size}px`;
   el.setAttribute('aria-hidden', 'true');
-  
-  // Custom GLM-5.2 SVG icons — load from /photobooth/icons/
+
   const svgMap = {
     camera: 'camera', gallery: 'gallery', settings: 'settings',
     heart: 'heart', heartFilled: 'heart-filled', switch: 'switch',

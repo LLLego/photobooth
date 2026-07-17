@@ -85,7 +85,7 @@ async function renderRoute(name, params) {
       h.className = 'heading-display text-2xl mb-2';
       h.textContent = 'Something went wrong';
       const p = document.createElement('p');
-      p.className = 'text-warmth-700 dark:text-warmth-400';
+      p.className = 'text-warmth-700';
       p.textContent = err?.message || 'Unknown error';
       const back = document.createElement('a');
       back.className = 'btn-accent mt-6 inline-flex';

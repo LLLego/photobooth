@@ -1,5 +1,4 @@
-import { getState } from '../state.js';
-import { Button, Icon } from './components.js';
+import { getState, set } from '../state.js';
 import { navigate } from '../router.js';
 
 // Best-character PNG per theme for chip previews (transparent character art).
@@ -16,261 +15,258 @@ export async function renderHome(mount) {
   const firstName = displayName.split(' ')[0];
 
   mount.innerHTML = '';
+
   const wrap = document.createElement('div');
-  wrap.className = 'max-w-md md:max-w-lg mx-auto px-6 pt-12 md:pt-16 pb-40';
+  wrap.className = 'hero';
   wrap.setAttribute('role', 'main');
 
-  // === Greeting ===
-  const greeting = document.createElement('div');
-  greeting.className = 'mb-8 fade-up';
-  greeting.style.animationDelay = '0ms';
-  
-  const hi = document.createElement('p');
-  hi.className = 'text-warmth-500 dark:text-warmth-400 text-sm tracking-wide mb-1';
-  hi.textContent = `Hey ${firstName} 👋`;
-  
-  const title = document.createElement('h1');
-  title.className = 'heading-display text-5xl md:text-6xl leading-none tracking-tight';
-  title.innerHTML = 'our<br>photobooth';
-  
-  const tagline = document.createElement('p');
-  tagline.className = 'text-warmth-400 dark:text-warmth-500 text-sm mt-3 opacity-80';
-  tagline.textContent = 'moments together, wherever you are';
-  
-  greeting.append(hi, title, tagline);
-  wrap.append(greeting);
+  // Eyebrow
+  const eyebrow = document.createElement('div');
+  eyebrow.className = 'hero-eyebrow fade-up';
+  eyebrow.style.animationDelay = '0ms';
+  eyebrow.textContent = 'every photo, a memory';
 
-  // === Settings gear ===
-  const settingsBtn = document.createElement('button');
-  settingsBtn.className = 'absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-warmth-400 hover:text-warmth-600 dark:text-warmth-500 dark:hover:text-warmth-200 transition';
-  settingsBtn.append(Icon({ name: 'settings', size: 20 }));
-  settingsBtn.setAttribute('aria-label', 'Settings');
-  settingsBtn.addEventListener('click', () => navigate('settings'));
-  
-  const topWrap = document.createElement('div');
-  topWrap.className = 'relative';
-  topWrap.append(wrap, settingsBtn);
-  mount.append(topWrap);
+  // Hero title
+  const title = document.createElement('h1');
+  title.className = 'hero-title fade-up';
+  title.style.animationDelay = '60ms';
+  const our = document.createElement('span');
+  our.className = 'our';
+  our.textContent = 'our';
+  const photobooth = document.createElement('span');
+  photobooth.className = 'photobooth';
+  photobooth.textContent = 'photobooth';
+  title.append(our, photobooth);
+
+  // Subtitle
+  const subtitle = document.createElement('p');
+  subtitle.className = 'hero-subtitle fade-up';
+  subtitle.style.animationDelay = '120ms';
+  subtitle.innerHTML = `Hey ${firstName} &mdash; <span class="underline">moments together</span>, wherever you are`;
+
+  wrap.append(eyebrow, title, subtitle);
 
   // === Feature Cards ===
   const cardsWrap = document.createElement('div');
-  cardsWrap.className = 'space-y-3 mb-8';
-  
-  // Single Camera card
+  cardsWrap.className = 'feature-grid';
+
   const singleCard = createFeatureCard({
     icon: 'camera',
-    title: 'Single camera',
+    eyebrow: 'Solo · one of us',
+    title: 'single <em>camera</em>',
     desc: 'Take 4 photos and create a beautiful photo strip with frames and filters.',
-    variant: 'primary',
-    delay: 100,
+    visual: 'single',
+    delay: 180,
     onClick: () => navigate('single'),
   });
-  
-  // Dual Camera card
+
   const dualCard = createFeatureCard({
     icon: 'dual-camera',
-    title: 'Dual camera',
+    eyebrow: 'Together · both of us',
+    title: 'dual <em>camera</em>',
     desc: 'Take photos together even when apart. Host a room and invite your partner.',
-    variant: 'accent',
-    delay: 200,
+    visual: 'dual',
+    delay: 240,
     onClick: () => navigate('dual'),
   });
-  
+
   cardsWrap.append(singleCard, dualCard);
   wrap.append(cardsWrap);
 
-  // === Gallery row ===
+  // === Gallery peek ===
   const galleryRow = document.createElement('div');
-  galleryRow.className = 'flex items-center gap-3 fade-up';
-  galleryRow.style.animationDelay = '300ms';
-  
-  const galleryBtn = document.createElement('button');
-  galleryBtn.className = 'flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl border border-warmth-200 dark:border-warmth-300 hover:border-warmth-400 dark:hover:border-warmth-500 transition text-left';
-  galleryBtn.addEventListener('click', () => navigate('gallery'));
-  
-  const galleryIcon = document.createElement('span');
-  galleryIcon.className = 'w-10 h-10 rounded-xl bg-warmth-100 dark:bg-warmth-200 flex items-center justify-center shrink-0';
-  galleryIcon.append(Icon({ name: 'gallery', size: 20 }));
-  
-  const galleryText = document.createElement('div');
-  const galleryLabel = document.createElement('p');
-  galleryLabel.className = 'text-sm font-medium text-warmth-900 dark:text-warmth-50';
-  galleryLabel.textContent = 'Gallery';
-  const gallerySub = document.createElement('p');
-  gallerySub.className = 'text-xs text-warmth-500 dark:text-warmth-400';
-  gallerySub.textContent = 'View your saved photo strips';
-  galleryText.append(galleryLabel, gallerySub);
-  
-  galleryBtn.append(galleryIcon, galleryText);
-  
-  // Photo count badge
-  const badge = document.createElement('span');
-  badge.className = 'shrink-0 px-2.5 py-1 rounded-full bg-warmth-100 dark:bg-warmth-200 text-xs font-medium text-warmth-700 dark:text-warmth-200';
-  badge.textContent = '0';
-  galleryBtn.append(badge);
-  
-  async function updateGalleryBadge() {
-    try {
-      const { fetchStrips } = await import('../gallery/gallery.js');
-      await fetchStrips({ limit: 1, reset: true });
-      if (badge.isConnected) {
-        badge.textContent = String(getState().gallery?.total ?? 0);
-      }
-    } catch {
-      if (badge.isConnected) {
-        badge.textContent = '—';
-        badge.setAttribute('aria-label', 'Gallery count unavailable');
-      }
-    }
-  }
+  galleryRow.className = 'gallery-card fade-up';
+  galleryRow.style.animationDelay = '320ms';
 
-  updateGalleryBadge();
-  window.addEventListener('pageshow', updateGalleryBadge, { once: true });
-  
-  galleryRow.append(galleryBtn);
+  const galleryTitle = document.createElement('div');
+  galleryTitle.className = 'gallery-info';
+  const galleryLabel = document.createElement('p');
+  galleryLabel.className = 'gallery-info-title';
+  galleryLabel.textContent = 'Our memories';
+  const gallerySub = document.createElement('p');
+  gallerySub.className = 'gallery-info-meta';
+  gallerySub.textContent = 'Photo strips we have saved together';
+  galleryTitle.append(galleryLabel, gallerySub);
+
+  const galleryCta = document.createElement('button');
+  galleryCta.className = 'gallery-cta';
+  galleryCta.textContent = 'View gallery →';
+  galleryCta.addEventListener('click', () => navigate('gallery'));
+
+  const galleryFooter = document.createElement('div');
+  galleryFooter.className = 'gallery-footer';
+  galleryFooter.append(galleryTitle, galleryCta);
+  galleryRow.append(galleryFooter);
+
+  // Hero strip preview — four placeholder frames in a row.
+  const strip = document.createElement('div');
+  strip.className = 'gallery-strip';
+  for (let i = 1; i <= 4; i++) {
+    const item = document.createElement('div');
+    item.className = 'gallery-strip-item';
+    const img = document.createElement('div');
+    img.className = `gallery-strip-img m${i}`;
+    img.setAttribute('data-date', 'soon');
+    item.append(img);
+    strip.append(item);
+  }
+  galleryRow.insertBefore(strip, galleryFooter);
+
   wrap.append(galleryRow);
 
   // === Frame preview row ===
   const framePreview = document.createElement('div');
-  framePreview.className = 'mt-8';
+  framePreview.className = 'themes-section fade-up';
   framePreview.style.animationDelay = '400ms';
-  framePreview.classList.add('fade-up');
-  
-  const frameLabel = document.createElement('p');
-  frameLabel.className = 'text-xs uppercase tracking-widest text-warmth-400 dark:text-warmth-500 mb-3';
-  frameLabel.textContent = 'Choose a frame';
-  framePreview.append(frameLabel);
-  
-  // Quick frame picker — horizontal scroll of frames
-  const frameScroller = document.createElement('div');
-  frameScroller.className = 'flex gap-2 overflow-x-auto no-scrollbar pb-2';
-  
-  const themes = ['minimal', 'hundred-acre-gang', 'pucca', 'hello-kitty'];
-  const themeColors = {
-    'minimal': '#D4956A',
-    'hundred-acre-gang': '#FFB400', 
-    'pucca': '#E8443A',
-    'hello-kitty': '#E891A0',
-  };
-  
-  const selectedTheme = getState().preferences?.themeId;
 
-  themes.forEach((slug) => {
-    const name = slug === 'hundred-acre-gang' ? 'Hundred Acre'
-      : slug.replace('-', ' ').replace(/(^|\s)\S/g, c => c.toUpperCase());
+  const frameHeader = document.createElement('div');
+  frameHeader.className = 'section-header';
+  const frameHeadInner = document.createElement('div');
+  const eyebrowFrame = document.createElement('span');
+  eyebrowFrame.className = 'section-eyebrow';
+  eyebrowFrame.textContent = 'choose a frame';
+  const frameTitle = document.createElement('h2');
+  frameTitle.className = 'section-title';
+  frameTitle.innerHTML = 'pick your <em>flavor</em>';
+  frameHeadInner.append(eyebrowFrame, frameTitle);
+  frameHeader.append(frameHeadInner);
+
+  const frameMeta = document.createElement('div');
+  frameMeta.className = 'section-meta';
+  frameMeta.innerHTML = '<strong>4</strong>frames · tap to choose';
+  frameHeader.append(frameMeta);
+
+  framePreview.append(frameHeader);
+
+  const themesGrid = document.createElement('div');
+  themesGrid.className = 'themes-grid';
+
+  const themes = [
+    { slug: 'minimal', previewClass: 'minimal', name: 'Minimal', sub: 'clean & simple', tag: null },
+    { slug: 'hundred-acre-gang', previewClass: 'acre', name: 'Hundred Acre', sub: 'cosy & sweet', tag: 'new' },
+    { slug: 'pucca', previewClass: 'pucca', name: 'Pucca', sub: 'bold & playful', tag: null },
+    { slug: 'hello-kitty', previewClass: 'kitty', name: 'Hello Kitty', sub: 'soft & lovely', tag: null },
+  ];
+
+  const selectedTheme = getState().preferences?.themeId || 'minimal';
+
+  themes.forEach(({ slug, previewClass, name, sub, tag }) => {
     const isActive = slug === selectedTheme;
-    const chip = document.createElement('button');
-    chip.className = [
-      'shrink-0 flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95',
-      isActive ? 'frame-chip-active' : '',
-    ].filter(Boolean).join(' ');
-    chip.setAttribute('aria-label', `Choose ${name} frame`);
-    chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    chip.dataset.themeSlug = slug;
+    const card = document.createElement('button');
+    card.className = `theme-card${isActive ? ' active' : ''}`;
+    card.type = 'button';
+    card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    card.setAttribute('aria-label', `Choose ${name} frame`);
+    card.dataset.themeSlug = slug;
+    card.style.animationDelay = '0ms';
 
-    const swatch = document.createElement('span');
-    const baseBorder = 'border-warmth-200 dark:border-warmth-300';
-    const activeBorder = 'border-honey-500 dark:border-honey-400 ring-2 ring-honey-400/60 ring-offset-1 ring-offset-warmth-50 dark:ring-offset-warmth-900';
-    swatch.className = [
-      'w-12 h-16 rounded-2xl border-2 overflow-hidden shadow-sm relative bg-warmth-50 dark:bg-warmth-100',
-      isActive ? activeBorder : baseBorder,
-    ].join(' ');
+    const preview = document.createElement('div');
+    preview.className = `theme-preview ${previewClass}`;
+    preview.setAttribute('aria-hidden', 'true');
 
-    const baseUrl = `${import.meta.env.BASE_URL}themes/${slug}`;
-    const candidates = [];
-    const characterPng = CHARACTER_PNG[slug];
-    if (characterPng) candidates.push(`${import.meta.env.BASE_URL}${characterPng}`);
-    candidates.push(`${baseUrl}/preview.svg`);
-    candidates.push(`${baseUrl}/preview.png`);
-    candidates.push(`${baseUrl}/frame-preview.png`);
+    const tagEl = document.createElement('span');
+    tagEl.className = tag ? `theme-tag ${tag}` : 'theme-tag';
+    tagEl.textContent = tag || name.toLowerCase();
+    preview.append(tagEl);
 
-    const previewImg = document.createElement('img');
-    previewImg.alt = '';
-    previewImg.className = 'absolute inset-0 w-full h-full object-cover';
-    previewImg.loading = 'lazy';
-    previewImg.decoding = 'async';
+    const info = document.createElement('div');
+    info.className = 'theme-info';
+    const themeName = document.createElement('div');
+    themeName.className = 'theme-name';
+    themeName.innerHTML = `${name}<em>${sub}</em>`;
+    const radio = document.createElement('span');
+    radio.className = 'theme-radio';
+    radio.setAttribute('aria-hidden', 'true');
+    info.append(themeName, radio);
 
-    let fallbackIdx = 0;
-    const showColorFallback = () => {
-      previewImg.style.display = 'none';
-      swatch.style.background = themeColors[slug];
-      if (!swatch.querySelector('.frame-chip-fallback-glyph')) {
-        const glyph = document.createElement('span');
-        glyph.className = 'frame-chip-fallback-glyph absolute inset-0 flex items-center justify-center text-base leading-none';
-        glyph.textContent = slug === 'minimal' ? '✦' : '·';
-        glyph.setAttribute('aria-hidden', 'true');
-        swatch.append(glyph);
-      }
-    };
-    previewImg.onerror = () => {
-      fallbackIdx += 1;
-      if (fallbackIdx < candidates.length) {
-        previewImg.src = candidates[fallbackIdx];
-      } else {
-        showColorFallback();
-      }
-    };
-    previewImg.src = candidates[0];
-    swatch.append(previewImg);
-
-    const check = document.createElement('span');
-    check.className = [
-      'absolute -top-1 -right-1 w-4 h-4 rounded-full bg-honey-500 text-warmth-900 flex items-center justify-center text-[10px] font-bold leading-none shadow',
-      isActive ? 'is-visible' : '',
-    ].filter(Boolean).join(' ');
-    check.setAttribute('aria-hidden', 'true');
-    check.textContent = '✓';
-    swatch.append(check);
-
-    const label = document.createElement('span');
-    label.className = `text-[10px] leading-tight text-center font-medium ${isActive ? 'text-warmth-900 dark:text-warmth-50' : 'text-warmth-600 dark:text-warmth-400'}`;
-    label.textContent = name;
-
-    chip.append(swatch, label);
-    chip.addEventListener('click', () => {
-      import('../state.js').then(({ set, getState: gs }) => {
-        set({ preferences: { ...gs().preferences, themeId: slug } });
-        navigate('single');
-      });
+    card.append(preview, info);
+    card.addEventListener('click', () => {
+      set({ preferences: { ...getState().preferences, themeId: slug } });
+      navigate('single');
     });
-    frameScroller.append(chip);
+    themesGrid.append(card);
   });
-  
-  framePreview.append(frameScroller);
+
+  framePreview.append(themesGrid);
   wrap.append(framePreview);
+
+  // === Footer mark ===
+  const footer = document.createElement('div');
+  footer.className = 'footer-mark fade-up';
+  footer.textContent = 'made with love · for us';
+  wrap.append(footer);
+
+  mount.append(wrap);
+
+  // Load gallery count after the route renders so we don't block first paint.
+  async function updateGalleryBadge() {
+    try {
+      const { fetchStrips } = await import('../gallery/gallery.js');
+      await fetchStrips({ limit: 1, reset: true });
+      const total = getState().gallery?.total ?? 0;
+      const meta = frameMeta.querySelector('strong');
+      if (meta) meta.textContent = String(total);
+    } catch {
+      // Gallery count unavailable — leave the default "4" in place.
+    }
+  }
+  updateGalleryBadge();
 }
 
-function createFeatureCard({ icon, title, desc, variant, delay, onClick }) {
+function createFeatureCard({ icon, eyebrow, title, desc, visual, delay, onClick }) {
   const card = document.createElement('button');
-  card.className = 'w-full text-left p-5 rounded-2xl border-2 border-warmth-200 dark:border-warmth-300 hover:border-warmth-400 dark:hover:border-warmth-500 hover:shadow-lg transition-all duration-200 fade-up';
+  card.className = 'feature-card fade-up';
   card.style.animationDelay = `${delay}ms`;
   card.addEventListener('click', onClick);
-  
-  const header = document.createElement('div');
-  header.className = 'flex items-center gap-3 mb-2';
-  
-  const iconWrap = document.createElement('span');
-  iconWrap.className = `w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-    variant === 'primary' 
-      ? 'bg-honey-500 dark:bg-honey-600 text-warmth-50' 
-      : 'bg-rose-500 dark:bg-rose-600 text-warmth-50'
-  }`;
-  iconWrap.append(Icon({ name: icon, size: 22 }));
-  
+
+  const tag = document.createElement('div');
+  tag.className = 'feature-card-tag';
+  const dot = document.createElement('span');
+  dot.className = 'dot';
+  tag.append(dot, document.createTextNode(eyebrow));
+
   const cardTitle = document.createElement('h3');
-  cardTitle.className = 'heading-display text-lg';
-  cardTitle.textContent = title;
-  
-  header.append(iconWrap, cardTitle);
-  
+  cardTitle.className = 'feature-card-title';
+  cardTitle.innerHTML = title;
+
   const cardDesc = document.createElement('p');
-  cardDesc.className = 'text-sm text-warmth-500 dark:text-warmth-400';
+  cardDesc.className = 'feature-card-desc';
   cardDesc.textContent = desc;
-  
-  const arrow = document.createElement('span');
-  arrow.className = 'inline-block mt-3 text-warmth-400 dark:text-warmth-500 text-sm';
-  arrow.textContent = '→ Get started';
-  
-  card.append(header, cardDesc, arrow);
+
+  const visualEl = document.createElement('div');
+  visualEl.className = 'feature-card-visual';
+  if (visual === 'single') {
+    visualEl.classList.add('single-visual');
+    for (let i = 0; i < 3; i++) {
+      const p = document.createElement('div');
+      p.className = 'polaroid';
+      const f = document.createElement('div');
+      f.className = 'polaroid-frame';
+      p.append(f);
+      visualEl.append(p);
+    }
+  } else {
+    visualEl.classList.add('dual-visual');
+    for (let i = 0; i < 3; i++) {
+      if (i === 1) {
+        const bridge = document.createElement('div');
+        bridge.className = 'heart-bridge';
+        visualEl.append(bridge);
+        continue;
+      }
+      const cam = document.createElement('div');
+      cam.className = 'camera-mock';
+      const lens = document.createElement('div');
+      lens.className = 'lens';
+      cam.append(lens);
+      visualEl.append(cam);
+    }
+  }
+
+  const cta = document.createElement('span');
+  cta.className = 'feature-card-cta';
+  cta.innerHTML = 'Get started <span class="arrow">→</span>';
+
+  card.append(tag, cardTitle, cardDesc, visualEl, cta);
   return card;
 }

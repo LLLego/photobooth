@@ -62,13 +62,13 @@ export async function renderThemePicker(mount) {
       const previewWrap = document.createElement('span');
       const accent = t.palette?.accent || t.previewColor || '#FFFFFF';
       const fallbackBg = t.previewColor || t.palette?.background || '#FFFFFF';
-      previewWrap.className = 'theme-thumb relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 dark:border-warmth-300 bg-warmth-50 dark:bg-warmth-100 transition-transform duration-150 ease-out';
+      previewWrap.className = 'theme-thumb relative w-16 h-16 rounded-3xl overflow-hidden border-2 border-warmth-200 bg-warmth-50 transition-transform duration-150 ease-out';
       previewWrap.style.background = fallbackBg;
 
       if (t.id !== 'none') {
         const img = document.createElement('img');
         img.className = 'absolute inset-0 w-full h-full object-cover';
-        img.alt = `${v.name} preview`;
+        img.alt = '';
         img.loading = 'lazy';
         img.decoding = 'async';
         const baseUrl = `${import.meta.env.BASE_URL}themes/${t.id}`;
@@ -120,7 +120,7 @@ export async function renderThemePicker(mount) {
           iconEl.textContent = icon;
           
           const fallbackLabel = document.createElement('span');
-          fallbackLabel.className = 'text-[9px] font-medium text-warmth-900 dark:text-warmth-50 text-center px-1 leading-tight';
+          fallbackLabel.className = 'text-[9px] font-medium text-warmth-900 text-center px-1 leading-tight';
           fallbackLabel.textContent = v.name.length > 12 ? v.name.slice(0, 11) + '…' : v.name;
           
           previewWrap.append(iconEl, fallbackLabel);
@@ -140,13 +140,13 @@ export async function renderThemePicker(mount) {
         previewWrap.append(img);
       } else {
         const noneIcon = document.createElement('span');
-        noneIcon.className = 'absolute inset-0 flex items-center justify-center text-warmth-400 dark:text-warmth-600 text-2xl';
+        noneIcon.className = 'absolute inset-0 flex items-center justify-center text-warmth-400 text-2xl';
         noneIcon.textContent = '∅';
         previewWrap.append(noneIcon);
       }
 
       const label = document.createElement('span');
-      label.className = 'theme-card-label text-xs text-warmth-700 dark:text-warmth-200 leading-tight';
+      label.className = 'theme-card-label text-xs text-warmth-700 leading-tight';
       label.textContent = v.name;
 
       const badge = document.createElement('span');
@@ -161,16 +161,16 @@ export async function renderThemePicker(mount) {
   }
 
   const layoutWrap = document.createElement('div');
-  layoutWrap.className = 'mt-2 pt-2 border-t border-warmth-200 dark:border-warmth-300';
+  layoutWrap.className = 'mt-2 pt-2 border-t border-warmth-200';
   layoutWrap.innerHTML = `
     <p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Layout</p>
-    <div class="grid grid-cols-4 gap-2" data-layouts></div>
+    <div class="grid gap-2" data-layouts style="grid-template-columns: repeat(4, minmax(0, 1fr));"></div>
   `;
   const layoutRow = layoutWrap.querySelector('[data-layouts]');
   for (const layout of PREVIEW_LAYOUTS) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 dark:border-warmth-300 text-warmth-900 dark:text-warmth-100 transition-colors duration-150';
+    b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 transition-colors duration-150';
     b.textContent = layout.label;
     b.dataset.layout = layout.id;
     b.setAttribute('aria-pressed', 'false');
@@ -182,10 +182,10 @@ export async function renderThemePicker(mount) {
 
   // Aspect ratio selector
   const ratioWrap = document.createElement('div');
-  ratioWrap.className = 'mt-2 pt-2 border-t border-warmth-200 dark:border-warmth-300';
+  ratioWrap.className = 'mt-2 pt-2 border-t border-warmth-200';
   ratioWrap.innerHTML = `
     <p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Aspect ratio</p>
-    <div class="grid grid-cols-4 gap-2" data-ratios></div>
+    <div class="grid gap-2" data-ratios style="grid-template-columns: repeat(4, minmax(0, 1fr));"></div>
   `;
   const ratioRow = ratioWrap.querySelector('[data-ratios]');
   const RATIOS = [
@@ -197,7 +197,7 @@ export async function renderThemePicker(mount) {
   for (const r of RATIOS) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 dark:border-warmth-300 text-warmth-900 dark:text-warmth-100 transition-colors duration-150';
+    b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 transition-colors duration-150';
     b.textContent = r.label;
     b.dataset.ratio = r.id;
     b.setAttribute('aria-pressed', 'false');
@@ -264,47 +264,46 @@ function applyActiveStates() {
   document.querySelectorAll('[data-layout]').forEach((b) => {
     const isActive = b.dataset.layout === layout;
     b.classList.remove(
-      'bg-warmth-900', 'dark:bg-warmth-100',
-      'text-warmth-50', 'dark:text-warmth-900',
-      'border-warmth-900', 'dark:border-warmth-100',
-      'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
-      'border-warmth-200', 'dark:border-warmth-300'
+      'bg-warmth-900',
+      'text-warmth-50',
+      'border-warmth-900',
+      'bg-transparent',
+      'border-warmth-200'
     );
     if (isActive) {
       b.classList.add(
-        'bg-warmth-900', 'dark:bg-warmth-100',
-        'text-warmth-50', 'dark:text-warmth-900',
-        'border-warmth-900', 'dark:border-warmth-100'
+        'bg-warmth-900',
+        'text-warmth-50',
+        'border-warmth-900'
       );
     } else {
       b.classList.add(
-        'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
-        'border-warmth-200', 'dark:border-warmth-300'
+        'bg-transparent',
+        'border-warmth-200'
       );
     }
     b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   });
-  // Aspect ratio buttons
   document.querySelectorAll('[data-ratio]').forEach((b) => {
     const ratioId = getState().preferences.aspectRatio || '3:4';
     const isActive = b.dataset.ratio === ratioId;
     b.classList.remove(
-      'bg-warmth-900', 'dark:bg-warmth-100',
-      'text-warmth-50', 'dark:text-warmth-900',
-      'border-warmth-900', 'dark:border-warmth-100',
-      'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
-      'border-warmth-200', 'dark:border-warmth-300'
+      'bg-warmth-900',
+      'text-warmth-50',
+      'border-warmth-900',
+      'bg-transparent',
+      'border-warmth-200'
     );
     if (isActive) {
       b.classList.add(
-        'bg-warmth-900', 'dark:bg-warmth-100',
-        'text-warmth-50', 'dark:text-warmth-900',
-        'border-warmth-900', 'dark:border-warmth-100'
+        'bg-warmth-900',
+        'text-warmth-50',
+        'border-warmth-900'
       );
     } else {
       b.classList.add(
-        'bg-transparent', 'text-warmth-900', 'dark:text-warmth-100',
-        'border-warmth-200', 'dark:border-warmth-300'
+        'bg-transparent',
+        'border-warmth-200'
       );
     }
     b.setAttribute('aria-pressed', isActive ? 'true' : 'false');

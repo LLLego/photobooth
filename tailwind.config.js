@@ -1,10 +1,17 @@
 /** @type {import('tailwindcss').Config} */
+// Tailwind config retained for compatibility — CSS now lives in src/styles/main.css
+// using GLM-5.2 design system. Tailwind directives are stripped from main.css.
 export default {
   content: ['./index.html', './src/**/*.{js,html}'],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        terracotta: '#D4956A',
+        cream: '#FFFAF0',
+        chocolate: '#2D1B11',
+        honey: '#FFB400',
+        // Legacy warmth palette aliases — preserved so existing classNames still resolve.
         warmth: {
           50: '#FFFAF0',
           100: '#FFF3E0',
@@ -17,25 +24,13 @@ export default {
           800: '#4A2515',
           900: '#2D1B11',
         },
-        honey: {
-          400: '#FFD54F',
-          500: '#FFB400',
-          600: '#E09E00',
-        },
-        sage: {
-          400: '#8FAC95',
-          500: '#6B8F71',
-          600: '#527058',
-        },
-        rose: {
-          400: '#D47A7A',
-          500: '#C44D4D',
-        }
+        sage: { 500: '#6B8F71' },
+        rose: { 500: '#C44D4D' },
       },
       fontFamily: {
-        display: ['Playfair Display', 'Georgia', 'Times New Roman', 'serif'],
-        body: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        mono: ['Courier New', 'Courier', 'monospace'],
+        display: ['Fraunces', 'Playfair Display', 'Georgia', 'serif'],
+        body: ['"DM Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"Courier New"', 'Courier', 'monospace'],
       },
     },
   },
