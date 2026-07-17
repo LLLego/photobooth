@@ -38,6 +38,10 @@ async function boot() {
 
   mountLoading(mount);
 
+  // Start router IMMEDIATELY — don't wait for Supabase
+  // The router clears the loading spinner when it renders
+  startRouter(mount);
+
   // Don't block boot on theme loading — render UI immediately
   Promise.allSettled([
     preloadPopularThemes(),
@@ -90,13 +94,8 @@ async function boot() {
     set({ user: null, initialized: true });
   }
 
-  // Wire the router first, BEFORE mounting nav host. The router's first
-  // handleHashChange() call will render the current route directly into
-  // mount, removing the loading spinner as part of its normal render cycle.
-  startRouter(mount);
-
-  // Now that the router has rendered, mount the navigation host so it
-  // subscribes to state changes that have already settled.
+  // Router already started above. Mount nav host + toaster after
+  // async init settles so they subscribe to the settled state.
   mountNavigationHost();
   mountToaster();
 }
