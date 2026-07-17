@@ -149,6 +149,14 @@ export async function renderDualCamera(mount) {
     startBtn.disabled = true;
     status.textContent = 'Creating room…';
     try {
+      // If a previous session is still alive (rapid double-click, or a
+      // failed teardown), dispose it before starting a new one — otherwise
+      // startDualSession leaves the old peer/channel live and the user
+      // sees stale state.
+      if (activeSession) {
+        try { activeSession.dispose(); } catch {}
+        activeSession = null;
+      }
       const prefs = getState().preferences;
       const { roomCode, session } = await startDualSession({ themeId: prefs.themeId, layout: prefs.layout });
       activeSession = session;

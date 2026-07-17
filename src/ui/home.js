@@ -39,11 +39,17 @@ export async function renderHome(mount) {
   photobooth.textContent = 'photobooth';
   title.append(our, photobooth);
 
-  // Subtitle
+  // Subtitle — build via DOM (no innerHTML) so user-controlled display_name
+  // can't inject markup.
   const subtitle = document.createElement('p');
   subtitle.className = 'hero-subtitle fade-up';
   subtitle.style.animationDelay = '120ms';
-  subtitle.innerHTML = `Hey ${firstName} &mdash; <span class="underline">moments together</span>, wherever you are`;
+  const heyName = document.createElement('span');
+  heyName.textContent = `Hey ${firstName} — `;
+  const underline = document.createElement('span');
+  underline.className = 'underline';
+  underline.textContent = 'moments together';
+  subtitle.append(heyName, underline, document.createTextNode(', wherever you are'));
 
   wrap.append(eyebrow, title, subtitle);
 
@@ -128,13 +134,19 @@ export async function renderHome(mount) {
   eyebrowFrame.textContent = 'choose a frame';
   const frameTitle = document.createElement('h2');
   frameTitle.className = 'section-title';
-  frameTitle.innerHTML = 'pick your <em>flavor</em>';
+  frameTitle.append(
+    document.createTextNode('pick your '),
+    Object.assign(document.createElement('em'), { textContent: 'flavor' }),
+  );
   frameHeadInner.append(eyebrowFrame, frameTitle);
   frameHeader.append(frameHeadInner);
 
   const frameMeta = document.createElement('div');
   frameMeta.className = 'section-meta';
-  frameMeta.innerHTML = '<strong>4</strong>frames · tap to choose';
+  frameMeta.append(
+    Object.assign(document.createElement('strong'), { textContent: '4' }),
+    document.createTextNode('frames · tap to choose'),
+  );
   frameHeader.append(frameMeta);
 
   framePreview.append(frameHeader);
@@ -174,7 +186,10 @@ export async function renderHome(mount) {
     info.className = 'theme-info';
     const themeName = document.createElement('div');
     themeName.className = 'theme-name';
-    themeName.innerHTML = `${name}<em>${sub}</em>`;
+    themeName.append(
+      document.createTextNode(name),
+      Object.assign(document.createElement('em'), { textContent: sub }),
+    );
     const radio = document.createElement('span');
     radio.className = 'theme-radio';
     radio.setAttribute('aria-hidden', 'true');
@@ -227,7 +242,18 @@ function createFeatureCard({ icon, eyebrow, title, desc, visual, delay, onClick 
 
   const cardTitle = document.createElement('h3');
   cardTitle.className = 'feature-card-title';
-  cardTitle.innerHTML = title;
+  // Build title via DOM rather than innerHTML so callers can't accidentally
+  // pass user-controlled markup here in the future.
+  const titleMatch = /^(.*?)<em>(.*?)<\/em>(.*)$/s.exec(title || '');
+  if (titleMatch) {
+    cardTitle.append(
+      document.createTextNode(titleMatch[1]),
+      Object.assign(document.createElement('em'), { textContent: titleMatch[2] }),
+      document.createTextNode(titleMatch[3]),
+    );
+  } else {
+    cardTitle.textContent = title || '';
+  }
 
   const cardDesc = document.createElement('p');
   cardDesc.className = 'feature-card-desc';
@@ -265,7 +291,10 @@ function createFeatureCard({ icon, eyebrow, title, desc, visual, delay, onClick 
 
   const cta = document.createElement('span');
   cta.className = 'feature-card-cta';
-  cta.innerHTML = 'Get started <span class="arrow">→</span>';
+  cta.append(
+    document.createTextNode('Get started '),
+    Object.assign(document.createElement('span'), { className: 'arrow', textContent: '→' }),
+  );
 
   card.append(tag, cardTitle, cardDesc, visualEl, cta);
   return card;

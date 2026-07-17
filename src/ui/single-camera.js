@@ -37,6 +37,7 @@ export async function renderSingleCamera(mount) {
   let stopCanvasPreview = null;
   let handleThemeChanged = null;
   let handleRatioChanged = null;
+  let handleStageDoubleClick = null;
   let cameraReady = false;
   let captureSequenceActive = false;
   let localPhotos = [];
@@ -128,7 +129,10 @@ export async function renderSingleCamera(mount) {
   // Filter bar
   const filterBar = document.createElement('div');
   filterBar.className = 'mt-4';
-  filterBar.innerHTML = '<p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Filter</p>';
+  const filterHeading = document.createElement('p');
+  filterHeading.className = 'text-xs uppercase tracking-widest text-warmth-500 mb-2';
+  filterHeading.textContent = 'Filter';
+  filterBar.append(filterHeading);
   const filterScroller = document.createElement('div');
   filterScroller.className = 'flex gap-2 overflow-x-auto no-scrollbar pb-1';
   const filterButtons = new Map();
@@ -203,11 +207,12 @@ export async function renderSingleCamera(mount) {
   cameraBar.append(zoomLabel, zoomSlider, zoomValue, mirrorBtn, flashBtn);
   wrap.append(cameraBar);
 
-  stage.addEventListener('dblclick', () => {
+  handleStageDoubleClick = () => {
     zoomSlider.value = '1';
     zoomValue.textContent = '1.0x';
     set({ preferences: { ...getState().preferences, zoom: 1 } });
-  });
+  };
+  stage.addEventListener('dblclick', handleStageDoubleClick);
 
   const finalBar = document.createElement('div');
   finalBar.className = 'mt-6 hidden flex gap-2';
@@ -293,9 +298,12 @@ export async function renderSingleCamera(mount) {
   } catch (err) {
     const isBlocked = err.name === 'NotAllowedError' || err.message?.includes('Permission');
     status.textContent = '';
-    status.innerHTML = isBlocked
-      ? '<span class="text-amber-600">🔒 Camera access needed — tap the lock/camera icon in your browser address bar, then try again.</span>'
-      : '<span class="text-rose-600">⚠️ Camera unavailable — check your device connection.</span>';
+    const warnSpan = document.createElement('span');
+    warnSpan.className = isBlocked ? 'text-amber-600' : 'text-rose-600';
+    warnSpan.textContent = isBlocked
+      ? '🔒 Camera access needed — tap the lock/camera icon in your browser address bar, then try again.'
+      : '⚠️ Camera unavailable — check your device connection.';
+    status.append(warnSpan);
 
     const retryBtn = Button({
       label: 'Try again',
@@ -562,6 +570,7 @@ export async function renderSingleCamera(mount) {
   function teardown() {
     if (handleThemeChanged) window.removeEventListener('theme-changed', handleThemeChanged);
     if (handleRatioChanged) window.removeEventListener('ratio-changed', handleRatioChanged);
+    if (stage && handleStageDoubleClick) stage.removeEventListener('dblclick', handleStageDoubleClick);
     if (typeof stopCanvasPreview === 'function') {
       try { stopCanvasPreview(); } catch {}
       stopCanvasPreview = null;
@@ -569,17 +578,26 @@ export async function renderSingleCamera(mount) {
     if (videoEl) {
       try { stopLivePreview(videoEl); } catch {}
     }
+    // Drop any references to the local MediaStream so the underlying
+    // tracks can be released even if stopLivePreview no-ops.
+    activeStream = null;
     if (abortController) {
+      // Abort any in-flight countdown/capture work tied to this controller
+      // before discarding it. Without this, a stale controller's signal
+      // listeners (and any pending timer) would linger across navigations.
       try { abortController.abort(); } catch {}
-      abortController = new AbortController();
+      abortController = null;
     }
     clearThumbnailUrls();
     clearResultUrl();
-    activeStream = null;
+    handleThemeChanged = null;
+    handleRatioChanged = null;
+    handleStageDoubleClick = null;
     videoEl = null;
     frameEl = null;
     previewCanvas = null;
     stage = null;
+    cameraReady = false;
   }
 
   function cleanupAndExit() {

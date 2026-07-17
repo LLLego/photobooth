@@ -6,11 +6,16 @@ import { defineConfig, loadEnv } from 'vite';
 function assertEnv(env, keys) {
   const missing = keys.filter((k) => !env[k] || env[k].trim() === '');
   if (missing.length) {
-    const hint = missing.includes('VITE_SUPABASE_URL')
-      ? '\n  → Set VITE_SUPABASE_URL in your .env file or CI secrets.\n  → Run `supabase status` locally or grab values from your project dashboard.'
-      : '';
+    const hints = [];
+    if (missing.includes('VITE_SUPABASE_URL')) {
+      hints.push('\n  → Set VITE_SUPABASE_URL in your .env file or CI secrets.');
+      hints.push('  → Run `supabase status` locally or grab values from your project dashboard.');
+    }
+    if (missing.includes('VITE_SUPABASE_ANON_KEY')) {
+      hints.push('\n  → Set VITE_SUPABASE_ANON_KEY (the publishable/anon key from your Supabase project API settings).');
+    }
     throw new Error(
-      `[vite.config] Missing required env var(s): ${missing.join(', ')}.${hint}`
+      `[vite.config] Missing required env var(s): ${missing.join(', ')}.${hints.join('')}`
     );
   }
 }
@@ -20,7 +25,7 @@ export default defineConfig(({ mode }) => {
   // Only enforce at build time — dev can boot with a placeholder so the
   // UI is still navigable while you wire up Supabase.
   if (mode === 'production' || process.env.CI) {
-    assertEnv(env, ['VITE_SUPABASE_URL']);
+    assertEnv(env, ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']);
   }
   return {
     base: '/photobooth/',
@@ -41,7 +46,8 @@ export default defineConfig(({ mode }) => {
       open: true
     },
     define: {
-      __VITE_SUPABASE_URL_PRESENT__: JSON.stringify(Boolean(env.VITE_SUPABASE_URL))
+      __VITE_SUPABASE_URL_PRESENT__: JSON.stringify(Boolean(env.VITE_SUPABASE_URL)),
+      __VITE_SUPABASE_ANON_KEY_PRESENT__: JSON.stringify(Boolean(env.VITE_SUPABASE_ANON_KEY))
     }
   };
 });
