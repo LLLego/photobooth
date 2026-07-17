@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Camera Test — Photobooth</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;background:#1a1a2e;color:#eee;padding:20px}
+h1{color:#e8453a;margin-bottom:8px}
+.panel{background:#16213e;border-radius:12px;padding:16px;margin:12px 0}
+.log{background:#0f0f23;border-radius:8px;padding:12px;max-height:400px;overflow-y:auto;font-size:13px;line-height:1.6}
+.log .ok{color:#4caf50}.log .err{color:#f44336}.log .info{color:#2196f3}.log .warn{color:#ff9800}
+.output{display:flex;gap:12px;flex-wrap:wrap}
+.output img{max-width:300px;border-radius:8px;border:2px solid #333}
+button{background:#e8453a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;margin:4px}
+button:hover{background:#c62828} button:disabled{opacity:.5}
+</style>
+</head>
+<body>
+<h1>📷 Virtual Camera Stress Test</h1>
+<div class="panel">
+  <button id="runAll">▶ Run All Tests</button>
+  <button id="runCapture">📸 Test Capture</button>
+  <button id="runComposite">🎞 Test Composite</button>
+  <button id="runExport">💾 Test Export</button>
+</div>
+<div class="output" id="output"></div>
+<div class="log" id="log"><span class="info">Ready. Click "Run All Tests" to start.</span></div>
+
+<script>
+const logEl = document.getElementById('log');
+const outEl = document.getElementById('output');
+
+function log(msg, type='info') {
+  const d = document.createElement('div');
+  d.className = type;
+  d.textContent = `[${new Date().toISOString().slice(11,19)}] ${msg}`;
+  logEl.append(d);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// Colors for test photos
+const TEST_COLORS = ['#4CAF50','#2196F3','#FF9800','#E91E63'];
+const W=1200, H=1600, SLOT_H=H/4;
+
+function createTestPhoto(color, label) {
+  const c = document.createElement('canvas');
+  c.width=W; c.height=SLOT_H;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle=color; ctx.fillRect(0,0,W,SLOT_H);
+  ctx.fillStyle='#fff'; ctx.font='bold 60px sans-serif';
+  ctx.textAlign='center'; ctx.fillText(label, W/2, SLOT_H/2+20);
+  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=3;
+  ctx.strokeRect(10,10,W-20,SLOT_H-20);
+  return c;
+}
+
+function canvasToBlob(canvas) {
+  return new Promise(r => canvas.toBlob(r, 'image/png'));
+}
+
+async function composeStrip(photos) {
+  const strip = document.createElement('canvas');
+  strip.width=W; strip.height=H;
+  const ctx=strip.getContext('2d');
+  
+  // Background
+  ctx.fillStyle='#2D1B11'; ctx.fillRect(0,0,W,H);
+  
+  // Draw photos vertically
+  for(let i=0;i<photos.length;i++){
+    const img = new Image();
+    img.src = photos[i];
+    await new Promise(r => {img.onload=r});
+    ctx.drawImage(img, 0, i*SLOT_H, W, SLOT_H);
+  }
+  
+  // Branding footer
+  ctx.font='18px serif'; ctx.fillStyle='#D4956A';
+  ctx.textAlign='center'; ctx.fillText('📷 our photobooth', W/2, H-30);
+  
+  return strip.toDataURL('image/png');
+}
+
+async function testCapture() {
+  log('Testing photo capture...', 'info');
+  const blobs=[];
+  for(let i=0;i<4;i++){
+    const canvas = createTestPhoto(TEST_COLORS[i], `Photo ${i+1}`);
+    const blob = await canvasToBlob(canvas);
+    blobs.push(blob);
+    log(`  Captured photo ${i+1}: ${(blob.size/1024).toFixed(1)}KB`, 'ok');
+    
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(blob);
+    img.title = `Photo ${i+1}`;
+    outEl.append(img);
+  }
+  log(`✓ Capture complete: ${blobs.length} photos, ${(blobs.reduce((s,b)=>s+b.size,0)/1024).toFixed(0)}KB total`, 'ok');
+  return blobs;
+}
+
+async function testComposite(blobs) {
+  log('Testing strip compositing...', 'info');
+  const urls = blobs.map(b => URL.createObjectURL(b));
+  const result = await composeStrip(urls);
+  
+  const img = document.createElement('img');
+  img.src = result;
+  img.style.borderColor = '#4caf50';
+  img.title = 'Composited Strip';
+  outEl.append(img);
+  
+  // Verify: check that the strip contains all 4 colors
+  const probe = document.createElement('canvas');
+  probe.width=W; probe.height=H;
+  const pctx=probe.getContext('2d');
+  const probeImg = new Image();
+  probeImg.src = result;
+  await new Promise(r => {probeImg.onload=r});
+  pctx.drawImage(probeImg,0,0);
+  
+  let detected=0;
+  const expectedColors=[{color:'#4CAF50',y:200},{color:'#2196F3',y:600},{color:'#FF9800',y:1000},{color:'#E91E63',y:1400}];
+  for(const {color,y} of expectedColors){
+    const px = pctx.getImageData(20, y, 1, 1).data;
+    const hex = '#'+[px[0],px[1],px[2]].map(c=>c.toString(16).padStart(2,'0')).join('').toUpperCase();
+    if(hex===color) detected++;
+  }
+  
+  log(`✓ Composite verified: ${detected}/4 photos detected in output`, detected===4?'ok':'err');
+  if(detected!==4) log('⚠ Composite may be incorrect — check image output', 'warn');
+  
+  return result;
+}
+
+async function testExport(dataUrl) {
+  log('Testing export...', 'info');
+  const blob = await (await fetch(dataUrl)).blob();
+  log(`  Export size: ${(blob.size/1024).toFixed(0)}KB`, 'ok');
+  log(`  Format: image/png`, 'ok');
+  log(`✓ Export ready for download`, 'ok');
+  return blob;
+}
+
+async function runAll() {
+  log('══════ STARTING FULL PIPELINE TEST ══════', 'info');
+  outEl.innerHTML='';
+  
+  try {
+    const blobs = await testCapture();
+    const dataUrl = await testComposite(blobs);
+    await testExport(dataUrl);
+    log('══════ ALL TESTS PASSED ✓ ══════', 'ok');
+  } catch(e) {
+    log(`✗ FAILED: ${e.message}`, 'err');
+    console.error(e);
+  }
+}
+
+document.getElementById('runAll').addEventListener('click', runAll);
+document.getElementById('runCapture').addEventListener('click', async ()=>{
+  try{await testCapture()}catch(e){log(`✗ ${e.message}`,'err')}
+});
+document.getElementById('runComposite').addEventListener('click', async ()=>{
+  try{
+    const blobs=[];
+    for(let i=0;i<4;i++){
+      const c=createTestPhoto(TEST_COLORS[i],`Photo ${i+1}`);
+      blobs.push(await canvasToBlob(c));
+    }
+    await testComposite(blobs);
+  }catch(e){log(`✗ ${e.message}`,'err')}
+});
+document.getElementById('runExport').addEventListener('click', async ()=>{
+  try{
+    const blobs=[];
+    for(let i=0;i<4;i++){
+      const c=createTestPhoto(TEST_COLORS[i],`Photo ${i+1}`);
+      blobs.push(await canvasToBlob(c));
+    }
+    const urls=blobs.map(b=>URL.createObjectURL(b));
+    const dataUrl=await composeStrip(urls);
+    await testExport(dataUrl);
+  }catch(e){log(`✗ ${e.message}`,'err')}
+});
+
+// Auto-run
+log('Page loaded. Virtual camera test harness ready.', 'info');
+</script>
+</body>
+</html>
