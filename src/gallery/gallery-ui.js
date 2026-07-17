@@ -89,6 +89,10 @@ export async function renderGallery(mount) {
     unsubscribe();
     observer.disconnect();
     stopRefresh();
+    // Reset the module-level refresh guard so the next gallery mount can
+    // actually fetch — otherwise an in-flight fetch that resolves after
+    // unmount leaves the guard stuck and the next gallery renders empty.
+    refreshInFlight = false;
     cleanup = null;
   };
   return cleanup;

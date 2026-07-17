@@ -107,6 +107,77 @@ html.dark :focus-visible {
   box-shadow: 0 0 0 5px var(--cream);
 }
 
+/* =====================================================================
+   DARK MODE PALETTE SWAP
+   =====================================================================
+   Re-bind the warmth variables so cream/chocolate/terracotta invert.
+   Pages stay legible because everything references --cream/--chocolate/
+   --terracotta via the warmth aliases. */
+html.dark {
+  --cream: #1A120B;
+  --cream-warm: #221710;
+  --cream-deep: #2E1F15;
+  --chocolate: #FFF1D8;
+  --chocolate-soft: #E2C8A0;
+  --chocolate-muted: #B89977;
+  --terracotta: #E89E6E;
+  --terracotta-soft: #D48758;
+  --terracotta-deep: #F0B180;
+  --warmth-50: var(--cream);
+  --warmth-100: var(--cream-warm);
+  --warmth-200: var(--cream-deep);
+  --warmth-900: var(--chocolate);
+  --paper-shadow: rgba(255, 241, 216, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.40);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.50);
+  --shadow-xl: 0 30px 70px rgba(0, 0, 0, 0.60);
+}
+
+/* Body background — kill the warm radial gradients in dark; they look
+   like a dirty smear at low luminance. A flat slate reads cleaner. */
+html.dark body {
+  background-image: none;
+}
+
+/* Nav and chips use translucent surface colors — invert to a darker tint
+   so they don't blind the user against the dark body. */
+html.dark #nav-host {
+  background: rgba(26, 18, 11, 0.80);
+  border-bottom-color: rgba(255, 241, 216, 0.08);
+}
+
+html.dark .card {
+  background: rgba(34, 23, 16, 0.80);
+  border-color: rgba(255, 241, 216, 0.06);
+}
+
+html.dark .surface {
+  background: var(--cream-warm);
+  border-color: rgba(255, 241, 216, 0.10);
+}
+
+html.dark .feature-card,
+html.dark .theme-card,
+html.dark .gallery-card {
+  background: var(--cream-warm);
+  border-color: rgba(255, 241, 216, 0.08);
+}
+
+html.dark .input {
+  background: var(--cream-warm);
+  border-color: rgba(255, 241, 216, 0.10);
+  color: var(--chocolate);
+}
+
+html.dark .bottom-nav {
+  background: color-mix(in srgb, var(--cream) 92%, transparent);
+  border-top-color: rgba(255, 241, 216, 0.10);
+}
+
+html.dark .toast-root { color-scheme: dark; }
+
+
 /* Inputs and textareas get a slightly tighter ring so it doesn't blow
    the layout. */
 .input:focus-visible,
@@ -1057,6 +1128,7 @@ html.dark select:focus-visible {
 }
 
 .capture-button {
+  position: relative;
   width: 78px; height: 78px;
   border-radius: 9999px;
   background: var(--honey);
@@ -1068,6 +1140,9 @@ html.dark select:focus-visible {
   transition: transform 150ms ease-out;
   cursor: pointer;
   color: var(--chocolate);
+  /* touch-action: manipulation disables the 300ms double-tap-to-zoom
+     delay on mobile so the capture feels immediate. */
+  touch-action: manipulation;
 }
 .capture-button:active { transform: scale(0.92); }
 .capture-button[disabled] { opacity: 0.5; pointer-events: none; }

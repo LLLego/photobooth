@@ -124,7 +124,7 @@ export async function renderSingleCamera(mount) {
   const themeCard = document.createElement('div');
   themeCard.className = 'mt-6';
   wrap.append(themeCard);
-  await renderThemePicker(themeCard);
+  const themePickerCleanup = await renderThemePicker(themeCard);
 
   // Filter bar
   const filterBar = document.createElement('div');
@@ -571,6 +571,9 @@ export async function renderSingleCamera(mount) {
     if (handleThemeChanged) window.removeEventListener('theme-changed', handleThemeChanged);
     if (handleRatioChanged) window.removeEventListener('ratio-changed', handleRatioChanged);
     if (stage && handleStageDoubleClick) stage.removeEventListener('dblclick', handleStageDoubleClick);
+    if (typeof themePickerCleanup === 'function') {
+      try { themePickerCleanup(); } catch {}
+    }
     if (typeof stopCanvasPreview === 'function') {
       try { stopCanvasPreview(); } catch {}
       stopCanvasPreview = null;

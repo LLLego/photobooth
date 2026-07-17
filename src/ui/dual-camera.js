@@ -48,7 +48,7 @@ export async function renderDualCamera(mount) {
   const themeCard = document.createElement('div');
   themeCard.className = 'mb-4';
   wrap.append(themeCard);
-  await renderThemePicker(themeCard);
+  const themePickerCleanup = await renderThemePicker(themeCard);
 
   hostStage = document.createElement('div');
   hostStage.className = 'dual-stage camera-stage w-full mx-auto hidden';
@@ -306,6 +306,9 @@ export async function renderDualCamera(mount) {
     activeSession = null;
     for (const url of resultUrlRefs.splice(0)) {
       try { URL.revokeObjectURL(url); } catch {}
+    }
+    if (typeof themePickerCleanup === 'function') {
+      try { themePickerCleanup(); } catch {}
     }
   }
 

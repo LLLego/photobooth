@@ -24,6 +24,8 @@ export async function renderThemePicker(mount) {
   const prefs = getState().preferences;
   mount.innerHTML = '';
 
+  const cleanups = [];
+
   const wrap = document.createElement('section');
   wrap.className = 'card p-4 pb-4 mb-4';
   wrap.setAttribute('aria-labelledby', 'theme-picker-heading');
@@ -158,6 +160,9 @@ export async function renderThemePicker(mount) {
             }
           }, { rootMargin: '200px' });
           io.observe(previewWrap);
+          // Track each observer so we can disconnect them in bulk if the
+          // picker unmounts before the preview scrolls into view.
+          cleanups.push(() => io.disconnect());
         } else {
           startLoad();
         }
@@ -239,6 +244,12 @@ export async function renderThemePicker(mount) {
   wrap.append(ratioWrap);
 
   mount.append(wrap);
+
+  return () => {
+    for (const dispose of cleanups.splice(0)) {
+      try { dispose(); } catch {}
+    }
+  };
 
   applyActiveStates();
 }

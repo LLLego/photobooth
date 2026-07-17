@@ -2,14 +2,6 @@ import { getState, set } from '../state.js';
 import { navigate } from '../router.js';
 import { fetchStrips } from '../gallery/gallery.js';
 
-// Best-character PNG per theme for chip previews (transparent character art).
-const CHARACTER_PNG = {
-  'minimal': null,
-  'hundred-acre-gang': 'themes/characters/pooh-solo.png',
-  'pucca': 'themes/characters/pucca-real.png',
-  'hello-kitty': 'themes/characters/hello-kitty.png',
-};
-
 export async function renderHome(mount) {
   const state = getState();
   const displayName = state.profile?.display_name || state.user?.user_metadata?.display_name || 'you';
@@ -215,17 +207,34 @@ export async function renderHome(mount) {
   mount.append(wrap);
 
   // Load gallery count after the route renders so we don't block first paint.
+  let badgeStale = false;
   async function updateGalleryBadge() {
     try {
+      // Don't reset the global gallery state — just peek at item count.
+      // A previous mount may have already populated the cache; reusing it
+      // avoids clobbering the user's gallery before they open it.
+      const s = getState();
+      if (s.gallery?.items?.length) {
+        const meta = frameMeta.querySelector('strong');
+        if (meta) meta.textContent = String(s.gallery.items.length);
+        return;
+      }
       await fetchStrips({ limit: 1, reset: true });
-      const total = getState().gallery?.total ?? 0;
+      if (badgeStale) return;
+      const items = getState().gallery?.items || [];
       const meta = frameMeta.querySelector('strong');
-      if (meta) meta.textContent = String(total);
+      if (meta) meta.textContent = String(items.length);
     } catch {
-      // Gallery count unavailable — leave the default "4" in place.
+      // Gallery count unavailable — leave the placeholder "4" in place.
     }
   }
   updateGalleryBadge();
+
+  return () => {
+    // Mark any in-flight badge fetch as stale so a late resolve on a
+    // detached route doesn't corrupt future renders.
+    badgeStale = true;
+  };
 }
 
 function createFeatureCard({ icon, eyebrow, title, desc, visual, delay, onClick }) {

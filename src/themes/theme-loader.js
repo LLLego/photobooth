@@ -17,7 +17,9 @@ async function fetchJson(url) {
 
 function resolveAssetUrl(manifestUrl, assetUrl) {
   if (!assetUrl) return null;
+  if (typeof assetUrl !== 'string') return null;
   if (/^(https?:|data:|blob:)/i.test(assetUrl)) return assetUrl;
+  if (!manifestUrl) return assetUrl;
   try {
     return new URL(assetUrl, manifestUrl).toString();
   } catch {
