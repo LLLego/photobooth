@@ -153,34 +153,79 @@ export async function renderHome(mount) {
     'hello-kitty': '#E891A0',
   };
   
+  const selectedTheme = getState().preferences?.themeId;
+
   themes.forEach((slug) => {
-    const name = slug === 'hundred-acre-gang' ? 'Hundred Acre' 
-      : slug.replace('-', ' ').replace(/(^|\\s)\\S/g, c => c.toUpperCase());
+    const name = slug === 'hundred-acre-gang' ? 'Hundred Acre'
+      : slug.replace('-', ' ').replace(/(^|\s)\S/g, c => c.toUpperCase());
+    const isActive = slug === selectedTheme;
     const chip = document.createElement('button');
-    chip.className = 'shrink-0 flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95';
+    chip.className = [
+      'shrink-0 flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95',
+      isActive ? 'frame-chip-active' : '',
+    ].filter(Boolean).join(' ');
     chip.setAttribute('aria-label', `Choose ${name} frame`);
+    chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     chip.dataset.themeSlug = slug;
-    
-    // Use actual frame preview image, not just a solid color
+
     const swatch = document.createElement('span');
-    swatch.className = 'w-12 h-16 rounded-2xl border-2 border-warmth-200 dark:border-warmth-300 overflow-hidden shadow-sm relative';
-    
+    const baseBorder = 'border-warmth-200 dark:border-warmth-300';
+    const activeBorder = 'border-honey-500 dark:border-honey-400 ring-2 ring-honey-400/60 ring-offset-1 ring-offset-warmth-50 dark:ring-offset-warmth-900';
+    swatch.className = [
+      'w-12 h-16 rounded-2xl border-2 overflow-hidden shadow-sm relative bg-warmth-50 dark:bg-warmth-100',
+      isActive ? activeBorder : baseBorder,
+    ].join(' ');
+
+    const baseUrl = `${import.meta.env.BASE_URL}themes/${slug}`;
+    const candidates = [];
+    const characterPng = CHARACTER_PNG[slug];
+    if (characterPng) candidates.push(`${import.meta.env.BASE_URL}${characterPng}`);
+    candidates.push(`${baseUrl}/preview.svg`);
+    candidates.push(`${baseUrl}/preview.png`);
+    candidates.push(`${baseUrl}/frame-preview.png`);
+
     const previewImg = document.createElement('img');
-    previewImg.src = `${import.meta.env.BASE_URL}themes/${slug}/preview.svg`;
     previewImg.alt = '';
     previewImg.className = 'absolute inset-0 w-full h-full object-cover';
     previewImg.loading = 'lazy';
-    previewImg.onerror = () => {
-      // Fallback: solid color if preview.svg fails
+    previewImg.decoding = 'async';
+
+    let fallbackIdx = 0;
+    const showColorFallback = () => {
       previewImg.style.display = 'none';
       swatch.style.background = themeColors[slug];
+      if (!swatch.querySelector('.frame-chip-fallback-glyph')) {
+        const glyph = document.createElement('span');
+        glyph.className = 'frame-chip-fallback-glyph absolute inset-0 flex items-center justify-center text-base leading-none';
+        glyph.textContent = slug === 'minimal' ? '✦' : '·';
+        glyph.setAttribute('aria-hidden', 'true');
+        swatch.append(glyph);
+      }
     };
+    previewImg.onerror = () => {
+      fallbackIdx += 1;
+      if (fallbackIdx < candidates.length) {
+        previewImg.src = candidates[fallbackIdx];
+      } else {
+        showColorFallback();
+      }
+    };
+    previewImg.src = candidates[0];
     swatch.append(previewImg);
-    
+
+    const check = document.createElement('span');
+    check.className = [
+      'absolute -top-1 -right-1 w-4 h-4 rounded-full bg-honey-500 text-warmth-900 flex items-center justify-center text-[10px] font-bold leading-none shadow',
+      isActive ? 'is-visible' : '',
+    ].filter(Boolean).join(' ');
+    check.setAttribute('aria-hidden', 'true');
+    check.textContent = '✓';
+    swatch.append(check);
+
     const label = document.createElement('span');
-    label.className = 'text-[10px] text-warmth-600 dark:text-warmth-400 leading-tight text-center font-medium';
+    label.className = `text-[10px] leading-tight text-center font-medium ${isActive ? 'text-warmth-900 dark:text-warmth-50' : 'text-warmth-600 dark:text-warmth-400'}`;
     label.textContent = name;
-    
+
     chip.append(swatch, label);
     chip.addEventListener('click', () => {
       import('../state.js').then(({ set, getState: gs }) => {

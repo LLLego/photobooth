@@ -2,6 +2,15 @@ import { loadTheme, NO_FRAME_THEME } from './theme-loader.js';
 import { getState, set } from '../state.js';
 import { fetchThemes } from '../db/themes.js';
 
+// Best-character PNG per theme for picker cards (transparent character art).
+// Inserted FIRST in the fallback chain so character art wins over SVGs.
+const CHARACTER_PNG = {
+  'minimal': null,
+  'hundred-acre-gang': 'themes/characters/pooh-solo.png',
+  'pucca': 'themes/characters/pucca-real.png',
+  'hello-kitty': 'themes/characters/hello-kitty.png',
+};
+
 const PREVIEW_LAYOUTS = [
   { id: 'strip_4', label: 'Strip' },
   { id: 'grid_2x2', label: 'Grid' },
@@ -64,6 +73,11 @@ export async function renderThemePicker(mount) {
         img.decoding = 'async';
         const baseUrl = `${import.meta.env.BASE_URL}themes/${t.id}`;
         const candidates = [];
+        // Character PNG FIRST — real transparent character art wins over SVGs.
+        const characterPng = CHARACTER_PNG[t.id];
+        if (characterPng) {
+          candidates.push(`${import.meta.env.BASE_URL}${characterPng}`);
+        }
         const variantPreviewUrl = `${baseUrl}/${v.id}/preview.svg`;
         candidates.push(variantPreviewUrl);
         candidates.push(`${baseUrl}/preview.svg`);

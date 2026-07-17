@@ -36,6 +36,7 @@ export async function setPreviewFrame(frameEl, themeId) {
     frameEl.removeAttribute('src');
     frameEl.onerror = null;
     frameEl.style.display = 'none';
+    frameEl.style.opacity = '0';
     return;
   }
   try {
@@ -48,18 +49,22 @@ export async function setPreviewFrame(frameEl, themeId) {
       frameEl.onerror = () => {
         console.warn('[preview] frame image failed to load', themeId, theme.frame.url);
         frameEl.style.display = 'none';
+        frameEl.style.opacity = '0';
       };
       frameEl.src = theme.frame.url;
       frameEl.style.display = '';
+      frameEl.style.opacity = '1';
     } else {
       frameEl.removeAttribute('src');
       frameEl.onerror = null;
       frameEl.style.display = 'none';
+      frameEl.style.opacity = '0';
     }
   } catch (err) {
     console.warn('[preview] setPreviewFrame failed', err);
     frameEl.removeAttribute('src');
     frameEl.onerror = null;
     frameEl.style.display = 'none';
+    frameEl.style.opacity = '0';
   }
 }

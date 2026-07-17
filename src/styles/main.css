@@ -116,7 +116,9 @@
   }
   .camera-frame {
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
+    opacity: 1;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.08));
   }
   .camera-overlay-grid {
     position: absolute;
@@ -240,6 +242,10 @@
   }
   html.dark .theme-card-badge { border-color: var(--warmth-900); }
   .theme-card-badge.is-visible { display: flex; }
+
+  .frame-chip-active {
+    transform: translateY(-2px);
+  }
 
   .strip-preview {
     position: relative;
