@@ -97,13 +97,10 @@ async function boot() {
   }
   startRouter(mount);
   mountToaster();
-
-  // Render home directly before nav host (which triggers state subscriptions)
-  if (!isSupabaseConfigured || !initial?.session) {
-    await renderHome(mount);
-  }
-
   mountNavigationHost();
+
+  // Router handles all rendering — clear boot content
+  mount.innerHTML = '';
 }
 
 function mountLoading(mount) {

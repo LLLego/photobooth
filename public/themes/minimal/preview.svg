@@ -1,1 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#FFF8E1" width="200" height="200" rx="30"/><rect x="30" y="30" width="140" height="140" rx="10" fill="none" stroke="#D4956A" stroke-width="3" stroke-dasharray="8 4"/><rect x="50" y="50" width="100" height="100" rx="4" fill="#FAE6B1"/><text x="100" y="110" text-anchor="middle" font-family="serif" font-size="40" fill="#8B6914">✦</text><text x="100" y="175" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#8B6914">Minimal</text></svg>
+Here's a minimal photo-frame preview icon built around restraint — the kind of object where the materials and proportions do the work, not the effects.
+
+
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Minimal photo frame preview</title>
+  <defs>
+    <linearGradient id="frameFace" x1="0.25" y1="0" x2="0.75" y2="1">
+      <stop offset="0%" stop-color="#E1AC83"/>
+      <stop offset="100%" stop-color="#C8855A"/>
+    </linearGradient>
+    <linearGradient id="matte" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFAF0"/>
+      <stop offset="100%" stop-color="#F2E6CE"/>
+    </linearGradient>
+    <radialGradient id="innerGlow" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="0%" stop-color="#FFFAF0" stop-opacity="0.75"/>
+      <stop offset="55%" stop-color="#FFFAF0" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FFFAF0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="highlight" x1="0" y1="0" x2="0.7" y2="0.5">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Soft warm shadow -->
+  <ellipse cx="100" cy="183" rx="62" ry="5.5" fill="#7A4A2A" opacity="0.16"/>
+
+  <!-- Outer frame: terracotta -->
+  <rect x="16" y="16" width="168" height="168" rx="2" fill="url(#frameFace)"/>
+  <rect x="16" y="16" width="168" height="168" rx="2" fill="url(#highlight)"/>
+
+  <!-- Inner cream matte -->
+  <rect x="32" y="32" width="136" height="136" rx="1" fill="url(#matte)"/>
+
+  <!-- Photo opening (deep terracotta) -->
+  <rect x="44" y="44" width="112" height="112" fill="#B57850"/>
+  <rect x="44" y="44" width="112" height="112" fill="url(#innerGlow)"/>
+
+  <!-- Thin inner border accents -->
+  <rect x="44" y="44" width="112" height="112" fill="none" stroke="#8E5A35" stroke-width="0.75" opacity="0.5"/>
+  <rect x="35" y="35" width="130" height="130" fill="none" stroke="#C8855A" stroke-width="0.5" opacity="0.45"/>
+
+  <!-- Centered four-pointed star ornament -->
+  <g transform="translate(100 100)" fill="#FFFAF0">
+    <path d="M 0 -32 L 4.5 -4.5 L 32 0 L 4.5 4.5 L 0 32 L -4.5 4.5 L -32 0 L -4.5 -4.5 Z"/>
+    <path d="M 0 -19 L 2.8 -2.8 L 19 0 L 2.8 2.8 L 0 19 L -2.8 2.8 L -19 0 L -2.8 -2.8 Z"
+          fill="#D4956A" opacity="0.9"/>
+    <circle r="2.2" fill="#FFFAF0"/>
+  </g>
+</svg>
+
+
+**Composition logic**
+- Three concentric rectangles (outer frame → cream matte → photo opening) create the visual hierarchy of a real matted frame. The matte is wider than the frame edge, which reads as elegant rather than bulky.
+- A subtle terracotta-toasted gradient on the frame face plus a soft top-left highlight gives material warmth without resorting to faux-3D bevels. The 16% opacity drop-shadow anchors the frame to the canvas.
+- The ✦ is built as two nested four-point stars (a large cream one over a smaller terracotta one) with a tiny cream pip at the centre — this nested silhouette is what makes the ornament read as engraved/embossed rather than just pasted on.
+
+**Palette discipline**
+Cream (`#FFFAF0`) and terracotta (`#D4956A`) carry the whole piece. I darkened the terracotta to `#B57850` for the photo opening so the cream star actually glows against it, and added a near-invisible `#8E5A35` hairline at the opening edge to sell the "depth" of the frame. No third hue, no decorative accent colour — restraint is the style.
+
+**Why no animation**
+A frame icon is an object, not a scene. It should sit still and look like something you'd hang on a wall — motion here would undercut the "minimal" premise.

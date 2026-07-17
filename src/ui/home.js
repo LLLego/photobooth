@@ -157,7 +157,7 @@ export async function renderHome(mount) {
     
     const previewImg = document.createElement('img');
     previewImg.src = `${import.meta.env.BASE_URL}themes/${slug}/preview.svg`;
-    previewImg.alt = name;
+    previewImg.alt = '';
     previewImg.className = 'absolute inset-0 w-full h-full object-cover';
     previewImg.loading = 'lazy';
     previewImg.onerror = () => {

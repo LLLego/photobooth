@@ -1,1 +1,111 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#FFEBEE" width="200" height="200" rx="30"/><circle cx="65" cy="80" r="25" fill="#E53935"/><circle cx="65" cy="70" r="12" fill="#EF9A9A"/><rect x="55" y="105" width="20" height="25" rx="10" fill="#E53935"/><circle cx="135" cy="80" r="25" fill="#212121"/><circle cx="135" cy="73" r="10" fill="#424242"/><rect x="125" y="105" width="20" height="25" rx="10" fill="#212121"/><text x="65" y="58" text-anchor="middle" font-size="16" fill="#E53935">♥</text><text x="100" y="170" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#C62828">Pucca & Garu</text></svg>
+Here's a clean 200×200 Pucca & Garu preview icon — a heart-shaped photographic frame with the two characters inside, the iconic red heart floating between them:
+
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <title>Pucca &amp; Garu Heart Frame Icon</title>
+  
+  <!-- White photo-frame backdrop -->
+  <rect width="200" height="200" fill="#FFFFFF"/>
+  
+  <!-- Decorative outer dots (corner sparkles) -->
+  <circle cx="22" cy="22" r="2.5" fill="#E8443A"/>
+  <circle cx="178" cy="22" r="2.5" fill="#E8443A"/>
+  <circle cx="22" cy="178" r="2.5" fill="#E8443A"/>
+  <circle cx="178" cy="178" r="2.5" fill="#E8443A"/>
+  
+  <!-- Heart photo frame -->
+  <path d="M 100 185
+           C 95 175 65 150 40 115
+           C 18 85 18 45 52 40
+           C 76 40 92 60 100 82
+           C 108 60 124 40 148 40
+           C 182 45 182 85 160 115
+           C 135 150 105 175 100 185 Z"
+        fill="#1A1A2E"/>
+  
+  <!-- Inner heart photo window -->
+  <path d="M 100 175
+           C 95 167 68 146 48 112
+           C 30 85 32 52 60 50
+           C 80 50 94 67 100 86
+           C 106 67 120 50 140 50
+           C 168 52 170 85 152 112
+           C 132 146 105 167 100 175 Z"
+        fill="#FFFFFF"/>
+  
+  <!-- Garu (left - black ninja) -->
+  <g id="garu">
+    <!-- Hair base -->
+    <path d="M 55 115
+             C 52 95 58 55 75 55
+             C 80 55 80 67 80 78
+             C 83 60 92 53 98 58
+             C 100 62 95 75 92 82
+             C 98 80 100 100 92 110
+             C 75 118 60 116 55 115 Z"
+          fill="#1A1A2E"/>
+    <!-- Face -->
+    <ellipse cx="75" cy="92" rx="13" ry="15" fill="#FFE0C4"/>
+    <!-- Side hair strand -->
+    <path d="M 62 85 C 60 95 62 102 65 100 C 64 92 66 88 68 86 Z" fill="#1A1A2E"/>
+    <!-- Headband ties -->
+    <path d="M 88 65 Q 103 55 101 72 Q 96 68 88 72 Z" fill="#1A1A2E"/>
+    <!-- Closed determined eyes -->
+    <path d="M 66 89 Q 70 91 74 89" stroke="#1A1A2E" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M 78 89 Q 82 91 86 89" stroke="#1A1A2E" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <!-- Cheeks -->
+    <circle cx="68" cy="100" r="2" fill="#E8443A" opacity="0.6"/>
+    <circle cx="83" cy="100" r="2" fill="#E8443A" opacity="0.6"/>
+    <!-- Shoulders -->
+    <ellipse cx="75" cy="125" rx="18" ry="10" fill="#1A1A2E"/>
+  </g>
+  
+  <!-- Pucca (right - twin-tailed girl) -->
+  <g id="pucca">
+    <!-- Twin tails -->
+    <ellipse cx="115" cy="83" rx="6" ry="11" fill="#1A1A2E" transform="rotate(-18 115 83)"/>
+    <ellipse cx="145" cy="83" rx="6" ry="11" fill="#1A1A2E" transform="rotate(18 145 83)"/>
+    <!-- Head with blunt-cut bangs -->
+    <ellipse cx="130" cy="93" rx="14" ry="16" fill="#FFE0C4"/>
+    <path d="M 116 85
+             Q 117 75 130 74
+             Q 143 75 144 85
+             Q 143 84 140 86
+             Q 138 81 134 84
+             Q 131 82 128 85
+             Q 125 82 122 86
+             Q 119 84 116 85 Z"
+          fill="#1A1A2E"/>
+    <!-- Side hair framing -->
+    <path d="M 116 86 C 114 100 116 108 119 108 C 117 100 118 92 119 88 Z" fill="#1A1A2E"/>
+    <path d="M 144 86 C 146 100 144 108 141 108 C 143 100 142 92 141 88 Z" fill="#1A1A2E"/>
+    <!-- Closed sweet eyes -->
+    <path d="M 121 90 Q 125 94 129 90" stroke="#1A1A2E" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <path d="M 133 90 Q 137 94 141 90" stroke="#1A1A2E" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <!-- Cheeks -->
+    <circle cx="121" cy="101" r="2" fill="#E8443A" opacity="0.7"/>
+    <circle cx="139" cy="101" r="2" fill="#E8443A" opacity="0.7"/>
+    <!-- Smile -->
+    <path d="M 125 103 Q 130 108 135 103" stroke="#1A1A2E" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    <!-- Shoulders (red dress) -->
+    <ellipse cx="130" cy="125" rx="18" ry="10" fill="#E8443A"/>
+  </g>
+  
+  <!-- Center red heart -->
+  <g id="love-heart">
+    <path d="M 100 64
+             C 90 48 60 46 60 66
+             C 60 78 82 90 100 100
+             C 118 90 140 78 140 66
+             C 140 46 110 48 100 64 Z"
+          fill="#E8443A"/>
+    <ellipse cx="78" cy="58" rx="6" ry="3.5" fill="#FFFFFF" opacity="0.5" transform="rotate(-30 78 58)"/>
+  </g>
+</svg>
+
+
+**Composition & layout** — I treated this as a "photo frame preview" literally: a black heart outline with a white photo window inside, like the placeholder graphics you'd see on a phone's frame-editor screen. Garu and Pucca stand side by side at chest-up framing, slightly tilted toward each other (heads near the top of the heart), with the bold red heart floating between them at the visual center. Four tiny corner dots echo the heart color and add the "app-icon" polish without crowding the design.
+
+**Palette discipline** — I stuck strictly to your red `#E8443A` and black `#1A1A2E`, plus a warm skin tone (`#FFE0C4`) so the faces read as figures rather than negative space. The red appears in exactly three places — the central heart, Pucca's dress, and the cheek blush — so the eye follows a single accent color through the composition. Everything structural uses the deep navy-black.
+
+**Silhouette readability** — Garu reads instantly through his spiky ninja hair, the characteristic side-tied headband flapping behind, and his sharp-determined eye arcs. Pucca reads through her round face, blunt-cut bangs with the little zigzag bottom edge, two side pigtails, and the upsweep closed-eye smile. Both characters use closed curved eyes (the show's signature "^.^" look) which keeps the icon friendly and avoids fiddly pupils at this small size. The center heart gets a subtle white highlight streak to give it a touch of dimension without breaking the flat aesthetic.
