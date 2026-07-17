@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "verify": "node verify.cjs"
+  },
+  "dependencies": {
+    "@playwright/browser-chromium": "^1.55.0",
+    "playwright": "^1.55.0"
+  }
+}

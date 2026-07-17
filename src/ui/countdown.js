@@ -8,14 +8,33 @@ function throwIfAborted(signal) {
   if (signal?.aborted) throw signal.reason || new DOMException('Operation cancelled.', 'AbortError');
 }
 
-function createOverlay(host) {
+function createOverlay(host, { progressLabel, onCancel } = {}) {
   const overlay = document.createElement('div');
   overlay.className = 'countdown-overlay';
-  overlay.setAttribute('aria-live', 'polite');
-  overlay.setAttribute('aria-atomic', 'true');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-label', progressLabel || 'Photo countdown');
+
+  const content = document.createElement('div');
+  content.className = 'countdown-content';
+
+  const progress = document.createElement('p');
+  progress.className = 'countdown-progress';
+  progress.textContent = progressLabel || 'Get ready';
+
   const num = document.createElement('span');
   num.className = 'countdown-number';
-  overlay.append(num);
+  num.setAttribute('aria-live', 'assertive');
+  num.setAttribute('aria-atomic', 'true');
+
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.className = 'countdown-cancel';
+  cancel.textContent = 'Cancel';
+  cancel.addEventListener('click', onCancel);
+
+  content.append(progress, num);
+  if (onCancel) content.append(cancel);
+  overlay.append(content);
   host.append(overlay);
   return { overlay, num };
 }
@@ -58,8 +77,9 @@ export function showFlash(host, { signal } = {}) {
     const f = document.createElement('div');
     f.className = 'flash-overlay';
     host.append(f);
-    requestAnimationFrame(() => f.classList.add('active'));
-    const timer = setTimeout(done, 360);
+    void f.offsetWidth;
+    f.classList.add('active');
+    const timer = setTimeout(done, 200);
     signal?.addEventListener('abort', aborted, { once: true });
     function cleanup() {
       clearTimeout(timer);
@@ -80,45 +100,53 @@ export function showFlash(host, { signal } = {}) {
 export async function startCountdown(host, {
   duration = 3,
   flashEnabled = true,
+  progressLabel,
+  onCancel,
   onSnap,
   signal,
 } = {}) {
   if (!host) throw new Error('Countdown host element is required.');
   const resolvedDuration = resolveDuration(duration);
-  // 0 / 'off' means "instant capture" — skip overlay/UI entirely and
-  // still honor the flash so the user gets visual feedback that a snap fired.
   if (resolvedDuration <= 0) {
     throwIfAborted(signal);
     const capture = Promise.resolve().then(() => {
       throwIfAborted(signal);
       return onSnap?.();
     });
-    const flash = flashEnabled ? showFlash(host, { signal }).catch(() => {}) : Promise.resolve();
-    await flash;
+    if (flashEnabled) await showFlash(host, { signal });
     return await capture;
   }
   const fast = prefersReducedMotion();
-  const { overlay, num } = createOverlay(host);
+  const countdownController = new AbortController();
+  const abortCountdown = () => countdownController.abort(signal?.reason);
+  signal?.addEventListener('abort', abortCountdown, { once: true });
+  const cancel = () => {
+    const reason = new DOMException('Countdown cancelled.', 'AbortError');
+    countdownController.abort(reason);
+    onCancel?.();
+  };
+  const { overlay, num } = createOverlay(host, { progressLabel, onCancel: cancel });
   try {
     for (let i = resolvedDuration; i >= 1; i--) {
-      await tick(num, String(i), fast, signal);
+      await tick(num, String(i), fast, countdownController.signal);
     }
-    throwIfAborted(signal);
+    throwIfAborted(countdownController.signal);
     num.textContent = 'SNAP!';
     num.classList.add('is-snap');
     num.style.animation = 'none';
     void num.offsetWidth;
     num.style.animation = '';
     const capture = Promise.resolve().then(() => {
-      throwIfAborted(signal);
+      throwIfAborted(countdownController.signal);
       return onSnap?.();
     });
-    const flash = flashEnabled ? showFlash(host, { signal }) : Promise.resolve();
-    await wait(fast ? 100 : 320, signal);
+    const flash = flashEnabled ? showFlash(host, { signal: countdownController.signal }) : Promise.resolve();
+    await wait(fast ? 100 : 200, countdownController.signal);
     overlay.remove();
     await flash;
     return await capture;
   } finally {
+    signal?.removeEventListener('abort', abortCountdown);
     overlay.remove();
   }
 }

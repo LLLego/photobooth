@@ -109,6 +109,7 @@ async function loadImage(src) {
 
 export async function takePhoto(videoEl, frameSource, themeConfig = {}, opts = {}) {
   if (!videoEl) throw new Error('Video element required for capture.');
+  if (!videoEl.videoWidth || !videoEl.videoHeight) throw new Error('Camera frame is not ready for capture.');
   const {
     width = DEFAULTS.width,
     height = DEFAULTS.height,

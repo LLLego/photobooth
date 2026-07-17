@@ -105,10 +105,15 @@ export async function renderSingleCamera(mount) {
   controls.append(flipBtn, captureBtn, document.createElement('span'));
   // Wire the click handler BEFORE camera init so any enabled state later
   // (initial success or post-retry) responds to taps.
-  captureBtn.addEventListener('click', onCapture);
+  captureBtn.addEventListener('click', () => onCapture());
 
   stage.append(videoEl, previewCanvas, frameEl, overlay, controls);
   wrap.append(stage);
+
+  const review = document.createElement('div');
+  review.className = 'capture-review';
+  review.setAttribute('data-review', 'true');
+  wrap.append(review);
 
   const status = document.createElement('p');
   status.className = 'text-center text-sm text-warmth-500 mt-3';
@@ -203,11 +208,6 @@ export async function renderSingleCamera(mount) {
     zoomValue.textContent = '1.0x';
     set({ preferences: { ...getState().preferences, zoom: 1 } });
   });
-
-  const review = document.createElement('div');
-  review.className = 'mt-6 space-y-3';
-  review.setAttribute('data-review', 'true');
-  wrap.append(review);
 
   const finalBar = document.createElement('div');
   finalBar.className = 'mt-6 hidden flex gap-2';
@@ -362,7 +362,7 @@ export async function renderSingleCamera(mount) {
   };
   window.addEventListener('ratio-changed', handleRatioChanged);
 
-  async function onCapture() {
+  async function onCapture(retakeIndex = null) {
     if (captureSequenceActive) return;
     if (!videoEl || videoEl.readyState < 2) {
       pushToast({ message: 'Camera not ready yet.', type: 'warn' });
@@ -373,35 +373,59 @@ export async function renderSingleCamera(mount) {
     captureBtn.disabled = true;
     flipBtn.disabled = true;
     const req = requiredPhotoCount(getState().capture.layout || layout);
+    const isRetake = Number.isInteger(retakeIndex);
+    if (isRetake) {
+      finalBar.classList.add('hidden');
+      finalBar.classList.remove('flex');
+    }
     try {
-      while (localPhotos.length < req) {
-        const position = localPhotos.length + 1;
-        status.textContent = `Photo ${position} of ${req} — get ready…`;
+      do {
+        const position = isRetake ? retakeIndex + 1 : localPhotos.length + 1;
+        status.textContent = `${isRetake ? 'Retaking' : 'Photo'} ${position} of ${req} — get ready…`;
         updateCaptureState('countdown');
         const theme = await loadTheme(getState().preferences.themeId || 'minimal');
         const { blob } = await startCountdown(stage, {
           duration: getState().preferences.countdownDuration,
           flashEnabled: getState().preferences.flashEnabled !== false,
+          progressLabel: `${isRetake ? 'Retake' : 'Photo'} ${position} of ${req}`,
           signal: abortController.signal,
+          onCancel: () => {
+            status.textContent = `${isRetake ? 'Retake' : 'Photo'} ${position} cancelled`;
+            updateCaptureState('idle');
+          },
           onSnap: () => takePhoto(videoEl, frameEl, theme, {
             filter: getFilterCSS(getState().preferences.filterId || 'original'),
             zoom: getState().preferences.zoom || 1,
             mirror: getState().preferences.mirror !== false,
           }),
         });
-        localPhotos.push(blob);
+        if (isRetake) localPhotos[retakeIndex] = blob;
+        else localPhotos.push(blob);
         updateCaptureState('captured');
-        renderReview();
+        renderReview(isRetake ? retakeIndex : localPhotos.length - 1);
         updateCount();
-        if (localPhotos.length < req) {
-          status.textContent = `Photo ${localPhotos.length} captured — next up: ${localPhotos.length + 1} of ${req}`;
+        if (!isRetake && localPhotos.length < req) {
+          status.textContent = `Photo ${localPhotos.length} captured — next up: ${localPhotos.length + 1}`;
         }
-      }
+      } while (!isRetake && localPhotos.length < req);
       await finalize();
     } catch (err) {
-      updateCaptureState('error');
-      pushToast({ message: err.message || 'Capture failed.', type: 'error' });
-      status.textContent = `Capture paused at photo ${localPhotos.length + 1} of ${req}`;
+      if (isRetake) {
+        finalBar.classList.remove('hidden');
+        finalBar.classList.add('flex');
+      }
+      if (err?.name === 'AbortError') {
+        status.textContent = isRetake
+          ? `Photo ${retakeIndex + 1} unchanged`
+          : `Ready for photo ${localPhotos.length + 1} of ${req}`;
+        updateCaptureState('idle');
+      } else {
+        updateCaptureState('error');
+        pushToast({ message: err.message || 'Capture failed.', type: 'error' });
+        status.textContent = isRetake
+          ? `Could not retake photo ${retakeIndex + 1}`
+          : `Capture paused at photo ${localPhotos.length + 1} of ${req}`;
+      }
     } finally {
       captureSequenceActive = false;
       if (localPhotos.length < req) {
@@ -411,7 +435,7 @@ export async function renderSingleCamera(mount) {
     }
   }
 
-  function renderReview() {
+  function renderReview(animatedIndex = null) {
     clearThumbnailUrls();
     review.innerHTML = '';
     const layoutId = getState().capture.layout || layout;
@@ -419,37 +443,44 @@ export async function renderSingleCamera(mount) {
     const label = document.createElement('p');
     label.className = 'capture-thumbnails-label';
     label.textContent = localPhotos.length
-      ? `${localPhotos.length} of ${req} captured`
-      : `Your ${req === 1 ? 'photo' : 'photos'} will appear here`;
+      ? 'Tap a photo to retake it'
+      : `Your ${req === 1 ? 'photo' : 'photos'} will develop here`;
 
-    const grid = document.createElement('div');
-    grid.className = 'capture-thumbnails';
-    grid.style.gridTemplateColumns = `repeat(${req}, minmax(0, 1fr))`;
+    const strip = document.createElement('div');
+    strip.className = 'capture-thumbnails';
     for (let i = 0; i < req; i++) {
-      const card = document.createElement('div');
+      const card = document.createElement(localPhotos[i] ? 'button' : 'div');
       card.className = 'capture-thumbnail';
       if (localPhotos[i]) {
+        card.type = 'button';
+        card.setAttribute('aria-label', `Retake photo ${i + 1}`);
         const img = document.createElement('img');
         const url = URL.createObjectURL(localPhotos[i]);
         thumbnailUrls.push(url);
         img.src = url;
-        img.alt = `Photo ${i + 1}`;
-        card.append(img);
+        img.alt = '';
+        const retake = document.createElement('span');
+        retake.className = 'capture-thumbnail-retake';
+        retake.textContent = 'Retake';
+        card.append(img, retake);
         card.classList.add('is-filled');
-        if (i === localPhotos.length - 1) card.classList.add('is-new');
+        if (i === animatedIndex) card.classList.add('is-new');
+        card.addEventListener('click', () => onCapture(i));
       } else {
         const slot = document.createElement('span');
         slot.textContent = String(i + 1);
         slot.setAttribute('aria-label', `Empty photo slot ${i + 1}`);
         card.append(slot);
       }
-      grid.append(card);
+      strip.append(card);
     }
-    review.append(label, grid);
+    review.append(label, strip);
   }
 
   async function finalize() {
     status.textContent = 'Composing strip…';
+    clearResultUrl();
+    review.querySelector('.strip-preview')?.remove();
     const themeIdFinal = getState().preferences.themeId || 'minimal';
     const layoutId = getState().capture.layout || layout;
     const theme = await loadTheme(themeIdFinal);

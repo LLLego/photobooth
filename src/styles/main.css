@@ -1075,32 +1075,49 @@ html.dark select:focus-visible {
 .countdown-overlay {
   position: absolute;
   inset: 0;
-  z-index: 8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(20, 12, 6, 0.2);
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(20, 12, 6, 0.28);
   backdrop-filter: blur(2px);
-  pointer-events: none;
+}
+
+.countdown-content {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+
+.countdown-progress {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  background: rgba(45, 27, 17, 0.68);
+  color: var(--cream);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  box-shadow: 0 8px 24px rgba(20, 12, 6, 0.18);
 }
 
 .countdown-number {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(150px, 42vw, 220px);
-  height: clamp(150px, 42vw, 220px);
-  border: 2px solid rgba(255, 250, 240, 0.7);
+  width: clamp(9rem, 42vw, 13.75rem);
+  height: clamp(9rem, 42vw, 13.75rem);
+  border: 2px solid rgba(255, 250, 240, 0.72);
   border-radius: 9999px;
-  background: rgba(45, 27, 17, 0.28);
+  background: rgba(45, 27, 17, 0.3);
   box-shadow: 0 24px 80px rgba(20, 12, 6, 0.32);
   font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
-  font-size: clamp(7rem, 32vw, 11rem);
+  font-size: clamp(6rem, 30vw, 11rem);
   font-weight: 600;
   line-height: 1;
   color: var(--cream);
   text-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
-  animation: countdown-pop 800ms ease-out both;
+  animation: countdown-pop 800ms ease-in-out both;
 }
 
 .countdown-number.is-snap {
@@ -1113,45 +1130,78 @@ html.dark select:focus-visible {
   transform: rotate(-2deg);
 }
 
+.countdown-cancel {
+  min-width: 6rem;
+  min-height: 44px;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid rgba(255, 250, 240, 0.75);
+  border-radius: 9999px;
+  background: rgba(45, 27, 17, 0.6);
+  color: var(--cream);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background-color 150ms ease-out, transform 150ms ease-out;
+}
+
+.countdown-cancel:hover { background: rgba(45, 27, 17, 0.82); }
+
 .flash-overlay {
   position: absolute;
   inset: 0;
-  z-index: 9;
-  background: white;
+  z-index: 30;
+  background: #fff;
   opacity: 0;
   pointer-events: none;
 }
 
-.flash-overlay.active { animation: flash 360ms ease-out forwards; }
+.flash-overlay.active { animation: flash 200ms ease-out forwards; }
+
+.capture-review {
+  margin-top: 0.75rem;
+}
 
 .capture-thumbnails-label {
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.45rem;
   color: var(--chocolate-muted);
   font-family: 'Caveat', cursive;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   text-align: center;
 }
 
 .capture-thumbnails {
-  display: grid;
-  gap: 0.6rem;
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
   padding: 0.75rem;
-  border: 1px solid rgba(45, 27, 17, 0.08);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(45, 27, 17, 0.06);
   box-shadow: inset 0 1px 3px rgba(45, 27, 17, 0.08);
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
 }
+
+.capture-thumbnails::-webkit-scrollbar { display: none; }
 
 .capture-thumbnail {
   position: relative;
+  flex: 1 0 4.25rem;
+  min-width: 4.25rem;
+  max-width: 6.5rem;
   overflow: hidden;
   aspect-ratio: 3 / 4;
+  padding: 0;
   border: 2px dashed rgba(45, 27, 17, 0.18);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255, 250, 240, 0.72);
+  font-family: inherit;
+  scroll-snap-align: start;
 }
 
-.capture-thumbnail > span {
+.capture-thumbnail > span:not(.capture-thumbnail-retake) {
   position: absolute;
   inset: 0;
   display: flex;
@@ -1167,12 +1217,40 @@ html.dark select:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 180ms ease-out, filter 180ms ease-out;
 }
 
 .capture-thumbnail.is-filled {
   border-style: solid;
   border-color: rgba(45, 27, 17, 0.18);
   box-shadow: 0 5px 14px rgba(45, 27, 17, 0.16);
+  cursor: pointer;
+}
+
+.capture-thumbnail.is-filled:hover img,
+.capture-thumbnail.is-filled:focus-visible img {
+  filter: brightness(0.72);
+  transform: scale(1.04);
+}
+
+.capture-thumbnail-retake {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 0.3rem 0.2rem;
+  background: rgba(45, 27, 17, 0.76);
+  color: var(--cream);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.capture-thumbnail.is-filled:hover .capture-thumbnail-retake,
+.capture-thumbnail.is-filled:focus-visible .capture-thumbnail-retake {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .capture-thumbnail.is-new {
@@ -1471,9 +1549,10 @@ html.dark select:focus-visible {
 }
 
 @keyframes countdown-pop {
-  0% { opacity: 0; transform: scale(0.55); }
-  35% { opacity: 1; transform: scale(1.08); }
-  100% { opacity: 0.9; transform: scale(1); }
+  0% { opacity: 0; transform: scale(0.45); }
+  32% { opacity: 1; transform: scale(1.12); }
+  72% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.82); }
 }
 
 @keyframes thumbnail-in {
