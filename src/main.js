@@ -97,6 +97,10 @@ async function boot() {
   }
   startRouter(mount);
   mountToaster();
+
+  // Show home immediately while router initializes
+  await renderHome(mount);
+
   mountNavigationHost();
 }
 
