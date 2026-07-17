@@ -2,6 +2,14 @@ import { getState } from '../state.js';
 import { Button, Icon } from './components.js';
 import { navigate } from '../router.js';
 
+// Best-character PNG per theme for chip previews (transparent character art).
+const CHARACTER_PNG = {
+  'minimal': null,
+  'hundred-acre-gang': 'themes/characters/pooh-solo.png',
+  'pucca': 'themes/characters/pucca-real.png',
+  'hello-kitty': 'themes/characters/hello-kitty.png',
+};
+
 export async function renderHome(mount) {
   const state = getState();
   const displayName = state.profile?.display_name || state.user?.user_metadata?.display_name || 'you';
