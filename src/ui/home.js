@@ -150,6 +150,8 @@ export async function renderHome(mount) {
       : slug.replace('-', ' ').replace(/(^|\\s)\\S/g, c => c.toUpperCase());
     const chip = document.createElement('button');
     chip.className = 'shrink-0 flex flex-col items-center gap-1.5 transition-transform hover:scale-105 active:scale-95';
+    chip.setAttribute('aria-label', `Choose ${name} frame`);
+    chip.dataset.themeSlug = slug;
     
     // Use actual frame preview image, not just a solid color
     const swatch = document.createElement('span');

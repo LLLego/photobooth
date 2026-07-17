@@ -1,6 +1,6 @@
 import './styles/main.css';
 import { isSupabaseConfigured, renderSupabaseMissing } from './db/supabase.js';
-import { defineRoute, startRouter, navigate } from './router.js';
+import { defineRoute, startRouter, navigate, setSkipFirstRender } from './router.js';
 import { renderAuthUI } from './auth/auth-ui.js';
 import { renderHome } from './ui/home.js';
 import { renderSingleCamera } from './ui/single-camera.js';
@@ -95,11 +95,11 @@ async function boot() {
   } else {
     set({ user: null, initialized: true });
   }
+  // Show home immediately, then let the router take over without re-rendering.
+  await renderHome(mount);
+  setSkipFirstRender(true);
   startRouter(mount);
   mountToaster();
-
-  // Show home immediately while router initializes
-  await renderHome(mount);
 
   mountNavigationHost();
 }

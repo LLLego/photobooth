@@ -49,6 +49,11 @@ export function navigate(name, params = {}, opts = {}) {
 }
 
 let isRendering = false;
+let skipFirstRender = false;
+
+export function setSkipFirstRender(value) {
+  skipFirstRender = Boolean(value);
+}
 
 async function renderRoute(name, params) {
   if (!routes.has(name)) {
@@ -112,6 +117,12 @@ function parseHash() {
 
 async function handleHashChange() {
   if (isRendering) return;
+  if (skipFirstRender) {
+    skipFirstRender = false;
+    const { name, params } = parseHash();
+    set({ route: { name, params } });
+    return;
+  }
   const { name, params } = parseHash();
 
   const currentRoute = getState().route;
