@@ -1,1 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#FFF8E1" width="200" height="200" rx="30"/><circle cx="70" cy="80" r="25" fill="#FFB400"/><circle cx="100" cy="75" r="20" fill="#FFD54F"/><circle cx="130" cy="80" r="22" fill="#FFC107"/><circle cx="75" cy="125" r="18" fill="#FF9800"/><circle cx="125" cy="120" r="18" fill="#F57C00"/><text x="100" y="170" text-anchor="middle" font-family="serif" font-size="16" font-weight="bold" fill="#8B6914">Friends</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Soft warm golden-yellow gradient background -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#FFFBEB" />
+      <stop offset="50%" stop-color="#FFEDC4" />
+      <stop offset="100%" stop-color="#F8C968" />
+    </radialGradient>
+
+    <!-- Bear Fur Gradient (gives a round 3D volume) -->
+    <radialGradient id="furGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#FFDF6E" />
+      <stop offset="60%" stop-color="#F9C420" />
+      <stop offset="100%" stop-color="#D49500" />
+    </radialGradient>
+
+    <!-- Inner Ear Gradient -->
+    <radialGradient id="earInnerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFA1CF" />
+      <stop offset="100%" stop-color="#F178A0" />
+    </radialGradient>
+
+    <!-- Shirt Fabric Gradient -->
+    <linearGradient id="shirtGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E20A15" />
+      <stop offset="100%" stop-color="#B00812" />
+    </linearGradient>
+
+    <!-- Snout Gradient -->
+    <radialGradient id="snoutGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFFDF5" />
+      <stop offset="80%" stop-color="#F5EBC8" />
+      <stop offset="100%" stop-color="#D8C895" />
+    </radialGradient>
+  </defs>
+
+  <!-- Base Background -->
+  <circle cx="100" cy="100" r="100" fill="url(#bgGrad)" />
+
+  <!-- Red Shirt Collar (Sits at the bottom, wrapping the neck/face) -->
+  <path d="M 15 155 C 35 180, 165 180, 185 155 C 185 145, 175 135, 165 135 C 140 150, 60 150, 35 135 C 25 135, 15 145, 15 155 Z" fill="url(#shirtGrad)" />
+
+  <!-- Collar inner shadow for depth -->
+  <path d="M 30 140 C 70 165, 130 165, 170 140" fill="none" stroke="#81060C" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Left Ear -->
+  <circle cx="45" cy="55" r="25" fill="url(#furGrad)" />
+  <circle cx="45" cy="55" r="12" fill="url(#earInnerGrad)" />
+
+  <!-- Right Ear -->
+  <circle cx="155" cy="55" r="25" fill="url(#furGrad)" />
+  <circle cx="155" cy="55" r="12" fill="url(#earInnerGrad)" />
+
+  <!-- Main Head -->
+  <circle cx="100" cy="105" r="70" fill="url(#furGrad)" />
+
+  <!-- Subtle cheek warmth -->
+  <circle cx="50" cy="115" r="15" fill="#FF9999" opacity="0.25" filter="blur(4px)"/>
+  <circle cx="150" cy="115" r="15" fill="#FF9999" opacity="0.25" filter="blur(4px)"/>
+
+  <!-- Left Eyebrow -->
+  <path d="M 60 75 Q 72 68 82 75" fill="none" stroke="#885E00" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Right Eyebrow -->
+  <path d="M 118 75 Q 128 68 140 75" fill="none" stroke="#885E00" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Left Eye -->
+  <circle cx="72" cy="92" r="6" fill="#1A1A1A" />
+  <!-- Catchlight -->
+  <circle cx="70" cy="90" r="2" fill="#FFFFFF" />
+
+  <!-- Right Eye -->
+  <circle cx="128" cy="92" r="6" fill="#1A1A1A" />
+  <!-- Catchlight -->
+  <circle cx="126" cy="90" r="2" fill="#FFFFFF" />
+
+  <!-- Small Smile -->
+  <path d="M 85 125 Q 100 132 115 125" fill="none" stroke="#1A1A1A" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Snout Base -->
+  <ellipse cx="100" cy="120" rx="32" ry="24" fill="url(#snoutGrad)" />
+
+  <!-- Nose -->
+  <ellipse cx="100" cy="113" rx="8" ry="6" fill="#2C2C2C" />
+  <!-- Nose Highlight -->
+  <ellipse cx="98" cy="111" rx="3" ry="1.5" fill="#FFFFFF" opacity="0.8" />
+
+</svg>
