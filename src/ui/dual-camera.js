@@ -16,6 +16,7 @@ export async function renderDualCamera(mount) {
   let localVideo = null;
   let remoteVideo = null;
   let handleThemeChanged = null;
+  let resultUrlRefs = [];
 
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md mx-auto px-4 pt-6 pb-40 fade-in';
@@ -243,10 +244,12 @@ export async function renderDualCamera(mount) {
     const preview = document.createElement('div');
     preview.className = 'strip-preview';
     const img = document.createElement('img');
-    img.src = URL.createObjectURL(blob);
+    const resultUrl = URL.createObjectURL(blob);
+    img.src = resultUrl;
     img.alt = 'Composed strip';
     preview.append(img);
     resultWrap.append(preview);
+    resultUrlRefs.push(resultUrl);
 
     const bar = document.createElement('div');
     bar.className = 'flex flex-wrap gap-2';
@@ -293,6 +296,9 @@ export async function renderDualCamera(mount) {
     if (handleThemeChanged) window.removeEventListener('theme-changed', handleThemeChanged);
     try { activeSession?.dispose(); } catch {}
     activeSession = null;
+    for (const url of resultUrlRefs.splice(0)) {
+      try { URL.revokeObjectURL(url); } catch {}
+    }
   }
 
   return teardown;

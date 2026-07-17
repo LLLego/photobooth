@@ -272,17 +272,18 @@ class DualSession {
       onConnectionStateChange(pc, (state) => {
         if (this.disposed || pc !== this.pc) return;
         this.emit('connection-state', state);
-        if (state === 'connected') this.clearRestartTimer();
+        if (state === 'connected') { this.clearRestartTimer(); this.clearIceWatchdog(); }
         if (state === 'failed') this.scheduleIceRestart();
         if (state === 'disconnected') {
           this.emit('disconnected', state);
           this.scheduleIceRestart(3000);
         }
+        if (state === 'new' || state === 'connecting') this.startIceWatchdog();
       }),
       onIceConnectionStateChange(pc, (state) => {
         if (this.disposed || pc !== this.pc) return;
         this.emit('ice-connection-state', state);
-        if (state === 'connected' || state === 'completed') this.clearRestartTimer();
+        if (state === 'connected' || state === 'completed') { this.clearRestartTimer(); this.clearIceWatchdog(); }
         if (state === 'failed') this.scheduleIceRestart();
       }),
     );
@@ -307,6 +308,28 @@ class DualSession {
         if (!this.disposed) this.emit('error', err);
       }
     }, delay);
+  }
+
+  // Watchdog: if the peer connection sits in 'checking' / 'new' for too long
+  // without progressing, force an ICE restart. This catches early-ICE drops
+  // that never fire connectionState 'failed'.
+  startIceWatchdog(timeoutMs = 15000) {
+    this.clearIceWatchdog();
+    this.iceWatchdogTimer = setTimeout(() => {
+      if (this.disposed || !this.pc) return;
+      const state = this.pc.connectionState;
+      const iceState = this.pc.iceConnectionState;
+      if (state === 'connected' || state === 'completed' || state === 'closed') return;
+      if (state === 'checking' || state === 'new' || iceState === 'checking' || iceState === 'new') {
+        console.warn('[dual] ICE stuck in', state, '/', iceState, '— forcing restart');
+        this.scheduleIceRestart(0);
+      }
+    }, timeoutMs);
+  }
+
+  clearIceWatchdog() {
+    if (this.iceWatchdogTimer) clearTimeout(this.iceWatchdogTimer);
+    this.iceWatchdogTimer = null;
   }
 
   async startLocalCamera() {
@@ -497,6 +520,7 @@ class DualSession {
     this.disposed = true;
     this.abortController.abort(abortError());
     this.clearRestartTimer();
+    this.clearIceWatchdog();
     this.messageCleanup?.();
     this.messageCleanup = null;
     this.clearPeerHandlers();

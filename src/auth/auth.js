@@ -39,7 +39,12 @@ export async function signIn({ email, password }) {
   return data;
 }
 
-export async function signOut() {
+export async function signOut({ onBeforeSignOut } = {}) {
+  // Run any pre-signOut cleanup FIRST so callers (like settings.js) can
+  // clear local profile/user state before the SIGNED_OUT event races in.
+  if (typeof onBeforeSignOut === 'function') {
+    try { onBeforeSignOut(); } catch (err) { console.warn('[auth] onBeforeSignOut failed', err); }
+  }
   if (!isSupabaseConfigured) return;
   const c = requireSupabase();
   const { error } = await c.auth.signOut();
