@@ -26,10 +26,12 @@ export async function renderThemePicker(mount) {
 
   const wrap = document.createElement('section');
   wrap.className = 'card p-4 pb-4 mb-4';
+  wrap.setAttribute('aria-labelledby', 'theme-picker-heading');
 
   const heading = document.createElement('div');
   heading.className = 'flex items-center justify-between mb-3';
   const h = document.createElement('h2');
+  h.id = 'theme-picker-heading';
   h.className = 'heading-display text-lg';
   h.textContent = 'Theme';
   const sub = document.createElement('span');
@@ -40,6 +42,8 @@ export async function renderThemePicker(mount) {
 
   const scroller = document.createElement('div');
   scroller.className = 'theme-picker no-scrollbar theme-picker-scroller';
+  scroller.setAttribute('role', 'radiogroup');
+  scroller.setAttribute('aria-label', 'Choose a frame theme');
   wrap.append(scroller);
 
   const themeList = await listThemes();
@@ -57,7 +61,10 @@ export async function renderThemePicker(mount) {
       card.className = 'theme-card shrink-0 w-24 min-w-24 flex flex-col items-center gap-2 text-center focus:outline-none';
       card.setAttribute('data-theme-id', variantKey);
       card.setAttribute('data-frame-url', v.frame || '');
-      card.setAttribute('aria-pressed', 'false');
+      card.setAttribute('role', 'radio');
+      const ariaLabelText = v.name;
+      card.setAttribute('aria-label', ariaLabelText);
+      card.setAttribute('aria-checked', 'false');
 
       const previewWrap = document.createElement('span');
       const accent = t.palette?.accent || t.previewColor || '#FFFFFF';
@@ -162,6 +169,8 @@ export async function renderThemePicker(mount) {
 
   const layoutWrap = document.createElement('div');
   layoutWrap.className = 'mt-2 pt-2 border-t border-warmth-200';
+  layoutWrap.setAttribute('role', 'radiogroup');
+  layoutWrap.setAttribute('aria-label', 'Photo strip layout');
   layoutWrap.innerHTML = `
     <p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Layout</p>
     <div class="grid gap-2" data-layouts style="grid-template-columns: repeat(4, minmax(0, 1fr));"></div>
@@ -173,7 +182,9 @@ export async function renderThemePicker(mount) {
     b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 transition-colors duration-150';
     b.textContent = layout.label;
     b.dataset.layout = layout.id;
-    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-label', `${layout.label} layout`);
+    b.setAttribute('aria-checked', 'false');
     b.addEventListener('click', () => onSelectLayout(layout.id));
     layoutRow.append(b);
   }
@@ -183,6 +194,8 @@ export async function renderThemePicker(mount) {
   // Aspect ratio selector
   const ratioWrap = document.createElement('div');
   ratioWrap.className = 'mt-2 pt-2 border-t border-warmth-200';
+  ratioWrap.setAttribute('role', 'radiogroup');
+  ratioWrap.setAttribute('aria-label', 'Photo aspect ratio');
   ratioWrap.innerHTML = `
     <p class="text-xs uppercase tracking-widest text-warmth-500 mb-2">Aspect ratio</p>
     <div class="grid gap-2" data-ratios style="grid-template-columns: repeat(4, minmax(0, 1fr));"></div>
@@ -200,7 +213,9 @@ export async function renderThemePicker(mount) {
     b.className = 'px-3 py-2 rounded-2xl text-xs border bg-transparent border-warmth-200 transition-colors duration-150';
     b.textContent = r.label;
     b.dataset.ratio = r.id;
-    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-label', `Aspect ratio ${r.label}`);
+    b.setAttribute('aria-checked', 'false');
     b.addEventListener('click', () => onSelectRatio(r.id));
     ratioRow.append(b);
   }
@@ -257,7 +272,7 @@ function applyActiveStates() {
   cards.forEach((c) => {
     const isActive = c.getAttribute('data-theme-id') === themeId;
     c.classList.toggle('is-active', isActive);
-    c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    c.setAttribute('aria-checked', isActive ? 'true' : 'false');
     const badge = c.querySelector('.theme-card-badge');
     if (badge) badge.classList.toggle('is-visible', isActive);
   });
@@ -282,7 +297,7 @@ function applyActiveStates() {
         'border-warmth-200'
       );
     }
-    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    b.setAttribute('aria-checked', isActive ? 'true' : 'false');
   });
   document.querySelectorAll('[data-ratio]').forEach((b) => {
     const ratioId = getState().preferences.aspectRatio || '3:4';
@@ -306,6 +321,6 @@ function applyActiveStates() {
         'border-warmth-200'
       );
     }
-    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    b.setAttribute('aria-checked', isActive ? 'true' : 'false');
   });
 }

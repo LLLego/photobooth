@@ -88,7 +88,46 @@ body::after {
 }
 
 ::selection { background: var(--cream-deep); color: var(--chocolate); }
-:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 2px; }
+
+/* High-contrast focus indicators — visible in both light and dark modes.
+   The terracotta ring on cream has insufficient contrast on cream-toned
+   surfaces, so we pair it with a chocolate shadow ring for a forced-color
+   outline that stays visible everywhere. */
+:focus-visible {
+  outline: 3px solid var(--terracotta-deep);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--chocolate);
+  border-radius: inherit;
+}
+
+/* Dark mode overrides for the focus ring — keep contrast against dark
+   surfaces by inverting shadow + outline colors. */
+html.dark :focus-visible {
+  outline-color: var(--honey);
+  box-shadow: 0 0 0 5px var(--cream);
+}
+
+/* Inputs and textareas get a slightly tighter ring so it doesn't blow
+   the layout. */
+.input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--honey), 0 0 0 5px var(--chocolate);
+}
+html.dark .input:focus-visible,
+html.dark textarea:focus-visible,
+html.dark select:focus-visible {
+  box-shadow: 0 0 0 3px var(--honey), 0 0 0 5px var(--cream);
+}
+
+/* Forced-colors / Windows high-contrast mode: never lose the ring. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid CanvasText !important;
+    box-shadow: none !important;
+  }
+}
 
 /* ======================== NAV HOST ======================== */
 #nav-host {
@@ -99,7 +138,7 @@ body::after {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   background: rgba(255, 250, 240, 0.75);
   border-bottom: 1px solid rgba(45, 27, 17, 0.08);
-  padding: 18px 40px;
+  padding: calc(18px + env(safe-area-inset-top)) 40px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -860,8 +899,11 @@ body::after {
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95rem;
+  min-height: 44px;
+  min-width: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn:active { transform: scale(0.97); }
+.btn:active { transform: scale(0.96); }
 .btn:disabled, .btn[disabled] { opacity: 0.5; pointer-events: none; }
 
 .btn-primary {
@@ -1337,6 +1379,15 @@ body::after {
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modal-backdrop > .card {
+  max-height: calc(100dvh - 2.5rem);
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -1466,12 +1517,72 @@ body::after {
   animation: skeleton-pulse 1.5s ease-in-out infinite;
   background: var(--cream-deep);
   border-radius: 8px;
+  display: block;
 }
 
 .skeleton-circle { border-radius: 9999px; }
 .skeleton-text { height: 14px; width: 80%; margin-bottom: 8px; }
 .skeleton-text-short { width: 50%; }
-.skeleton-rect { width: 100%; }
+.skeleton-rect { width: 100%; aspect-ratio: 3 / 4; }
+.skeleton-card { width: 100%; aspect-ratio: 3 / 4; border-radius: 16px; }
+.skeleton-thumb { aspect-ratio: 1; border-radius: 12px; }
+.skeleton-button { height: 44px; width: 120px; border-radius: 16px; }
+
+/* Touch feedback — applied to all interactive elements via touch class */
+button,
+a,
+[role="button"],
+[role="tab"],
+[role="radio"],
+[role="switch"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled):active,
+a:active,
+[role="button"]:active,
+[role="tab"]:active,
+[role="radio"]:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:active,
+  a:active,
+  [role="button"]:active,
+  [role="tab"]:active,
+  [role="radio"]:active {
+    transform: none;
+  }
+}
+
+/* Touch-target sizing — WCAG 2.5.5 (AAA) / Apple HIG (44pt min) */
+button,
+.nav-links a,
+.theme-card,
+.feature-card,
+.gallery-strip-item,
+.nav-settings,
+.gallery-cta,
+.capture-button,
+.filter button,
+[data-filter],
+[data-layout],
+[data-ratio],
+[role="tab"],
+[role="radio"],
+[role="switch"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Navigation links — keep visual height compact but still tappable */
+.nav-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+}
 
 /* =====================================================================
    COMPATIBILITY — legacy tailwind class aliases used by generated JS

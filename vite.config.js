@@ -1,21 +1,47 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig({
-  base: '/photobooth/',
-  root: '.',
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    minify: 'esbuild',
-    target: 'es2022',
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    }
-  },
-  server: {
-    port: 3000,
-    open: true
+// Fail fast in CI if required env vars are missing — without this,
+// the build silently ships a broken app and only fails at runtime
+// when the user hits the first Supabase call.
+function assertEnv(env, keys) {
+  const missing = keys.filter((k) => !env[k] || env[k].trim() === '');
+  if (missing.length) {
+    const hint = missing.includes('VITE_SUPABASE_URL')
+      ? '\n  → Set VITE_SUPABASE_URL in your .env file or CI secrets.\n  → Run `supabase status` locally or grab values from your project dashboard.'
+      : '';
+    throw new Error(
+      `[vite.config] Missing required env var(s): ${missing.join(', ')}.${hint}`
+    );
   }
+}
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  // Only enforce at build time — dev can boot with a placeholder so the
+  // UI is still navigable while you wire up Supabase.
+  if (mode === 'production' || process.env.CI) {
+    assertEnv(env, ['VITE_SUPABASE_URL']);
+  }
+  return {
+    base: '/photobooth/',
+    root: '.',
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+      minify: 'esbuild',
+      target: 'es2022',
+      rollupOptions: {
+        output: {
+          manualChunks: undefined
+        }
+      }
+    },
+    server: {
+      port: 3000,
+      open: true
+    },
+    define: {
+      __VITE_SUPABASE_URL_PRESENT__: JSON.stringify(Boolean(env.VITE_SUPABASE_URL))
+    }
+  };
 });

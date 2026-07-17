@@ -42,13 +42,17 @@ export async function renderSettings(mount) {
 
   const nameCard = document.createElement('section');
   nameCard.className = 'card p-5 mb-5 md:mb-0';
+  nameCard.setAttribute('aria-labelledby', 'settings-name-heading');
   nameCard.innerHTML = `
-    <label class="block">
-      <span class="text-xs uppercase tracking-widest text-warmth-500">Display name</span>
-      <input class="input mt-2" type="text" data-field="displayName" maxlength="48" />
-    </label>
-    <p class="text-xs text-warmth-500 mt-3">Role: <span class="font-mono" data-field="role">…</span></p>
-    <p class="text-xs text-warmth-500 mt-1">Email: <span class="font-mono" data-field="email">…</span></p>
+    <h2 id="settings-name-heading" class="heading-display text-lg mb-3">Profile</h2>
+    <div class="block">
+      <label class="block" for="settings-display-name">
+        <span class="text-xs uppercase tracking-widest text-warmth-500">Display name</span>
+      </label>
+      <input id="settings-display-name" class="input mt-2" type="text" data-field="displayName" maxlength="48" autocomplete="name" dir="auto" />
+    </div>
+    <p class="text-xs text-warmth-500 mt-3" dir="auto">Role: <span class="font-mono" data-field="role">…</span></p>
+    <p class="text-xs text-warmth-500 mt-1" dir="auto">Email: <span class="font-mono" data-field="email">…</span></p>
   `;
   const nameInput = nameCard.querySelector('[data-field="displayName"]');
   const roleEl = nameCard.querySelector('[data-field="role"]');
@@ -60,6 +64,7 @@ export async function renderSettings(mount) {
   const nameActions = document.createElement('div');
   nameActions.className = 'mt-4 flex justify-end';
   const saveBtn = Button({ label: 'Save name', variant: 'primary' });
+  saveBtn.setAttribute('aria-label', 'Save display name');
   saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = true;
     const labelSpan = saveBtn.querySelector('span');
@@ -96,39 +101,40 @@ export async function renderSettings(mount) {
 
   const prefsCard = document.createElement('section');
   prefsCard.className = 'card p-5 mb-5 md:mb-0';
+  prefsCard.setAttribute('aria-labelledby', 'settings-prefs-heading');
   prefsCard.innerHTML = `
-    <h2 class="heading-display text-lg mb-3">Capture preferences</h2>
+    <h2 id="settings-prefs-heading" class="heading-display text-lg mb-3">Capture preferences</h2>
     <div class="flex items-center justify-between py-2">
       <div>
-        <p class="font-medium">Auto-download after capture</p>
+        <p class="font-medium" id="settings-auto-label">Auto-download after capture</p>
         <p class="text-xs text-warmth-500">Save a local copy automatically.</p>
       </div>
       <label class="inline-flex items-center cursor-pointer">
-        <input type="checkbox" class="sr-only peer" data-pref="autoDownload" />
-        <span class="toggle-track w-11 h-6 bg-warmth-200 rounded-full peer-checked:bg-warmth-900 relative transition">
+        <input type="checkbox" class="sr-only peer" data-pref="autoDownload" role="switch" aria-labelledby="settings-auto-label" />
+        <span class="toggle-track w-11 h-6 bg-warmth-200 rounded-full peer-checked:bg-warmth-900 relative transition" aria-hidden="true">
           <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 rounded-full transition peer-checked:translate-x-5"></span>
         </span>
       </label>
     </div>
     <div class="flex items-center justify-between py-2">
       <div>
-        <p class="font-medium">Dark mode</p>
+        <p class="font-medium" id="settings-dark-label">Dark mode</p>
         <p class="text-xs text-warmth-500">Easier on the eyes at night.</p>
       </div>
       <label class="inline-flex items-center cursor-pointer">
-        <input type="checkbox" class="sr-only peer" data-pref="darkMode" />
-        <span class="toggle-track w-11 h-6 bg-warmth-200 rounded-full peer-checked:bg-warmth-900 relative transition">
+        <input type="checkbox" class="sr-only peer" data-pref="darkMode" role="switch" aria-labelledby="settings-dark-label" />
+        <span class="toggle-track w-11 h-6 bg-warmth-200 rounded-full peer-checked:bg-warmth-900 relative transition" aria-hidden="true">
           <span class="toggle-knob absolute top-0.5 left-0.5 w-5 h-5 bg-warmth-50 rounded-full transition peer-checked:translate-x-5"></span>
         </span>
       </label>
     </div>
-    <div class="py-2">
-      <p class="font-medium mb-1">Countdown duration</p>
+    <fieldset class="py-2 border-0 p-0 m-0">
+      <legend class="font-medium mb-1">Countdown duration</legend>
       <p class="text-xs text-warmth-500 mb-2">Time between capture and shutter.</p>
-      <div class="grid gap-2" data-pref-group="countdownDuration" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
-        ${[3, 5, 0].map((v) => `<button class="px-3 py-2 rounded-2xl text-sm border border-warmth-200" data-value="${v}">${v === 0 ? 'Off' : `${v}s`}</button>`).join('')}
+      <div class="grid gap-2" data-pref-group="countdownDuration" role="radiogroup" aria-label="Countdown duration" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        ${[3, 5, 0].map((v) => `<button class="px-3 py-2 rounded-2xl text-sm border border-warmth-200" role="radio" data-value="${v}" aria-checked="false" aria-label="${v === 0 ? 'No countdown' : `${v} second countdown`}">${v === 0 ? 'Off' : `${v}s`}</button>`).join('')}
       </div>
-    </div>
+    </fieldset>
   `;
 
   const autoDownloadToggle = prefsCard.querySelector('[data-pref="autoDownload"]');
@@ -138,7 +144,9 @@ export async function renderSettings(mount) {
   const refreshPrefUI = () => {
     const prefs = getState().preferences;
     autoDownloadToggle.checked = !!prefs.autoDownload;
+    autoDownloadToggle.setAttribute('aria-checked', autoDownloadToggle.checked ? 'true' : 'false');
     darkModeToggle.checked = !!prefs.darkMode;
+    darkModeToggle.setAttribute('aria-checked', darkModeToggle.checked ? 'true' : 'false');
     const target = Number(prefs.countdownDuration);
     countdownGroup.querySelectorAll('button').forEach((b) => {
       b.classList.remove(
@@ -159,6 +167,7 @@ export async function renderSettings(mount) {
           'border-warmth-200'
         );
       }
+      b.setAttribute('aria-checked', isActive ? 'true' : 'false');
     });
   };
   refreshPrefUI();
@@ -183,7 +192,14 @@ export async function renderSettings(mount) {
 
   const accountCard = document.createElement('section');
   accountCard.className = 'card p-5 mb-5 md:mb-0';
+  accountCard.setAttribute('aria-labelledby', 'settings-account-heading');
+  const accountHeading = document.createElement('h2');
+  accountHeading.id = 'settings-account-heading';
+  accountHeading.className = 'heading-display text-lg mb-3';
+  accountHeading.textContent = 'Account';
+  accountCard.append(accountHeading);
   const refreshBtn = Button({ label: 'Refresh profile', variant: 'ghost' });
+  refreshBtn.setAttribute('aria-label', 'Refresh profile from server');
   refreshBtn.addEventListener('click', async () => {
     refreshBtn.disabled = true;
     const original = refreshBtn.querySelector('span')?.textContent;
@@ -215,6 +231,7 @@ export async function renderSettings(mount) {
     }
   });
   const reloadGalleryBtn = Button({ label: 'Reload gallery', variant: 'ghost' });
+  reloadGalleryBtn.setAttribute('aria-label', 'Reload gallery photos');
   reloadGalleryBtn.addEventListener('click', async () => {
     reloadGalleryBtn.disabled = true;
     try { await reloadGallery({ reset: true }); pushToast({ message: 'Gallery refreshed.', type: 'success' }); }
@@ -228,11 +245,15 @@ export async function renderSettings(mount) {
 
   const signOutBtn = Button({ label: 'Sign out', variant: 'danger' });
   signOutBtn.classList.add('w-full');
+  signOutBtn.setAttribute('aria-label', 'Sign out of your account');
   signOutBtn.addEventListener('click', async () => {
     signOutBtn.disabled = true;
     try {
+      // Clear local profile/user state BEFORE awaiting signOut so a concurrent
+      // SIGNED_OUT event from Supabase can't race the navigation.
+      set({ profile: null });
       await signOut();
-      set({ user: null, profile: null });
+      set({ user: null });
       navigate('login', {}, { replace: true });
     } catch (err) {
       pushToast({ message: err.message, type: 'error' });

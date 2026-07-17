@@ -42,6 +42,7 @@ export async function renderSingleCamera(mount) {
   let localPhotos = [];
   let thumbnailUrls = [];
   let resultUrl = null;
+  let abortController = new AbortController();
 
   const wrap = document.createElement('div');
   wrap.className = 'max-w-md md:max-w-lg mx-auto px-4 pt-6 pb-40 fade-in';
@@ -83,6 +84,7 @@ export async function renderSingleCamera(mount) {
   const flipBtn = document.createElement('button');
   flipBtn.className = 'btn-ghost w-12 h-12 rounded-full p-0';
   flipBtn.disabled = true;
+  flipBtn.setAttribute('aria-label', 'Flip camera');
   flipBtn.append(Icon({ name: 'switch', size: 22 }));
   flipBtn.addEventListener('click', async () => {
     flipBtn.disabled = true;
@@ -171,9 +173,12 @@ export async function renderSingleCamera(mount) {
   mirrorBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 text-xs';
   mirrorBtn.textContent = initialMirror ? '🪞' : '📷';
   mirrorBtn.title = 'Toggle mirror';
+  mirrorBtn.setAttribute('aria-label', 'Mirror preview');
+  mirrorBtn.setAttribute('aria-pressed', initialMirror ? 'true' : 'false');
   mirrorBtn.addEventListener('click', () => {
     const m = !getState().preferences.mirror;
     mirrorBtn.textContent = m ? '🪞' : '📷';
+    mirrorBtn.setAttribute('aria-pressed', m ? 'true' : 'false');
     set({ preferences: { ...getState().preferences, mirror: m } });
   });
 
@@ -181,9 +186,12 @@ export async function renderSingleCamera(mount) {
   flashBtn.className = 'shrink-0 px-2 py-1 rounded-lg border border-warmth-200 text-xs';
   flashBtn.textContent = flashEnabled ? '⚡' : '🌑';
   flashBtn.title = 'Toggle flash';
+  flashBtn.setAttribute('aria-label', 'Flash on capture');
+  flashBtn.setAttribute('aria-pressed', flashEnabled ? 'true' : 'false');
   flashBtn.addEventListener('click', () => {
     const next = !getState().preferences.flashEnabled;
     flashBtn.textContent = next ? '⚡' : '🌑';
+    flashBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
     set({ preferences: { ...getState().preferences, flashEnabled: next } });
   });
 
@@ -374,6 +382,7 @@ export async function renderSingleCamera(mount) {
         const { blob } = await startCountdown(stage, {
           duration: getState().preferences.countdownDuration,
           flashEnabled: getState().preferences.flashEnabled !== false,
+          signal: abortController.signal,
           onSnap: () => takePhoto(videoEl, frameEl, theme, {
             filter: getFilterCSS(getState().preferences.filterId || 'original'),
             zoom: getState().preferences.zoom || 1,
@@ -528,6 +537,10 @@ export async function renderSingleCamera(mount) {
     }
     if (videoEl) {
       try { stopLivePreview(videoEl); } catch {}
+    }
+    if (abortController) {
+      try { abortController.abort(); } catch {}
+      abortController = new AbortController();
     }
     clearThumbnailUrls();
     clearResultUrl();
