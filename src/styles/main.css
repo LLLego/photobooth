@@ -397,7 +397,7 @@ html.dark select:focus-visible {
 
 .feature-card-desc {
   font-size: 15px;
-  color: var(--chocolate-muted);
+  color: var(--chocolate);
   line-height: 1.6;
   margin-bottom: 32px;
   max-width: 360px;
@@ -551,22 +551,27 @@ html.dark select:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  padding: 12px 24px;
+  background: var(--terracotta);
+  color: var(--cream);
+  border-radius: 100px;
   font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
   font-style: italic;
-  font-size: 18px;
-  color: var(--chocolate);
+  font-size: 16px;
   font-weight: 500;
-  transition: gap 0.4s ease;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 12px rgba(178, 122, 82, 0.3);
+}
+.feature-card-cta:hover {
+  background: var(--terracotta-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(178, 122, 82, 0.5);
 }
 
 .feature-card-cta .arrow {
   display: inline-block;
   transition: transform 0.4s ease;
-  color: var(--terracotta-deep);
 }
-
-.feature-card:hover .feature-card-cta { gap: 16px; }
-.feature-card:hover .feature-card-cta .arrow { transform: translateX(4px); }
 
 /* ======================== SECTION HEADERS ======================== */
 .section-header {
@@ -766,10 +771,10 @@ html.dark select:focus-visible {
 }
 
 .theme-radio {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 2px solid rgba(45, 27, 17, 0.20);
+  border: 2px solid rgba(45, 27, 17, 0.25);
   flex-shrink: 0;
   transition: all 0.3s ease;
   position: relative;
