@@ -247,6 +247,9 @@ export async function renderThemePicker(mount) {
 
   applyActiveStates();
 
+  // Also schedule a delayed re-apply to handle late-arriving DOM
+  setTimeout(() => applyActiveStates(), 100);
+
   return () => {
     for (const dispose of cleanups.splice(0)) {
       try { dispose(); } catch {}
