@@ -1,10 +1,11 @@
 import { currentRouteName, navigate } from '../router.js';
+import { Icon } from './components.js';
 
 const ITEMS = [
-  { name: 'home', label: 'Home', emoji: '🏠' },
-  { name: 'single', label: 'Camera', emoji: '📷' },
-  { name: 'dual', label: 'Together', emoji: '💕' },
-  { name: 'gallery', label: 'Gallery', emoji: '🖼️' },
+  { name: 'home', label: 'Home', icon: 'home' },
+  { name: 'single', label: 'Camera', icon: 'camera' },
+  { name: 'dual', label: 'Together', icon: 'dual-camera' },
+  { name: 'gallery', label: 'Gallery', icon: 'gallery' },
 ];
 
 export function mountNavigation(root) {
@@ -25,12 +26,10 @@ export function mountNavigation(root) {
     a.dataset.route = item.name;
     a.setAttribute('aria-label', item.label);
 
-    const icon = document.createElement('span');
-    icon.className = 'nav-icon';
-    icon.textContent = item.emoji;
-    icon.setAttribute('aria-hidden', 'true');
+    const icon = Icon({ name: item.icon, size: 22 });
 
     const label = document.createElement('span');
+    label.className = 'nav-label';
     label.textContent = item.label;
 
     a.append(icon, label);
@@ -48,7 +47,7 @@ export function mountNavigation(root) {
   settings.className = 'nav-settings';
   settings.type = 'button';
   settings.setAttribute('aria-label', 'Settings');
-  settings.textContent = '⚙️';
+  settings.append(Icon({ name: 'settings', size: 18 }));
   listen(settings, 'click', () => navigate('settings'));
 
   root.append(links, settings);

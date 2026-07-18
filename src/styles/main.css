@@ -1675,10 +1675,8 @@ html.dark select:focus-visible {
   font-weight: 600;
 }
 
-.nav-icon {
-  font-size: 22px;
-  line-height: 1;
-  display: block;
+.nav-label {
+  font-size: 11px;
 }
 
 .nav-links a::after {

@@ -147,10 +147,10 @@ export async function renderHome(mount) {
   themesGrid.className = 'themes-grid';
 
   const themes = [
-    { slug: 'minimal', previewClass: 'minimal', name: 'Minimal', sub: 'clean & simple', tag: '✦', emoji: '✦' },
-    { slug: 'hundred-acre-gang', previewClass: 'acre', name: 'Hundred Acre', sub: 'cosy & sweet', tag: 'new', emoji: '🍯' },
-    { slug: 'pucca', previewClass: 'pucca', name: 'Pucca', sub: 'bold & playful', tag: null, emoji: '❤️' },
-    { slug: 'hello-kitty', previewClass: 'kitty', name: 'Hello Kitty', sub: 'soft & lovely', tag: null, emoji: '🎀' },
+    { slug: 'minimal', previewClass: 'minimal', name: 'Minimal', sub: 'clean & simple', tag: null },
+    { slug: 'hundred-acre-gang', previewClass: 'acre', name: 'Hundred Acre', sub: 'cosy & sweet', tag: 'new' },
+    { slug: 'pucca', previewClass: 'pucca', name: 'Pucca', sub: 'bold & playful', tag: null },
+    { slug: 'hello-kitty', previewClass: 'kitty', name: 'Hello Kitty', sub: 'soft & lovely', tag: null },
   ];
 
   const selectedTheme = getState().preferences?.themeId || 'minimal';
