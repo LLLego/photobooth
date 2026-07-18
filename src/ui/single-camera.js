@@ -139,7 +139,7 @@ export async function renderSingleCamera(mount) {
   for (const f of FILTER_PRESETS) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'shrink-0 px-3 py-1.5 rounded-2xl text-xs font-medium border border-warmth-200 text-warmth-700 whitespace-nowrap transition';
+    btn.className = 'filter-swatch shrink-0 px-4 py-2 rounded-2xl text-xs font-medium border border-warmth-200 text-warmth-700 whitespace-nowrap';
     btn.textContent = f.name;
     btn.dataset.filter = f.id;
     btn.addEventListener('click', () => applyFilter(f.id));
@@ -149,7 +149,7 @@ export async function renderSingleCamera(mount) {
   const savedFilterId = prefs.filterId || 'original';
   if (filterButtons.has(savedFilterId)) {
     const btn = filterButtons.get(savedFilterId);
-    btn.classList.add('bg-warmth-900', 'text-warmth-50');
+    btn.classList.add('active');
   }
   filterBar.append(filterScroller);
   wrap.append(filterBar);
@@ -231,8 +231,7 @@ export async function renderSingleCamera(mount) {
   function applyFilter(id) {
     for (const [fid, btn] of filterButtons.entries()) {
       const active = fid === id;
-      btn.classList.toggle('bg-warmth-900', active);
-      btn.classList.toggle('text-warmth-50', active);
+      btn.classList.toggle('active', active);
     }
     set({ preferences: { ...getState().preferences, filterId: id } });
   }
