@@ -382,6 +382,8 @@ export async function renderSingleCamera(mount) {
     flipBtn.disabled = true;
     const req = requiredPhotoCount(getState().capture.layout || layout);
     const isRetake = Number.isInteger(retakeIndex);
+    // Load theme ONCE before the capture loop
+    const theme = await loadTheme(getState().preferences.themeId || 'minimal');
     if (isRetake) {
       finalBar.classList.add('hidden');
       finalBar.classList.remove('flex');
@@ -391,7 +393,6 @@ export async function renderSingleCamera(mount) {
         const position = isRetake ? retakeIndex + 1 : localPhotos.length + 1;
         status.textContent = `${isRetake ? 'Retaking' : 'Photo'} ${position} of ${req} — get ready…`;
         updateCaptureState('countdown');
-        const theme = await loadTheme(getState().preferences.themeId || 'minimal');
         const { blob } = await startCountdown(stage, {
           duration: getState().preferences.countdownDuration,
           flashEnabled: getState().preferences.flashEnabled !== false,
@@ -401,7 +402,7 @@ export async function renderSingleCamera(mount) {
             status.textContent = `${isRetake ? 'Retake' : 'Photo'} ${position} cancelled`;
             updateCaptureState('idle');
           },
-          onSnap: () => takePhoto(videoEl, frameEl, theme, {
+          onSnap: () => takePhoto(videoEl, null, theme, {
             filter: getFilterCSS(getState().preferences.filterId || 'original'),
             zoom: getState().preferences.zoom || 1,
             mirror: getState().preferences.mirror !== false,
