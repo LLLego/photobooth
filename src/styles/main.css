@@ -1322,10 +1322,9 @@ html.dark select:focus-visible {
   background: linear-gradient(180deg, var(--chocolate) 0%, var(--chocolate-soft) 100%);
   border-radius: 24px;
   isolation: isolate;
-  box-shadow:
-    0 4px 12px rgba(45, 27, 17, 0.15),
-    0 0 0 1px rgba(255, 250, 240, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  min-height: calc(100dvh - 220px);
+  min-height: calc(100vh - 220px);
+  box-shadow: 0 12px 48px rgba(45, 27, 17, 0.25), inset 0 0 0 1px rgba(255, 250, 240, 0.08);
 }
 
 .camera-video, .camera-frame, .camera-live-canvas {

@@ -76,6 +76,16 @@ export async function renderSingleCamera(mount) {
   frameEl.className = 'camera-frame-source';
   frameEl.alt = '';
   frameEl.style.display = 'none';
+  frameEl.crossOrigin = 'anonymous';
+  // Force canvas redraw when frame image loads
+  frameEl.addEventListener('load', () => {
+    frameEl.style.display = '';
+    frameEl.style.opacity = '1';
+    if (status) status.textContent = 'Frame loaded · Ready';
+  });
+  frameEl.addEventListener('error', () => {
+    console.warn('[single] frame preload failed, will retry');
+  });
 
   const overlay = document.createElement('div');
   overlay.className = 'camera-overlay-grid';
