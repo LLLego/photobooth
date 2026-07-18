@@ -99,6 +99,14 @@ async function boot() {
   mountNavigationHost();
 }
 
+function mountLoading(mount) {
+  mount.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'min-h-dvh flex items-center justify-center';
+  wrap.append(Spinner({ size: 28, label: 'Loading…' }));
+  mount.append(wrap);
+}
+
 function applyDarkMode(enabled) {
   document.documentElement.classList.toggle('dark', Boolean(enabled));
 }
