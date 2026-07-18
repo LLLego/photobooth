@@ -202,17 +202,18 @@ html.dark select:focus-visible {
 
 /* ======================== NAV HOST ======================== */
 #nav-host {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
   z-index: 100;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  background: rgba(255, 250, 240, 0.75);
-  border-bottom: 1px solid rgba(45, 27, 17, 0.08);
-  padding: calc(18px + env(safe-area-inset-top)) 40px 18px;
+  background: rgba(255, 250, 240, 0.88);
+  border-top: 1px solid rgba(45, 27, 17, 0.10);
+  padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 8px;
 }
 
 .nav-mark {
@@ -243,7 +244,7 @@ html.dark select:focus-visible {
   z-index: 2;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 60px 40px 80px;
+  padding: 24px 24px calc(80px + env(safe-area-inset-bottom));
 }
 
 /* ======================== HERO ======================== */
@@ -1648,22 +1649,37 @@ html.dark select:focus-visible {
 
 .nav-links {
   display: flex;
-  gap: 36px;
+  gap: 28px;
   list-style: none;
   align-items: center;
 }
-
 .nav-links a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   color: var(--chocolate-muted);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.02em;
   transition: color 0.3s ease;
+  padding: 4px 8px;
   position: relative;
 }
 
 .nav-links a:hover { color: var(--terracotta-deep); }
+
+.nav-active {
+  color: var(--chocolate) !important;
+  font-weight: 600;
+}
+
+.nav-icon {
+  font-size: 22px;
+  line-height: 1;
+  display: block;
+}
 
 .nav-links a::after {
   content: '';
@@ -2154,9 +2170,8 @@ button,
    ===================================================================== */
 
 @media (max-width: 900px) {
-  #app { padding: 40px 24px 60px; }
-  #nav-host { padding: 16px 24px; }
-  .nav-links { display: none; }
+  #app { padding: 16px 16px calc(80px + env(safe-area-inset-bottom)); }
+  #nav-host { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
   .feature-grid { grid-template-columns: 1fr; gap: 20px; }
   .themes-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .gallery-strip { grid-template-columns: repeat(2, 1fr); }
