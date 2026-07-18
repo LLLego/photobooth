@@ -119,7 +119,7 @@ export async function setPreviewFrame(frameEl, themeId) {
         frameEl.style.display = 'none';
         frameEl.style.opacity = '0';
       };
-      frameEl.src = theme.frame.url;
+      frameEl.src = new URL(theme.frame.url, `${import.meta.env.BASE_URL}themes/${themeId}/`).href;
       frameEl.style.display = '';
       frameEl.style.opacity = '1';
     } else {

@@ -1087,7 +1087,7 @@ html.dark select:focus-visible {
   z-index: 3;
 }
 
-.camera-source-video,
+
 .camera-frame-source {
   position: absolute;
   inset: 0;
@@ -1095,11 +1095,6 @@ html.dark select:focus-visible {
   height: 100%;
   visibility: hidden;
   pointer-events: none;
-}
-
-.camera-frame-source {
-  width: 1px;
-  height: 1px;
 }
 
 .camera-frame {

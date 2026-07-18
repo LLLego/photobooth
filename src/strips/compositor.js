@@ -168,7 +168,8 @@ export async function compositeStrip(photos = [], theme, layoutId, opts = {}) {
   }
 
   if (opts.frame !== false && theme?.frame?.url && theme.id !== 'none') {
-    const frame = await loadImage(theme.frame.url).catch((err) => {
+    const frameUrl = new URL(theme.frame.url, `${import.meta.env.BASE_URL}themes/${theme.id}/`).href;
+    const frame = await loadImage(frameUrl).catch((err) => {
       console.warn('[compositor] frame load failed', err);
       return null;
     });
