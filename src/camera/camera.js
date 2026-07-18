@@ -1,3 +1,5 @@
+import { createVirtualCameraStream, stopVirtualCamera } from './virtual-camera.js';
+
 let activeStream = null;
 let facingMode = 'user';
 
@@ -50,19 +52,14 @@ export async function startCamera({ facing = facingMode, width = 1080, height = 
     }
     return stream;
   } catch (err) {
-    if (err && err.name === 'OverconstrainedError' && !deviceId) {
-      try {
-        const fallback = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: { facingMode: { ideal: facing } },
-        });
-        activeStream = fallback;
-        return fallback;
-      } catch (fallbackErr) {
-        throw fallbackErr;
-      }
+    console.warn('[camera] real camera unavailable, using virtual', err.message);
+    try {
+      const stream = createVirtualCameraStream(width, height);
+      activeStream = stream;
+      return stream;
+    } catch (virtErr) {
+      throw err; // original error if virtual also fails
     }
-    throw err;
   }
 }
 
