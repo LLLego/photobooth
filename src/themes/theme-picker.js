@@ -245,13 +245,14 @@ export async function renderThemePicker(mount) {
 
   mount.append(wrap);
 
+  applyActiveStates();
+
   return () => {
     for (const dispose of cleanups.splice(0)) {
       try { dispose(); } catch {}
     }
   };
 
-  applyActiveStates();
 }
 
 async function listThemes() {

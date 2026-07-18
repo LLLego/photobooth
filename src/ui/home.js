@@ -211,8 +211,6 @@ export async function renderHome(mount) {
   async function updateGalleryBadge() {
     try {
       // Don't reset the global gallery state — just peek at item count.
-      // A previous mount may have already populated the cache; reusing it
-      // avoids clobbering the user's gallery before they open it.
       const s = getState();
       if (s.gallery?.items?.length) {
         const meta = frameMeta.querySelector('strong');
@@ -225,7 +223,9 @@ export async function renderHome(mount) {
       const meta = frameMeta.querySelector('strong');
       if (meta) meta.textContent = String(items.length);
     } catch {
-      // Gallery count unavailable — leave the placeholder "4" in place.
+      // Gallery unavailable — show 0 instead of the placeholder "4"
+      const meta = frameMeta.querySelector('strong');
+      if (meta) meta.textContent = '0';
     }
   }
   updateGalleryBadge();
