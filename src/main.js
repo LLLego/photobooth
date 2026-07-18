@@ -38,6 +38,14 @@ async function boot() {
 
   mountLoading(mount);
 
+  // Define routes BEFORE starting router
+  defineRoute('login', renderLoginRoute);
+  defineRoute('home', renderHome);
+  defineRoute('single', renderSingleCamera);
+  defineRoute('dual', renderDualCamera);
+  defineRoute('gallery', renderGallery);
+  defineRoute('settings', renderSettings);
+
   // Start router IMMEDIATELY — don't wait for Supabase
   // The router clears the loading spinner when it renders
   startRouter(mount);
@@ -50,13 +58,6 @@ async function boot() {
     }),
     registerSW(),
   ]);
-
-  defineRoute('login', renderLoginRoute);
-  defineRoute('home', renderHome);
-  defineRoute('single', renderSingleCamera);
-  defineRoute('dual', renderDualCamera);
-  defineRoute('gallery', renderGallery);
-  defineRoute('settings', renderSettings);
 
   let initial = null;
   if (isSupabaseConfigured) {
@@ -94,18 +95,8 @@ async function boot() {
     set({ user: null, initialized: true });
   }
 
-  // Router already started above. Mount nav host + toaster after
-  // async init settles so they subscribe to the settled state.
-  mountNavigationHost();
   mountToaster();
-}
-
-function mountLoading(mount) {
-  mount.innerHTML = '';
-  const wrap = document.createElement('div');
-  wrap.className = 'min-h-dvh flex items-center justify-center';
-  wrap.append(Spinner({ size: 28, label: 'Loading…' }));
-  mount.append(wrap);
+  mountNavigationHost();
 }
 
 function applyDarkMode(enabled) {
